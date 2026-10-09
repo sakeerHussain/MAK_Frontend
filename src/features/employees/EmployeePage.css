@@ -1,0 +1,10 @@
+.employee-page .driver-table{min-width:1060px}
+.employee-page .driver-table th:nth-child(1){width:110px}
+.employee-page .driver-table th:nth-child(2){width:170px}
+.employee-page .driver-table th:nth-child(3){width:130px}
+.employee-page .driver-table th:nth-child(4){width:120px}
+.employee-page .driver-table th:nth-child(5){width:155px}
+.employee-page .driver-table th:nth-child(6){width:125px}
+.employee-page .driver-table th:nth-child(7){width:85px}
+.employee-page .driver-table th:nth-child(8){width:90px}
+.employee-page .driver-table th:nth-child(9){width:70px}
