@@ -1,36 +1,192 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Lenis from 'lenis'
 import 'lenis/dist/lenis.css'
 import Icon from '../../app/Icon.jsx'
+import LandingCarousel from './LandingCarousel.jsx'
+import RentalEnquiry from './RentalEnquiry.jsx'
+import { faqs, fleet, fleetCategories, heroSlides, imageUrl, locations, processSteps, rentalPreferences, services } from './LandingData.js'
 import './LandingPage.css'
-const image = (id, width=1000) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=85`
-const cars = [
- {type:'Sedan', title:'Everyday, elevated.', subtitle:'City drives & daily plans', seats:'4–5 seats', photo:'photo-1555215695-3004980ad54e'},
- {type:'SUV', title:'Room for more.', subtitle:'Family travel & longer stays', seats:'5–7 seats', photo:'photo-1606664515524-ed2f786a0bd6'},
- {type:'Premium', title:'Arrive differently.', subtitle:'Special occasions & business', seats:'2–5 seats', photo:'photo-1503376780353-7e6692767b70'},
-]
-function Brand(){return <a href="#/home" className="lp-brand" aria-label="MAK Rentals home"><b>M<span/></b><span>MAK<small>RENTALS</small></span></a>}
-function Photo({id, alt, eager=false}){return <img src={image(id,eager?2200:1000)} alt={alt} loading={eager?'eager':'lazy'} onError={e=>{e.currentTarget.style.visibility='hidden'}}/>}
-export default function LandingPage({user}){
- const lenis=useRef(null), closeRef=useRef(null), opener=useRef(null)
- const [menu,setMenu]=useState(false),[category,setCategory]=useState('All vehicles'),[location,setLocation]=useState('Al Khobar'),[service,setService]=useState('Self-drive'),[detail,setDetail]=useState(null)
- useEffect(()=>{const instance=new Lenis({autoRaf:true,duration:1.1});lenis.current=instance;return()=>{instance.destroy();lenis.current=null}},[])
- useEffect(()=>{if(!detail)return;closeRef.current?.focus();const handler=e=>{if(e.key==='Escape')setDetail(null);if(e.key==='Tab'){e.preventDefault();closeRef.current?.focus()}};lenis.current?.stop();document.addEventListener('keydown',handler);return()=>{document.removeEventListener('keydown',handler);lenis.current?.start();opener.current?.focus()}},[detail])
- const go=id=>{setMenu(false);const target=document.getElementById(id);if(target)lenis.current?lenis.current.scrollTo(target,{offset:-90}):target.scrollIntoView()}
- const show=(value,event)=>{opener.current=event.currentTarget;setDetail(value)}
- const login=user?'#/dashboard':'#/sign-in'
- return <div className="lp-site">
-  <div className="lp-top"><div className="lp-wrap"><span><Icon name="tracking" size={13}/>Saudi Arabia · Individual & corporate rentals</span><span>Every journey starts with a better drive <Icon name="arrow" size={13}/></span></div></div>
-  <header className="lp-header"><div className="lp-wrap"><Brand/><button className="lp-menu" aria-label={menu?'Close navigation':'Open navigation'} aria-expanded={menu} onClick={()=>setMenu(!menu)}><Icon name={menu?'close':'menu'}/></button><nav className={menu?'open':''} aria-label="Main navigation">{[['Home','lp-home'],['Our fleet','lp-fleet'],['Rental services','lp-services'],['For business','lp-business'],['About MAK','lp-about']].map(([label,id])=><button key={id} onClick={()=>go(id)}>{label}</button>)}<a className="lp-btn dark" href={login}>{user?'Dashboard':'Sign in'}<Icon name="arrow" size={16}/></a></nav></div></header>
-  <main>
-   <section className="lp-hero" id="lp-home"><div className="lp-hero-photo"><Photo id="photo-1606664515524-ed2f786a0bd6" alt="Front view of a premium vehicle — placeholder photograph" eager/></div><div className="lp-hero-shade"/><div className="lp-wrap lp-hero-copy"><span className="lp-eyebrow">THE ROAD IS YOURS</span><h1>Good journeys.<br/>Great <em>drives.</em></h1><p>From everyday plans to business milestones.<br/>Find a rental experience that moves with you.</p><div className="lp-hero-actions"><button className="lp-btn" onClick={()=>go('lp-fleet')}>Explore the fleet<Icon name="arrow" size={18}/></button><button className="lp-link" onClick={()=>go('lp-business')}>Corporate solutions<Icon name="arrow" size={16}/></button></div><div className="lp-hero-foot"><span><Icon name="check" size={14}/>Daily & monthly rentals</span><span><Icon name="check" size={14}/>With or without a driver</span></div></div><span className="lp-photo-note">Illustrative image</span></section>
-   <section className="lp-finder lp-wrap" aria-label="Explore rental options"><div><span className="lp-eyebrow">YOUR NEXT JOURNEY</span><h2>Find your kind of drive.</h2></div><form onSubmit={e=>{e.preventDefault();go('lp-fleet')}}><label>Starting location<select value={location} onChange={e=>setLocation(e.target.value)}>{['Al Khobar','Dammam','Riyadh','Other destination'].map(v=><option key={v}>{v}</option>)}</select></label><label>Vehicle category<select value={category} onChange={e=>setCategory(e.target.value)}>{['All vehicles','Sedan','SUV','Premium'].map(v=><option key={v}>{v}</option>)}</select></label><label>Rental preference<select value={service} onChange={e=>setService(e.target.value)}>{['Self-drive','With a driver','Corporate rental'].map(v=><option key={v}>{v}</option>)}</select></label><button className="lp-btn" type="submit"><Icon name="search" size={17}/>Explore vehicles</button></form><p>Explore our sample collection. Live availability and online reservations are coming soon.</p></section>
-   <section className="lp-fleet lp-wrap" id="lp-fleet"><div className="lp-section-heading"><div><span className="lp-eyebrow">A DRIVE FOR EVERY PLAN</span><h2>Meet your next ride.</h2></div><p>Everyday practicality. Extra space. A little luxury.<br/>Choose the category that feels right for you.</p></div><div className="lp-tabs"><div role="group" aria-label="Vehicle category filter">{['All vehicles','Sedan','SUV','Premium'].map(v=><button key={v} className={category===v?'active':''} aria-pressed={category===v} onClick={()=>setCategory(v)}>{v}</button>)}</div><span>Sample fleet · Images are illustrative</span></div><div className="lp-cars">{cars.filter(c=>category==='All vehicles'||c.type===category).map(car=><article key={car.type}><div className="lp-car-photo"><Photo id={car.photo} alt={`${car.type} category placeholder vehicle`}/><span>{car.type}</span></div><div className="lp-car-body"><span className="lp-caption">{car.subtitle}</span><h3>{car.title}</h3><div className="lp-specs"><span><Icon name="users" size={15}/>{car.seats}</span><span><Icon name="settings" size={15}/>Options vary</span></div><div className="lp-car-bottom"><span>Rates tailored to your rental</span><button aria-label={`Explore ${car.type} rentals`} onClick={e=>show(car,e)}><Icon name="arrow" size={19}/></button></div></div></article>)}</div></section>
-   <section className="lp-benefits" id="lp-services"><div className="lp-wrap">{[['inspections','Care in every detail','Vehicle care and inspections for a more confident journey.'],['calendar','On your schedule','Daily, monthly and longer rental options to fit your plans.'],['driver','Your choice of drive','Explore self-drive rentals or journeys with a driver.'],['corporate','Built for business','Transport options shaped around your team and project.']].map(([icon,title,text])=><article key={title}><Icon name={icon} size={28}/><h3>{title}</h3><p>{text}</p></article>)}</div></section>
-   <section className="lp-business lp-wrap" id="lp-business"><div><span className="lp-eyebrow">BUSINESS MOVES BETTER WITH MAK</span><h2>Your team.<br/>Your destinations.<br/><em>One rental partner.</em></h2><p>From a single business trip to a monthly transport plan. Arrange vehicles, drivers and multiple destinations around the way your business works.</p><button className="lp-btn" onClick={e=>{setService('Corporate rental');show({type:'Corporate rental',title:'Let’s move your business.',subtitle:'Plans can include multiple destinations, passenger groups, driver arrangements and customer-specific quotations.'},e)}}>Explore corporate rentals<Icon name="arrow" size={17}/></button><small>Project travel · Team transport · Monthly plans</small></div><div className="lp-business-photo"><Photo id="photo-1449965408869-eaa3f722e40d" alt="View from a car on the open road — placeholder photograph"/><div><Icon name="corporate" size={26}/><span>A partner for<br/><strong>the road ahead.</strong></span></div></div></section>
-   <section className="lp-about" id="lp-about"><div className="lp-wrap"><span className="lp-eyebrow">MORE THAN A RENTAL</span><h2>A better drive starts<br/>with a simpler experience.</h2><p>At MAK Rentals, we’re building a connected rental experience for individuals and businesses. Clear options, flexible plans and journeys designed around you.</p><button className="lp-link" onClick={()=>go('lp-fleet')}>Find your next journey<Icon name="arrow" size={18}/></button></div><span className="lp-watermark" aria-hidden="true">MAK</span></section>
-  </main>
-  <footer className="lp-footer"><div className="lp-wrap lp-footer-grid"><div><Brand/><p>For everyday journeys.<br/>For the road ahead.</p><span className="lp-location"><Icon name="tracking" size={15}/>Saudi Arabia</span></div><div><h3>Explore</h3>{[['Our fleet','lp-fleet'],['Rental services','lp-services'],['Corporate rentals','lp-business'],['About MAK','lp-about']].map(([label,id])=><button key={id} onClick={()=>go(id)}>{label}</button>)}</div><div><h3>Rental options</h3>{['Daily rentals','Monthly plans','Trips with a driver','Business transport'].map(v=><span key={v}>{v}</span>)}</div><div><h3>Your workspace</h3><p>Secure access for the MAK team.</p><a href={login}>{user?'Open dashboard':'Staff sign in'}<Icon name="arrow" size={15}/></a>{!user&&<a href="#/sign-up">Create a staff account</a>}<small>New accounts require admin approval.</small></div></div><div className="lp-wrap lp-footer-bottom"><span>© {new Date().getFullYear()} MAK Rentals.</span><span>Website preview · Online reservations coming soon</span><button onClick={()=>go('lp-home')}>Back to top ↑</button></div></footer>
-  {detail&&<div className="lp-modal-backdrop" onClick={()=>setDetail(null)}><section role="dialog" aria-modal="true" aria-labelledby="lp-detail-title" className="lp-modal" data-lenis-prevent onClick={e=>e.stopPropagation()}><button ref={closeRef} className="lp-modal-close" aria-label="Close rental details" onClick={()=>setDetail(null)}><Icon name="close"/></button>{detail.photo&&<div className="lp-modal-photo"><Photo id={detail.photo} alt={`${detail.type} illustrative vehicle`}/></div>}<div className="lp-modal-copy"><span className="lp-eyebrow">{detail.type}</span><h2 id="lp-detail-title">{detail.title}</h2><p>{detail.subtitle}</p><div className="lp-detail-meta"><span><strong>Starting location</strong>{location}</span><span><strong>Preference</strong>{service}</span></div><p className="lp-notice">This is a preview of our rental services. Images and specifications are illustrative. Live inventory, pricing and customer reservations will be added later.</p></div></section></div>}
- </div>
+
+function Brand({ onClick }) {
+  return <a href="#/home" className="mak-brand" aria-label="MAK Rentals home" onClick={onClick}><span className="mak-brand-mark" aria-hidden="true">M<span /></span><span>MAK<span className="mak-brand-subtitle">CAR RENTALS</span></span></a>
+}
+
+function Photo({ id, alt, eager = false, className = '' }) {
+  const [failed, setFailed] = useState(false)
+  return <div className={`mak-photo ${className} ${failed ? 'mak-photo-fallback' : ''}`}>
+    {failed ? <span><Icon name="fleet" size={42} /><span>MAK RENTALS</span><small>Illustrative vehicle image</small></span> : <img src={imageUrl(id, eager ? 2200 : 1100)} alt={alt} loading={eager ? 'eager' : 'lazy'} fetchPriority={eager ? 'high' : 'auto'} decoding="async" onError={() => setFailed(true)} />}
+  </div>
+}
+
+function SectionHeading({ eyebrow, children, text, centered = false }) {
+  return <div className={`mak-section-heading ${centered ? 'mak-centered' : ''}`} data-reveal><div><span className="mak-eyebrow">{eyebrow}</span><h2>{children}</h2></div>{text && <p>{text}</p>}</div>
+}
+
+export default function LandingPage({ user }) {
+  const root = useRef(null)
+  const lenis = useRef(null)
+  const menuButton = useRef(null)
+  const [scrolled, setScrolled] = useState(() => window.scrollY > 70)
+  const [menu, setMenu] = useState(false)
+  const [slideIndex, setSlideIndex] = useState(0)
+  const [category, setCategory] = useState('All vehicles')
+  const [location, setLocation] = useState('Al Khobar')
+  const [preference, setPreference] = useState('Self-drive')
+  const [pickup, setPickup] = useState('')
+  const [returnDate, setReturnDate] = useState('')
+  const [finderError, setFinderError] = useState('')
+  const [enquiry, setEnquiry] = useState(null)
+  const slide = heroSlides[slideIndex]
+  const login = user ? '#/dashboard' : '#/sign-in'
+  const today = new Date().toLocaleDateString('en-CA')
+  const filteredFleet = fleet.filter((car) => category === 'All vehicles' || car.category === category)
+  const closeEnquiry = useCallback(() => setEnquiry(null), [])
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const setup = () => {
+      lenis.current?.destroy()
+      lenis.current = media.matches ? null : new Lenis({ autoRaf: true, duration: 1.05, smoothWheel: true, anchors: false })
+    }
+    setup()
+    media.addEventListener('change', setup)
+    return () => { media.removeEventListener('change', setup); lenis.current?.destroy(); lenis.current = null }
+  }, [])
+
+  useEffect(() => {
+    const element = root.current
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    let frame = null
+    const update = () => {
+      const position = window.scrollY
+      const distance = document.documentElement.scrollHeight - window.innerHeight
+      setScrolled(position > 70)
+      element.style.setProperty('--mak-scroll-progress', Math.max(0, Math.min(1, distance > 0 ? position / distance : 0)))
+      element.style.setProperty('--mak-hero-offset', `${media.matches ? 0 : Math.min(position * 0.15, 160)}px`)
+      frame = null
+    }
+    const onScroll = () => { if (frame === null) frame = requestAnimationFrame(update) }
+    update()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); if (frame !== null) cancelAnimationFrame(frame) }
+  }, [])
+
+  useEffect(() => {
+    const element = root.current
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    if (media.matches || !('IntersectionObserver' in window)) return
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target) } })
+    }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' })
+    element.querySelectorAll('[data-reveal]').forEach((item) => observer.observe(item))
+    element.classList.add('mak-motion-ready')
+    return () => { observer.disconnect(); element.classList.remove('mak-motion-ready') }
+  }, [])
+
+  useEffect(() => {
+    if (!menu) return
+    const handleKey = (event) => { if (event.key === 'Escape') { setMenu(false); menuButton.current?.focus() } }
+    const media = window.matchMedia('(min-width: 961px)')
+    const handleResize = () => { if (media.matches) setMenu(false) }
+    document.addEventListener('keydown', handleKey)
+    media.addEventListener('change', handleResize)
+    return () => { document.removeEventListener('keydown', handleKey); media.removeEventListener('change', handleResize) }
+  }, [menu])
+
+  const go = (id) => {
+    setMenu(false)
+    const target = document.getElementById(id)
+    if (!target) return
+    if (lenis.current) lenis.current.scrollTo(target, { offset: -98 })
+    else window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 98, behavior: 'instant' })
+  }
+  const openEnquiry = (values = {}) => {
+    setMenu(false)
+    setEnquiry({ category, location, preference, pickup, returnDate, ...values })
+  }
+  const explore = (event) => {
+    event.preventDefault()
+    if (pickup && returnDate && returnDate < pickup) { setFinderError('Choose a return date on or after your pickup date.'); return }
+    setFinderError(''); go('mak-fleet')
+  }
+  const changeSlide = (offset) => setSlideIndex((current) => (current + offset + heroSlides.length) % heroSlides.length)
+
+  return <div ref={root} className="mak-landing">
+    <a className="mak-skip" href="#mak-main" onClick={(event) => { event.preventDefault(); document.getElementById('mak-main')?.focus(); go('mak-main') }}>Skip to content</a>
+    <header className={`mak-header ${scrolled ? 'is-scrolled' : ''} ${menu ? 'is-open' : ''}`}>
+      <div className="mak-container mak-header-inner">
+        <Brand onClick={(event) => { event.preventDefault(); go('mak-home') }} />
+        <nav id="mak-navigation" className={menu ? 'is-open' : ''} aria-label="Main navigation">
+          {[['Home', 'mak-home'], ['About', 'mak-about'], ['Services', 'mak-services'], ['Our fleet', 'mak-fleet'], ['For business', 'mak-business']].map(([label, id]) => <button type="button" key={id} onClick={() => go(id)}>{label}</button>)}
+          <a className="mak-nav-login" href={login}>{user ? 'Dashboard' : 'Sign in'}<Icon name="arrow" size={15} /></a>
+        </nav>
+        <button type="button" className="mak-button mak-header-cta" onClick={() => openEnquiry()}>Plan a rental <Icon name="arrow" size={16} /></button>
+        <button type="button" ref={menuButton} className="mak-menu-button" aria-label={menu ? 'Close navigation' : 'Open navigation'} aria-expanded={menu} aria-controls="mak-navigation" onClick={() => setMenu((value) => !value)}><Icon name={menu ? 'close' : 'menu'} size={23} /></button>
+      </div>
+    </header>
+
+    <main id="mak-main" tabIndex={-1}>
+      <section className="mak-hero" id="mak-home" aria-label="Rental inspiration" aria-roledescription="carousel">
+        <div className="mak-hero-images" aria-hidden="true">{heroSlides.map((item, index) => <div key={item.image} className={`mak-hero-image ${slideIndex === index ? 'is-active' : ''}`}><Photo id={item.image} alt="" eager={index === 0} /></div>)}</div>
+        <div className="mak-hero-overlay" />
+        <div className="mak-container mak-hero-content">
+          <div className="mak-hero-copy" key={slideIndex}>
+            <h1>{slide.title}<br /><em>{slide.accent}</em></h1>
+            <p>{slide.text}</p>
+            <div className="mak-hero-buttons"><button type="button" className="mak-button" onClick={() => { setCategory(slide.category); go('mak-fleet') }}>Explore the collection <Icon name="arrow" size={18} /></button><button type="button" className="mak-button mak-button-outline" onClick={() => openEnquiry({ category: slide.category })}>Plan your journey <Icon name="arrow" size={18} /></button></div>
+          </div>
+          <div className="mak-hero-meta"><span>PERSONAL JOURNEYS.<br /><strong>BUSINESS POSSIBILITIES.</strong></span><span className="mak-hero-rule" /><span>Daily & monthly rentals<br />Self-drive & with a driver</span></div>
+        </div>
+        <div className="mak-hero-pagination" role="group" aria-label="Choose hero slide">{heroSlides.map((item, index) => <button type="button" key={item.label} className={slideIndex === index ? 'is-active' : ''} aria-label={`Show slide ${index + 1}: ${item.title} ${item.accent}`} aria-pressed={slideIndex === index} onClick={() => setSlideIndex(index)}><span>0{index + 1}</span><i /></button>)}</div>
+        <div className="mak-container mak-hero-bottom"><button type="button" className="mak-scroll-cue" onClick={() => go('mak-finder')}><span><Icon name="arrow" size={17} /></span>SCROLL TO EXPLORE</button><span className="mak-hero-caption">{slide.caption}<small>Illustrative photography</small></span><div className="mak-hero-arrows"><button type="button" className="mak-round-button" aria-label="Previous hero slide" onClick={() => changeSlide(-1)}><Icon name="arrow" size={18} className="mak-flip" /></button><button type="button" className="mak-round-button" aria-label="Next hero slide" onClick={() => changeSlide(1)}><Icon name="arrow" size={18} /></button></div></div>
+      </section>
+
+      <section className="mak-finder-area" id="mak-finder" aria-labelledby="mak-finder-title"><div className="mak-container">
+        <div className="mak-finder-top"><h2 id="mak-finder-title">Where will the road take you?</h2><span>YOUR JOURNEY, YOUR WAY</span></div>
+        <form className="mak-finder" onSubmit={explore}>
+          <label><span><Icon name="fleet" size={16} />Vehicle type</span><select value={category} onChange={(event) => setCategory(event.target.value)}>{fleetCategories.map((item) => <option key={item}>{item}</option>)}</select></label>
+          <label><span><Icon name="tracking" size={16} />Pickup location</span><input aria-label="Pickup location" list="mak-pickup-locations" value={location} required onChange={(event) => setLocation(event.target.value)} placeholder="City or address" autoComplete="off" /><datalist id="mak-pickup-locations">{locations.map((item) => <option key={item} value={item} />)}</datalist></label>
+          <label><span><Icon name="calendar" size={16} />Pickup date</span><input aria-label="Pickup date" type="date" min={today} value={pickup} onChange={(event) => { setPickup(event.target.value); setFinderError('') }} /></label>
+          <label><span><Icon name="calendar" size={16} />Return date</span><input aria-label="Return date" type="date" min={pickup || today} value={returnDate} onChange={(event) => { setReturnDate(event.target.value); setFinderError('') }} /></label>
+          <button type="submit" className="mak-button">Find my drive <Icon name="arrow" size={18} /></button>
+        </form>
+        <div className="mak-finder-bottom"><span><Icon name="document" size={13} />Sample collection. Availability and rates confirmed by our team.</span><label>Rental preference<select aria-label="Rental preference" value={preference} onChange={(event) => setPreference(event.target.value)}>{rentalPreferences.map((item) => <option key={item}>{item}</option>)}</select></label></div>
+        {finderError && <p className="mak-form-error" role="alert">{finderError}</p>}
+      </div></section>
+
+      <section className="mak-section mak-about mak-container" id="mak-about">
+        <div className="mak-about-copy" data-reveal><span className="mak-eyebrow">THE MAK EXPERIENCE</span><h2>More than a car.<br />A better way <em>to move.</em></h2><p>A great rental should fit your life, not the other way around. From a simple city drive to a business journey with multiple destinations, start with a plan that works for you.</p><p>Thoughtful choices. Flexible rental options. A more personal approach to every mile.</p><ul className="mak-check-list"><li><span><Icon name="check" size={14} /></span>Daily, monthly & corporate rental options</li><li><span><Icon name="check" size={14} /></span>Your choice of self-drive or a driver</li></ul><button type="button" className="mak-button" onClick={() => go('mak-services')}>Discover the difference <Icon name="arrow" size={18} /></button></div>
+        <div className="mak-about-visual" data-reveal style={{ '--mak-delay': '130ms' }}><Photo id="photo-1449965408869-eaa3f722e40d" alt="A driver's view of an open road through the countryside" /><span className="mak-photo-tag">A LITTLE FREEDOM.<br /><strong>A lot of possibility.</strong></span><div className="mak-about-stamp"><Icon name="tracking" size={26} /><span>Made for<br /><strong>your journey.</strong></span></div></div>
+      </section>
+
+      <section className="mak-section mak-services" id="mak-services"><div className="mak-container">
+        <SectionHeading eyebrow="WHAT MOVES YOU?" text="One destination or many. A day or a month. Explore a rental experience built around your plans.">A service for <em>every journey.</em></SectionHeading>
+        <LandingCarousel label="rental services">{services.map((item, index) => <article className="mak-service-card" key={item.title}>
+          <Photo id={item.image} alt={`${item.title} illustrative photograph`} /><div className="mak-service-shade" /><span className="mak-service-index">0{index + 1}</span><div className="mak-service-copy"><Icon name={item.icon} size={25} /><h3>{item.title}</h3><p>{item.description}</p></div><div className="mak-card-cutout"><button type="button" className="mak-round-button" aria-label={`Enquire about ${item.title.toLowerCase()}`} onClick={() => openEnquiry({ preference: item.preference })}><Icon name="arrow" size={21} /></button></div>
+        </article>)}</LandingCarousel>
+      </div></section>
+
+      <section className="mak-section mak-fleet mak-container" id="mak-fleet">
+        <SectionHeading eyebrow="THE COLLECTION" text="A little practicality. A little luxury. Find the right starting point for your next journey.">Your next <em>great drive.</em></SectionHeading>
+        <div className="mak-fleet-toolbar"><div className="mak-tabs" role="group" aria-label="Filter fleet by vehicle category">{fleetCategories.map((item) => <button type="button" key={item} className={category === item ? 'is-active' : ''} aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}</div><span aria-live="polite">{filteredFleet.length} {filteredFleet.length === 1 ? 'category' : 'categories'} to explore</span></div>
+        <div className="mak-fleet-grid">{filteredFleet.map((car) => <article key={car.id} className="mak-fleet-card"><div className="mak-fleet-photo"><Photo id={car.image} alt={`${car.subtitle}, illustrative vehicle`} /><span>{car.category}</span><button type="button" className="mak-round-button" aria-label={`Enquire about ${car.subtitle.toLowerCase()}`} onClick={() => openEnquiry({ category: car.category })}><Icon name="arrow" size={20} /></button></div><div className="mak-fleet-body"><span className="mak-kicker">{car.subtitle}</span><h3>{car.title}</h3><div className="mak-fleet-specs"><span><Icon name="users" size={16} />{car.seats}</span><span><Icon name="tracking" size={16} />{car.luggage}</span></div><div className="mak-fleet-price"><span>Personalised rates<small>Based on your rental requirements</small></span><button type="button" className="mak-text-button" onClick={() => openEnquiry({ category: car.category })}>Enquire <Icon name="arrow" size={17} /></button></div></div></article>)}</div>
+        <p className="mak-collection-note">Illustrative collection. Specific models, seating, rates and availability will be confirmed with your quotation.</p>
+      </section>
+
+      <section className="mak-types mak-section"><div className="mak-container"><SectionHeading eyebrow="FIND YOUR FIT" centered>The right car. <em>Your kind of journey.</em></SectionHeading><div className="mak-type-grid">{fleet.map((car, index) => <button type="button" className="mak-type-card" key={car.id} onClick={() => { setCategory(car.category); go('mak-fleet') }}><Photo id={car.image} alt="" /><span className="mak-type-shade" /><span className="mak-type-number">0{index + 1}</span><span className="mak-type-label"><span>{car.category}<small>{car.description}</small></span><span className="mak-type-arrow"><Icon name="arrow" size={21} /></span></span></button>)}</div></div></section>
+
+      <section className="mak-section mak-process mak-container" id="mak-process"><SectionHeading eyebrow="SIMPLE BY DESIGN" centered>Less to arrange. <em>More to enjoy.</em></SectionHeading><div className="mak-process-grid">{processSteps.map((item, index) => <article key={item.title} data-reveal style={{ '--mak-delay': `${index * 100}ms` }}><span className="mak-step-number">0{index + 1}</span><span className="mak-step-icon"><Icon name={item.icon} size={27} /></span><h3>{item.title}</h3><p>{item.text}</p></article>)}</div><p className="mak-process-note"><span><Icon name="check" size={14} /></span>New to renting? Start with an enquiry and take it one step at a time.</p></section>
+
+      <section className="mak-business" id="mak-business"><Photo id="photo-1449965408869-eaa3f722e40d" alt="Open-road scenery from a vehicle" /><div className="mak-business-overlay" /><div className="mak-container mak-business-inner"><div data-reveal><span className="mak-eyebrow">BUSINESS MOVES BETTER WITH MAK</span><h2>Your people.<br />Your projects.<br /><em>Our road ahead.</em></h2><p>From a single business trip to an ongoing transport plan, bring your team, destinations and rental requirements together.</p><button type="button" className="mak-button" onClick={() => openEnquiry({ preference: 'Corporate rental' })}>Let's talk business <Icon name="arrow" size={18} /></button></div><div className="mak-business-options" data-reveal style={{ '--mak-delay': '130ms' }}>{[['corporate', 'Corporate accounts', 'Customer-specific quotations and rental requirements.'], ['tracking', 'Multiple destinations', 'Plan pickup points, stops and passenger journeys.'], ['calendar', 'Monthly & project plans', 'Transport shaped around the way your business works.']].map(([icon, title, text]) => <div key={title}><span><Icon name={icon} size={22} /></span><div><h3>{title}</h3><p>{text}</p></div></div>)}</div></div></section>
+
+      <section className="mak-section mak-faq mak-container" id="mak-faq"><div data-reveal><span className="mak-eyebrow">A LITTLE CLARITY</span><h2>Before you<br />hit <em>the road.</em></h2><p>Good journeys begin with the right information. Here are a few helpful things to know.</p><button type="button" className="mak-text-button" onClick={() => openEnquiry()}>Prepare your rental enquiry <Icon name="arrow" size={18} /></button></div><div className="mak-faq-list" data-reveal style={{ '--mak-delay': '100ms' }}>{faqs.map((item, index) => <details key={item.question}><summary><span className="mak-faq-number">0{index + 1}</span><span>{item.question}</span><span className="mak-faq-toggle"><Icon name="plus" size={18} /></span></summary><p>{item.answer}</p></details>)}</div></section>
+
+      <section className="mak-cta"><div className="mak-container"><div data-reveal><span className="mak-eyebrow">THE ROAD IS CALLING</span><h2>Let's make your<br />next move <em>a great one.</em></h2><p>Personal plans or business possibilities. Start your journey with MAK.</p></div><button type="button" className="mak-button" onClick={() => openEnquiry()}>Plan my rental <Icon name="arrow" size={19} /></button></div><span className="mak-cta-watermark" aria-hidden="true">MAK</span></section>
+    </main>
+
+    <footer className="mak-footer"><div className="mak-container"><div className="mak-footer-top"><Brand onClick={(event) => { event.preventDefault(); go('mak-home') }} /><p>For everyday journeys.<br />For the road ahead.</p><span><Icon name="tracking" size={17} />Saudi Arabia</span></div><div className="mak-footer-grid"><div><span className="mak-eyebrow">YOUR JOURNEY STARTS HERE</span><h2>A better drive.<br /><em>A little more freedom.</em></h2><button type="button" className="mak-text-button" onClick={() => openEnquiry()}>Prepare an enquiry <Icon name="arrow" size={18} /></button></div><div><h3>Explore MAK</h3>{[['About us', 'mak-about'], ['Rental services', 'mak-services'], ['Our collection', 'mak-fleet'], ['Rental process', 'mak-process'], ['Common questions', 'mak-faq']].map(([label, id]) => <button type="button" key={id} onClick={() => go(id)}>{label}</button>)}</div><div><h3>Your way to travel</h3>{rentalPreferences.map((item) => <button type="button" key={item} onClick={() => openEnquiry({ preference: item })}>{item}</button>)}</div><div><h3>MAK workspace</h3><p>Secure access for our team.</p><a href={login}>{user ? 'Open dashboard' : 'Staff sign in'}<Icon name="arrow" size={16} /></a>{!user && <a href="#/sign-up">Create staff account</a>}<small>New accounts require admin approval.</small></div></div><div className="mak-footer-bottom"><span>&copy; {new Date().getFullYear()} MAK Rentals.</span><span>Public website preview <span aria-hidden="true">&middot;</span> Online reservations coming soon</span><button type="button" onClick={() => go('mak-home')}>Back to top <Icon name="arrow" size={15} /></button></div></div></footer>
+    {scrolled && <button type="button" className="mak-back-top" aria-label="Back to top" onClick={() => go('mak-home')}><svg viewBox="0 0 48 48" aria-hidden="true"><circle className="mak-progress-track" cx="24" cy="24" r="21" /><circle className="mak-progress-value" cx="24" cy="24" r="21" pathLength="100" /></svg><Icon name="arrow" size={19} /></button>}
+    {enquiry && <RentalEnquiry initial={enquiry} lenisRef={lenis} onClose={closeEnquiry} />}
+  </div>
 }
