@@ -1,31 +1,55 @@
-import { useEffect, useRef, useState } from 'react'
-import Icon from '../../app/Icon.jsx'
+import { Children, useEffect, useId, useRef, useState } from 'react'
 
 export default function LandingCarousel({ children, label }) {
   const track = useRef(null)
-  const [edges, setEdges] = useState({ start: true, end: false })
+  const trackId = useId()
+  const childCount = Children.count(children)
+  const [navigation, setNavigation] = useState({ offsets: [0], active: 0, visibleCount: 1 })
+
   useEffect(() => {
     const element = track.current
-    const update = () => setEdges({ start: element.scrollLeft < 5, end: element.scrollLeft + element.clientWidth >= element.scrollWidth - 5 })
+    const update = () => {
+      const firstCard = element.firstElementChild
+      const gap = Number.parseFloat(getComputedStyle(element).columnGap) || 0
+      const step = (firstCard?.getBoundingClientRect().width || element.clientWidth) + gap
+      const visibleCount = Math.max(1, Math.floor((element.clientWidth + gap + 1) / Math.max(1, step)))
+      const maxScroll = Math.max(0, element.scrollWidth - element.clientWidth)
+      const pageCount = maxScroll < 2 ? 1 : Math.ceil(childCount / visibleCount)
+      const offsets = Array.from({ length: pageCount }, (_, index) => Math.min(index * visibleCount * step, maxScroll))
+      const active = offsets.reduce((nearest, offset, index) => Math.abs(offset - element.scrollLeft) < Math.abs(offsets[nearest] - element.scrollLeft) ? index : nearest, 0)
+
+      setNavigation((previous) => previous.active === active && previous.visibleCount === visibleCount && previous.offsets.length === offsets.length && previous.offsets.every((offset, index) => Math.abs(offset - offsets[index]) < 1)
+        ? previous : { offsets, active, visibleCount })
+    }
+
     update()
     element.addEventListener('scroll', update, { passive: true })
     const observer = new ResizeObserver(update)
     observer.observe(element)
+    if (element.firstElementChild) observer.observe(element.firstElementChild)
     return () => { element.removeEventListener('scroll', update); observer.disconnect() }
-  }, [])
-  const move = (direction) => {
-    const element = track.current
+  }, [childCount])
+
+  const goToPage = (index) => {
+    const page = Math.max(0, Math.min(index, navigation.offsets.length - 1))
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    element.scrollBy({ left: direction * (element.firstElementChild?.getBoundingClientRect().width + 24 || element.clientWidth), behavior: reduced ? 'instant' : 'smooth' })
+    track.current.scrollTo({ left: navigation.offsets[page], behavior: reduced ? 'instant' : 'smooth' })
   }
+
   return <div className="mak-carousel">
-    <div ref={track} className="mak-carousel-track" role="region" aria-label={label} tabIndex={0} onKeyDown={(event) => {
-      if (event.target !== event.currentTarget || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return
-      event.preventDefault(); move(event.key === 'ArrowRight' ? 1 : -1)
+    <div ref={track} id={trackId} className="mak-carousel-track" role="region" aria-roledescription="carousel" aria-label={label} tabIndex={0} onKeyDown={(event) => {
+      if (event.target !== event.currentTarget || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+      event.preventDefault()
+      if (event.key === 'Home') { goToPage(0); return }
+      if (event.key === 'End') { goToPage(navigation.offsets.length - 1); return }
+      const element = track.current
+      const gap = Number.parseFloat(getComputedStyle(element).columnGap) || 0
+      const step = (element.firstElementChild?.getBoundingClientRect().width || element.clientWidth) + gap
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      element.scrollBy({ left: (event.key === 'ArrowRight' ? 1 : -1) * step, behavior: reduced ? 'instant' : 'smooth' })
     }}>{children}</div>
-    <div className="mak-carousel-bottom"><span>Explore at your own pace <span aria-hidden="true">&middot;</span> Swipe or use the arrows</span><div>
-      <button type="button" className="mak-round-button" aria-label={`Previous ${label}`} disabled={edges.start} onClick={() => move(-1)}><Icon name="arrow" className="mak-flip" size={18} /></button>
-      <button type="button" className="mak-round-button" aria-label={`Next ${label}`} disabled={edges.end} onClick={() => move(1)}><Icon name="arrow" size={18} /></button>
-    </div></div>
+    {navigation.offsets.length > 1 && <div className="mak-carousel-dots" role="group" aria-label={`${label} navigation`}>
+      {navigation.offsets.map((_, index) => <button type="button" key={index} aria-controls={trackId} aria-label={`Show ${label} ${index * navigation.visibleCount + 1} to ${Math.min((index + 1) * navigation.visibleCount, childCount)}`} aria-current={navigation.active === index ? 'true' : undefined} onClick={() => goToPage(index)} />)}
+    </div>}
   </div>
 }

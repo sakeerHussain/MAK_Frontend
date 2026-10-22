@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 /* All public-page styling stays under this root; admin and auth styles are untouched. */
+html:has(.mak-landing), body:has(.mak-landing), #root:has(.mak-landing) { min-width: 0; }
 .mak-landing {
   --mak-gold: #f5b754;
   --mak-gold-dark: #956326;
@@ -51,6 +52,7 @@
 .mak-skip { position: fixed; left: 20px; top: 12px; z-index: 110; padding: 12px 20px; background: var(--mak-gold); color: #1b1b1b; border-radius: 30px; transform: translateY(-160%); }
 .mak-skip:focus { transform: none; }
 .mak-photo { position: relative; width: 100%; height: 100%; overflow: hidden; background: linear-gradient(140deg,#4a4f50,#afb5b2); }
+.mak-photo picture { display: block; width: 100%; height: 100%; }
 .mak-photo img { transition: transform .8s cubic-bezier(.2,.65,.3,1); }
 .mak-photo-fallback { display: grid; place-items: center; min-height: 180px; background: linear-gradient(145deg,#222a2e,#5f696b); color: #fff; }
 .mak-photo-fallback > span { display: grid; justify-items: center; gap: 10px; padding: 25px; font-size: 16px; letter-spacing: 4px; text-align: center; }
@@ -81,7 +83,7 @@
 .mak-hero-image { opacity: 0; transition: opacity .85s ease; }
 .mak-hero-image.is-active { opacity: 1; }
 .mak-hero-image .mak-photo { background: #424d50; }
-.mak-hero-image img { object-position: 61% 58%; transform: scale(1.035); transition: transform 6s ease; }
+.mak-hero-image img { object-position: var(--mak-slide-position, 61% 58%); transform: scale(1.035); transition: transform 6s ease; }
 .mak-hero-image.is-active img { transform: scale(1); }
 .mak-hero-overlay { z-index: -2; background: linear-gradient(90deg,#11171bde 0%,#11171b99 39%,#11171b1a 80%),linear-gradient(0deg,#11171bba 0%,#11171b08 42%,#11171b66 100%); }
 .mak-hero-content { padding-top: 150px; padding-bottom: 160px; }
@@ -93,26 +95,25 @@
 .mak-hero-copy > p { max-width: 420px; font-size: 16px; font-weight: 300; color: #eeefef; line-height: 1.8; animation: mak-arrive .9s .2s both; }
 .mak-hero-buttons { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 34px; animation: mak-arrive .9s .3s both; }
 .mak-hero-buttons .mak-button:hover { background: #fff; color: #1b1b1b; }
-.mak-hero-meta { display: flex; align-items: center; gap: 24px; margin-top: 48px; color: #e1e3e3; font-size: 11px; line-height: 1.7; }
-.mak-hero-meta > span:first-child { font-size: 8px; font-weight: 300; letter-spacing: 2px; }
-.mak-hero-meta strong { color: #fff; font-weight: 500; }
-.mak-hero-rule { width: 42px; height: 1px; background: #ffffff55; }
 .mak-hero-pagination { position: absolute; right: 34px; top: 50%; transform: translateY(-50%); display: grid; gap: 18px; }
 .mak-hero-pagination button { display: flex; align-items: center; gap: 13px; border: 0; background: none; padding: 5px; color: #ffffffaa; font-size: 11px; }
 .mak-hero-pagination i { width: 22px; height: 1px; background: #ffffff70; transition: width .3s, background .3s; }
 .mak-hero-pagination .is-active { color: var(--mak-gold); }
 .mak-hero-pagination .is-active i { width: 43px; background: var(--mak-gold); }
-.mak-hero-bottom { position: absolute; bottom: 36px; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; gap: 30px; }
-.mak-scroll-cue { display: flex; align-items: center; gap: 13px; color: #fff; background: none; border: 0; padding: 0; font-size: 8px; letter-spacing: 2px; }
-.mak-scroll-cue > span { width: 30px; height: 43px; border: 1px solid #ffffff70; border-radius: 20px; display: grid; place-items: center; }
-.mak-scroll-cue svg { transform: rotate(90deg); }
-.mak-hero-caption { margin-left: auto; text-align: right; font-weight: 300; font-size: 12px; }
-.mak-hero-caption small { display: block; font-size: 8px; color: #fff; letter-spacing: 1px; margin-top: 4px; opacity: .7; }
-.mak-hero-arrows { display: flex; gap: 9px; }
-.mak-hero-arrows .mak-round-button { width: 39px; height: 39px; color: white; border-color: #ffffff60; }
-.mak-hero-arrows .mak-round-button:hover { color: var(--mak-ink); }
 
-.mak-finder-area { background: var(--mak-paper); padding: 37px 0 24px; }
+/* The background moves independently; the booking form stays in the foreground. */
+.mak-booking-section { position: relative; isolation: isolate; overflow: clip; min-height: 0; background: #20272b; color: #fff; }
+.mak-booking-background { position: absolute; inset: -96px 0; z-index: -2; transform: translate3d(0,var(--mak-booking-offset,0px),0); will-change: transform; pointer-events: none; }
+.mak-booking-background picture { display: block; width: 100%; height: 100%; }
+.mak-booking-background img { object-position: center 55%; }
+.mak-booking-shade { position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg,#11171b8c 0%,#11171b20 48%,#11171ba8 100%); pointer-events: none; }
+.mak-booking-content { position: relative; padding-block: 52px; display: flex; flex-direction: column; gap: 28px; }
+.mak-booking-section .mak-finder-top { align-items: flex-start; flex-direction: column-reverse; gap: 10px; margin-bottom: 0; max-width: 640px; }
+.mak-booking-section .mak-finder-top h2 { font-size: clamp(32px,3.5vw,48px); line-height: 1.15; letter-spacing: -1.5px; font-weight: 500; }
+.mak-booking-section .mak-finder-top > span { display: block; color: var(--mak-gold); font-size: 10px; letter-spacing: 3px; }
+.mak-booking-panel { color: var(--mak-ink); background: #fff; border: 1px solid #eeeee9; border-radius: 24px; padding: 12px 26px; box-shadow: 0 18px 55px #00000024; }
+.mak-booking-panel .mak-finder { padding: 18px 0; border: 0; border-radius: 0; box-shadow: none; }
+.mak-booking-section .mak-form-error { margin-top: 8px; }
 .mak-finder-top { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 22px; }
 .mak-finder-top h2 { font-size: 19px; letter-spacing: -.4px; font-weight: 500; }
 .mak-finder-top > span { color: var(--mak-gold-dark); font-size: 8px; letter-spacing: 3px; }
@@ -124,25 +125,23 @@
 .mak-finder label > span svg { color: var(--mak-gold-dark); }
 .mak-finder :is(select,input) { width: 100%; min-width: 0; border: 0; padding: 0; border-radius: 0; background: none; color: #1b1b1b; font-size: 12px; height: 25px; font-weight: 400; color-scheme: light; }
 .mak-finder .mak-button { font-size: 12px; padding-inline: 25px; min-height: 53px; }
-.mak-finder-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 14px; font-size: 10px; color: #70716b; }
-.mak-finder-bottom > span { display: flex; gap: 7px; align-items: center; }
-.mak-finder-bottom > label { display: flex; align-items: center; gap: 12px; }
-.mak-finder-bottom select { border: 0; border-bottom: 1px solid #d1d0ca; border-radius: 0; background: none; color: #3a3b36; padding: 3px 17px 3px 0; font-size: 10px; }
 
-.mak-about { display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; gap: 95px; }
-.mak-about h2 { margin-bottom: 24px; }
-.mak-about-copy > p { color: var(--mak-muted); font-weight: 300; font-size: 14px; margin-bottom: 17px; line-height: 1.95; }
-.mak-check-list { list-style: none; padding: 5px 0 28px; display: grid; gap: 14px; color: #383a35; font-size: 13px; }
-.mak-check-list li { display: flex; align-items: center; gap: 12px; }
-.mak-check-list li > span { width: 26px; height: 26px; background: #fcf0db; color: #8b5e1f; border-radius: 50%; display: grid; place-items: center; }
-.mak-about-visual { position: relative; height: 490px; padding: 0 25px 25px 0; }
-.mak-about-visual > .mak-photo { border-radius: 22px 22px 80px 22px; }
-.mak-about-visual::before { position: absolute; content: ''; z-index: -1; right: 0; bottom: 0; width: 65%; height: 60%; background: #f9e9cc; border-radius: 22px 22px 80px 22px; }
-.mak-about-visual > .mak-photo::after { position: absolute; content: ''; inset: 0; background: linear-gradient(0deg,#111b21b3,transparent 65%); }
-.mak-photo-tag { position: absolute; left: 30px; bottom: 58px; color: #e7e9e4; font-size: 9px; letter-spacing: 3px; }
-.mak-photo-tag strong { display: block; color: white; font-size: 24px; letter-spacing: -.5px; font-weight: 500; margin-top: 7px; }
-.mak-about-stamp { position: absolute; top: 32px; right: -14px; display: flex; gap: 14px; align-items: center; padding: 22px 25px; background: var(--mak-gold); border-radius: 15px 15px 15px 0; font-size: 12px; line-height: 1.6; box-shadow: 0 10px 35px #00000010; }
-.mak-about-stamp strong { font-size: 14px; font-weight: 500; }
+/* Compact collage: a short introduction beside a portrait, experience card and detail. */
+.mak-about { display: grid; grid-template-columns: minmax(0,.95fr) minmax(0,1.05fr); align-items: center; gap: clamp(32px,5vw,64px); padding-block: 68px; }
+.mak-about-copy { min-width: 0; }
+.mak-about h2 { margin-bottom: 20px; }
+.mak-about-copy > p { max-width: 440px; color: var(--mak-muted); font-weight: 400; font-size: 14px; margin-bottom: 25px; line-height: 1.8; }
+.mak-about-visual { display: grid; grid-template-columns: minmax(0,1.05fr) minmax(0,1fr); grid-template-rows: .4fr .6fr; grid-template-areas: "portrait assurance" "portrait detail"; gap: 14px; height: clamp(280px,25vw,340px); min-width: 0; }
+.mak-about-portrait, .mak-about-detail { position: relative; min-width: 0; min-height: 0; overflow: hidden; border-radius: 20px; isolation: isolate; }
+.mak-about-portrait { grid-area: portrait; }
+.mak-about-portrait img { object-position: 55% center; }
+.mak-about-stamp { grid-area: assurance; min-width: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 7px; padding: 18px 12px; border-radius: 20px; color: #deded9; background: var(--mak-ink); font-size: 13px; font-weight: 400; line-height: 1.5; text-align: center; }
+.mak-about-stamp strong { display: block; color: #fff; font-size: clamp(28px,2.6vw,38px); font-weight: 600; line-height: 1.15; letter-spacing: -.8px; white-space: nowrap; }
+.mak-about-detail { grid-area: detail; }
+.mak-about-detail img { object-position: 48% center; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .mak-about-portrait:hover img, .mak-about-detail:hover img { transform: scale(1.045); }
+}
 .mak-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 50px; margin-bottom: 44px; }
 .mak-section-heading .mak-eyebrow { margin-bottom: 16px; }
 .mak-section-heading > p { max-width: 330px; color: var(--mak-muted); font-size: 13px; font-weight: 300; line-height: 1.9; }
@@ -156,7 +155,6 @@
 .mak-service-card > .mak-photo { position: absolute; inset: 0; z-index: -2; }
 .mak-service-card:hover img { transform: scale(1.07); }
 .mak-service-shade { position: absolute; inset: 0; z-index: -1; background: linear-gradient(0deg,#141b20ed,#141b201a 100%); }
-.mak-service-index { position: absolute; top: 25px; left: 27px; border: 1px solid #ffffff70; border-radius: 30px; padding: 4px 13px; font-size: 11px; }
 .mak-service-copy { position: absolute; left: 29px; right: 29px; bottom: 33px; }
 .mak-service-copy > svg { color: var(--mak-gold); margin-bottom: 14px; }
 .mak-service-copy h3 { font-size: 24px; letter-spacing: -.7px; margin-bottom: 12px; }
@@ -167,35 +165,39 @@
 .mak-card-cutout::after { top: -20px; right: 0; }
 .mak-card-cutout .mak-round-button { width: 48px; height: 48px; background: var(--mak-gold); border-color: var(--mak-gold); }
 .mak-card-cutout .mak-round-button:hover { background: #1b1b1b; border-color: #1b1b1b; color: white; }
-.mak-carousel-bottom { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-top: 25px; }
-.mak-carousel-bottom > span { color: #77786f; font-size: 10px; }
-.mak-carousel-bottom > div { display: flex; gap: 9px; }
+.mak-carousel-dots { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 18px; }
+.mak-carousel-dots button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: transparent; }
+.mak-carousel-dots button::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #c5c3bb; transition: background .2s, transform .2s; }
+.mak-carousel-dots button:hover::before { background: var(--mak-gold-dark); }
+.mak-carousel-dots button[aria-current="true"]::before { background: var(--mak-gold-dark); transform: scale(1.25); box-shadow: 0 0 0 3px #f5b75440; }
+/* Refined gallery: integrated cards, readable details and a clear enquiry action. */
 .mak-fleet { padding-bottom: 95px; }
 .mak-fleet-toolbar { display: flex; gap: 20px; align-items: center; justify-content: space-between; margin: -8px 0 30px; }
 .mak-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
-.mak-tabs button { padding: 10px 20px; border-radius: 30px; border: 1px solid var(--mak-line); background: none; color: #5c5e57; font-size: 12px; transition: background .2s,color .2s,border-color .2s; }
+.mak-tabs button { min-height: 44px; padding: 10px 20px; border-radius: 30px; border: 1px solid var(--mak-line); background: none; color: #5c5e57; font-size: 12px; transition: background .2s,color .2s,border-color .2s; }
 .mak-tabs button.is-active { background: var(--mak-ink); border-color: var(--mak-ink); color: #fff; }
 .mak-tabs button:hover:not(.is-active) { border-color: var(--mak-gold-dark); color: var(--mak-gold-dark); }
-.mak-fleet-toolbar > span { color: #76796f; font-size: 10px; }
-.mak-fleet-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: start; gap: 26px; }
-.mak-fleet-card { min-width: 0; }
-.mak-fleet-photo { height: 260px; position: relative; overflow: hidden; border-radius: 20px; }
+.mak-fleet-toolbar > span { color: #666761; font-size: 12px; }
+.mak-fleet-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: stretch; gap: 24px; }
+.mak-fleet-grid-filtered { grid-template-columns: minmax(0,1fr); max-width: 400px; }
+.mak-fleet-card { min-width: 0; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--mak-line); border-radius: 20px; background: #fff; }
+.mak-fleet-photo { aspect-ratio: 1.43; position: relative; overflow: hidden; flex-shrink: 0; }
 .mak-fleet-photo .mak-photo::after { position: absolute; content: ''; inset: 0; background: linear-gradient(0deg,#0000003a,transparent 40%); }
 .mak-fleet-card:hover img { transform: scale(1.06); }
-.mak-fleet-photo > span { position: absolute; left: 19px; top: 18px; background: #ffffffed; padding: 5px 14px; border-radius: 30px; color: var(--mak-ink); font-size: 10px; }
+.mak-fleet-photo > span { position: absolute; left: 18px; top: 18px; background: #ffffffed; padding: 5px 13px; border-radius: 30px; color: var(--mak-ink); font-size: 11px; }
 .mak-fleet-photo > button { position: absolute; right: 18px; bottom: 18px; background: var(--mak-gold); border-color: var(--mak-gold); transform: rotate(-35deg); }
 .mak-fleet-photo > button:hover { background: #fff; border-color: #fff; transform: rotate(0); }
-.mak-fleet-body { position: relative; margin: -20px 17px 0; z-index: 1; background: #fff; padding: 25px 10px 0; border-radius: 15px 15px 0 0; }
-.mak-kicker { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--mak-gold-dark); }
-.mak-fleet-body h3 { font-size: 23px; letter-spacing: -.6px; margin: 9px 0 18px; }
-.mak-fleet-specs { display: flex; flex-wrap: wrap; gap: 15px; font-size: 10px; color: #74756f; padding-bottom: 22px; border-bottom: 1px solid var(--mak-line); }
-.mak-fleet-specs > span { display: flex; align-items: center; gap: 6px; }
-.mak-fleet-specs svg { color: #8a6b3d; }
-.mak-fleet-price { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 17px; }
-.mak-fleet-price > span { font-size: 12px; font-weight: 500; }
-.mak-fleet-price small { display: block; margin-top: 2px; font-size: 8px; color: #73746d; font-weight: 400; }
-.mak-fleet-price button { font-size: 11px; gap: 7px; }
-.mak-collection-note { color: #7a7a71; font-size: 10px; text-align: center; margin-top: 35px!important; }
+.mak-fleet-body { display: flex; flex-direction: column; flex: 1; min-width: 0; padding: 24px; }
+.mak-kicker { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--mak-gold-dark); }
+.mak-fleet-body h3 { font-size: 25px; line-height: 1.2; letter-spacing: -.6px; margin: 10px 0 18px; }
+.mak-fleet-specs { display: flex; flex-wrap: wrap; gap: 12px 16px; margin-top: auto; font-size: 12px; color: #666761; padding-bottom: 20px; border-bottom: 1px solid var(--mak-line); }
+.mak-fleet-specs > span { display: inline-flex; align-items: center; gap: 6px; }
+.mak-fleet-specs svg { flex-shrink: 0; color: var(--mak-gold-dark); }
+.mak-fleet-price { display: flex; flex-direction: column; align-items: stretch; gap: 18px; padding-top: 18px; }
+.mak-fleet-price > span { font-size: 14px; font-weight: 500; }
+.mak-fleet-price small { display: block; margin-top: 3px; font-size: 11px; line-height: 1.7; color: #666761; font-weight: 400; }
+.mak-fleet-enquire { width: 100%; min-height: 46px; justify-content: space-between; font-size: 13px; padding: 12px 18px; }
+.mak-collection-note { color: #666761; font-size: 11px; line-height: 1.8; text-align: center; margin-top: 28px!important; }
 
 .mak-types { background: var(--mak-paper); }
 .mak-type-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px; }
@@ -208,12 +210,17 @@
 .mak-type-label small { display: block; max-width: 225px; margin-top: 10px; font-size: 10px; line-height: 1.8; color: #e1e3e1; letter-spacing: 0; font-weight: 300; }
 .mak-type-arrow { width: 37px; height: 37px; flex-shrink: 0; display: grid; place-items: center; border: 1px solid #ffffff66; border-radius: 50%; transition: color .25s, background .25s; }
 .mak-type-card:hover .mak-type-arrow { color: #1b1b1b; background: var(--mak-gold); border-color: var(--mak-gold); }
-.mak-process-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 28px; }
-.mak-process-grid article { position: relative; background: var(--mak-paper); border: 1px solid #eeeee9; padding: 32px 32px 34px; border-radius: 20px; }
-.mak-step-number { position: absolute; right: 25px; top: 26px; font-size: 45px; color: #e3e3dc; line-height: 1; font-weight: 500; letter-spacing: -2px; }
-.mak-step-icon { width: 52px; height: 52px; display: grid; place-items: center; background: #fff; border-radius: 50%; color: #99703a; margin-bottom: 25px; }
-.mak-process-grid h3 { font-size: 21px; margin-bottom: 13px; letter-spacing: -.5px; }
-.mak-process-grid p { color: #72746c; font-weight: 300; line-height: 1.9; font-size: 12px; }
+/* Soft workflow cards with a curved number pocket, matching the landing-page cutouts. */
+.mak-process-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: stretch; gap: 24px; list-style: none; padding: 0; margin: 0; }
+.mak-process-card { position: relative; isolation: isolate; min-width: 0; min-height: 276px; overflow: hidden; background: var(--mak-paper); padding: 60px 40px 112px; border-radius: 24px; }
+.mak-process-grid h3 { font-size: 21px; line-height: 1.25; margin-bottom: 16px; letter-spacing: -.5px; }
+.mak-process-grid p { color: var(--mak-muted); font-weight: 400; line-height: 1.9; font-size: 13px; }
+.mak-step-cutout { position: absolute; bottom: -1px; left: -1px; padding: 14px; background: #fff; border-top-right-radius: 40px; }
+.mak-step-cutout::before, .mak-step-cutout::after { position: absolute; content: ''; width: 22px; height: 22px; background: transparent; border-radius: 0 0 0 22px; box-shadow: -6px 6px 0 6px #fff; }
+.mak-step-cutout::before { bottom: 0; right: -22px; }
+.mak-step-cutout::after { top: -22px; left: 0; }
+.mak-step-number { display: grid; place-items: center; width: 60px; height: 60px; border-radius: 50%; background: var(--mak-paper); color: var(--mak-ink); font-size: 13px; line-height: 1; font-weight: 600; letter-spacing: -.2px; transition: background .25s; }
+@media (hover: hover) { .mak-process-card:hover .mak-step-number { background: var(--mak-gold); } }
 .mak-process-note { display: flex; align-items: center; justify-content: center; gap: 9px; text-align: center; color: #72746d; font-size: 11px; margin-top: 32px!important; }
 .mak-process-note > span { display: grid; place-items: center; width: 23px; height: 23px; background: #fbeed9; border-radius: 50%; color: #936425; flex: none; }
 
@@ -316,10 +323,9 @@
   .mak-header-inner { gap: 24px; }
   .mak-header nav { gap: 20px; }
   .mak-header nav > button, .mak-nav-login { font-size: 12px; }
-  .mak-about { gap: 60px; }
+  .mak-about { gap: 40px; }
   .mak-finder > label { padding-inline: 15px; }
   .mak-finder .mak-button { padding-inline: 19px; gap: 12px; }
-  .mak-fleet-body { margin-inline: 8px; padding-inline: 7px; }
   .mak-business-inner { gap: 80px; }
   .mak-faq { gap: 65px; }
   .mak-footer-grid { gap: 30px; }
@@ -347,29 +353,27 @@
   .mak-finder > label:nth-child(3) { grid-column: 1; grid-row: 2; }
   .mak-finder > label:nth-child(4) { grid-column: 2; grid-row: 2; }
   .mak-finder > button { grid-column: 3; grid-row: 1/3; align-self: stretch; border-radius: 15px; }
-  .mak-finder-bottom { align-items: start; }
-  .mak-about { grid-template-columns: 1fr 1fr; gap: 35px; }
-  .mak-about-visual { height: 440px; padding-right: 15px; }
-  .mak-about-stamp { right: -8px; padding: 16px; gap: 10px; }
-  .mak-about-copy > p { font-size: 12px; }
-  .mak-check-list { font-size: 11px; }
+  .mak-booking-content { padding-block: 48px; gap: 28px; }
+  .mak-booking-panel { padding: 12px 24px; }
+  .mak-booking-panel .mak-finder { padding-block: 18px; }
+  .mak-about { grid-template-columns: 1fr; gap: 30px; padding-block: 56px; }
+  .mak-about-copy { max-width: 660px; }
+  .mak-about-copy > p { max-width: 520px; }
+  .mak-about-visual { height: 320px; }
   .mak-section-heading { gap: 35px; }
   .mak-section-heading > p { max-width: 260px; font-size: 12px; }
   .mak-carousel-track { grid-auto-columns: calc((100% - 24px) / 2); }
-  .mak-fleet-grid { gap: 18px; }
-  .mak-fleet-photo { height: 210px; }
-  .mak-fleet-body { margin-inline: 0; padding-inline: 8px; }
-  .mak-fleet-body h3 { font-size: 20px; }
-  .mak-fleet-price { flex-wrap: wrap; }
-  .mak-fleet-specs { gap: 8px; }
-  .mak-fleet-price small { font-size: 8px; }
+  .mak-fleet-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }
+  .mak-fleet-grid-filtered { grid-template-columns: minmax(0,1fr); }
+  .mak-fleet-body { padding: 20px; }
+  .mak-fleet-body h3 { font-size: 24px; }
   .mak-type-grid { gap: 18px; }
   .mak-type-label { left: 21px; right: 20px; font-size: 25px; gap: 7px; }
   .mak-type-label small { font-size: 9px; }
   .mak-type-arrow { width: 30px; height: 30px; }
   .mak-process-grid { gap: 18px; }
-  .mak-process-grid article { padding: 25px; }
-  .mak-process-grid h3 { font-size: 18px; }
+  .mak-process-card { padding: 40px 26px 108px; }
+  .mak-process-grid h3 { font-size: 20px; }
   .mak-business-inner { padding-block: 80px; gap: 60px; grid-template-columns: 1fr 1fr; }
   .mak-faq { gap: 40px; }
   .mak-footer-grid { grid-template-columns: 1.3fr 1fr 1fr; }
@@ -397,22 +401,20 @@
   .mak-hero .mak-eyebrow { max-width: 310px; font-size: 7px; letter-spacing: 2.8px; gap: 11px; margin-bottom: 25px; }
   .mak-hero .mak-star { width: 21px; height: 21px; flex-shrink: 0; font-size: 16px; }
   .mak-hero-copy > p { max-width: 300px; font-size: 13px; line-height: 1.9; }
-  .mak-hero-image img { object-position: 62% center; }
+  .mak-hero-image img { object-position: var(--mak-slide-mobile-position, 62% center); }
   .mak-hero-overlay { background: linear-gradient(90deg,#11171be0,#11171b33),linear-gradient(0deg,#11171bb3,transparent 60%,#11171b88); }
   .mak-hero-buttons { gap: 12px; flex-direction: column; align-items: start; margin-top: 27px; }
   .mak-hero-buttons .mak-button { font-size: 11px; padding: 16px 24px; gap: 25px; }
-  .mak-hero-meta { margin-top: 33px; gap: 16px; font-size: 9px; }
-  .mak-hero-meta > span:first-child { font-size: 6px; letter-spacing: 1.5px; }
-  .mak-hero-rule { width: 20px; }
-  .mak-hero-pagination { top: auto; right: 24px; bottom: 112px; display: flex; gap: 10px; transform: none; }
+  .mak-hero-pagination { top: auto; right: 24px; bottom: 32px; display: flex; gap: 10px; transform: none; }
   .mak-hero-pagination i { width: 18px; }
   .mak-hero-pagination .is-active i { width: 30px; }
-  .mak-hero-bottom { bottom: 26px; gap: 15px; }
-  .mak-hero-caption { display: none; }
-  .mak-scroll-cue { font-size: 7px; gap: 9px; letter-spacing: 1.7px; }
-  .mak-hero-arrows { gap: 8px; }
-  .mak-hero-arrows .mak-round-button { width: 35px; height: 35px; }
-  .mak-finder-area { padding-block: 28px 22px; }
+  .mak-booking-content { padding-block: 36px; gap: 24px; }
+  .mak-booking-section .mak-finder-top h2 { font-size: clamp(30px,8vw,38px); letter-spacing: -1px; }
+  .mak-booking-section .mak-finder-top > span { font-size: 9px; letter-spacing: 2.5px; }
+  .mak-booking-panel { border-radius: 20px; padding: 8px 20px; }
+  .mak-booking-panel .mak-finder { padding: 18px 0; }
+  .mak-booking-panel .mak-finder :is(input,select) { font-size: 16px; min-height: 32px; }
+  .mak-booking-panel .mak-finder label > span { font-size: 10px; }
   .mak-finder-top { margin-bottom: 20px; }
   .mak-finder-top h2 { font-size: 18px; letter-spacing: -.4px; }
   .mak-finder-top > span { display: none; }
@@ -423,49 +425,37 @@
   .mak-finder label > span { font-size: 9px; gap: 6px; }
   .mak-finder label > span svg { width: 14px; }
   .mak-finder :is(select,input) { font-size: 11px; height: 29px; }
-  .mak-finder-bottom { gap: 14px; font-size: 9px; }
-  .mak-finder-bottom > span { align-items: start; line-height: 1.8; }
-  .mak-finder-bottom > span svg { margin-top: 2px; }
-  .mak-finder-bottom label { justify-content: space-between; width: 100%; }
-  .mak-finder-bottom select { font-size: 10px; }
-  .mak-about { grid-template-columns: 1fr; gap: 43px; }
-  .mak-about-copy > p { font-size: 13px; }
-  .mak-about-visual { height: 400px; width: 100%; padding-right: 15px; }
-  .mak-about-stamp { right: 0; top: 27px; padding: 17px 19px; }
-  .mak-about .mak-button { font-size: 12px; }
-  .mak-check-list { font-size: 12px; }
+  .mak-about { gap: 28px; padding-block: 44px; }
+  .mak-about h2 { margin-bottom: 16px; }
+  .mak-about-copy > p { font-size: 14px; margin-bottom: 22px; }
+  .mak-about-visual { height: clamp(228px,62vw,280px); width: 100%; gap: 10px; }
+  .mak-about-portrait, .mak-about-detail, .mak-about-stamp { border-radius: 16px; }
+  .mak-about-stamp { padding: 12px; gap: 5px; font-size: 12px; }
+  .mak-about-stamp strong { font-size: clamp(22px,6vw,30px); }
+  .mak-about .mak-button { min-height: 48px; font-size: 12px; padding: 14px 22px; }
   .mak-section-heading { align-items: start; flex-direction: column; gap: 18px; margin-bottom: 30px; }
   .mak-section-heading > p { max-width: 100%; font-size: 12px; }
   .mak-centered { align-items: center; }
   .mak-carousel-track { grid-auto-columns: 87%; overflow: auto; border-radius: 18px; }
   .mak-service-card { height: 350px; }
-  .mak-carousel-bottom { gap: 10px; margin-top: 20px; }
-  .mak-carousel-bottom > span { max-width: 190px; font-size: 9px; }
-  .mak-carousel-bottom .mak-round-button { width: 38px; height: 38px; }
-  .mak-fleet-toolbar { align-items: start; flex-direction: column; gap: 15px; margin: 0 0 22px; }
+  .mak-carousel-dots { margin-top: 12px; }
+  .mak-fleet-toolbar { align-items: start; flex-direction: column; gap: 14px; margin: 0 0 22px; }
   .mak-tabs { gap: 6px; }
-  .mak-tabs button { padding: 8px 14px; font-size: 10px; }
-  .mak-fleet-toolbar > span { font-size: 9px; }
-  .mak-fleet-grid { grid-template-columns: 1fr; gap: 32px; }
-  .mak-fleet-photo { height: 280px; }
-  .mak-fleet-body { margin-inline: 18px; padding: 24px 10px 0; }
-  .mak-fleet-body h3 { font-size: 24px; }
-  .mak-fleet-specs { gap: 20px; font-size: 11px; }
-  .mak-fleet-price { flex-wrap: nowrap; }
-  .mak-fleet-price > span { font-size: 13px; }
-  .mak-fleet-price small { font-size: 9px; }
-  .mak-fleet-price button { font-size: 12px; }
-  .mak-collection-note { text-align: left; font-size: 9px; margin-top: 30px!important; }
+  .mak-tabs button { padding: 9px 13px; }
+  .mak-fleet-grid { grid-template-columns: minmax(0,1fr); gap: 22px; }
+  .mak-fleet-body { padding: 20px; }
+  .mak-fleet-specs { gap: 12px; }
+  .mak-fleet-enquire { min-height: 48px; }
+  .mak-collection-note { text-align: left; margin-top: 24px!important; }
   .mak-type-grid { grid-template-columns: 1fr; gap: 17px; }
   .mak-type-card { height: 235px; }
   .mak-type-label { font-size: 31px; }
   .mak-type-label small { font-size: 11px; max-width: 270px; }
   .mak-type-arrow { width: 40px; height: 40px; }
   .mak-process-grid { grid-template-columns: 1fr; gap: 16px; }
-  .mak-process-grid article { padding: 28px 30px; }
+  .mak-process-card { min-height: 250px; padding: 40px 28px 108px; }
   .mak-process-grid h3 { font-size: 22px; }
-  .mak-process-grid p { font-size: 12px; }
-  .mak-step-icon { margin-bottom: 22px; }
+  .mak-process-grid p { font-size: 13px; }
   .mak-process-note { font-size: 10px; text-align: left; align-items: start; line-height: 1.9; }
   .mak-business-inner { grid-template-columns: 1fr; gap: 46px; padding-block: 70px; }
   .mak-business h2 { font-size: 46px; letter-spacing: -1.5px; }
@@ -507,15 +497,14 @@
   .mak-header-cta { display: none; }
   .mak-menu-button { margin-left: auto; }
   .mak-hero h1 { font-size: 40px; letter-spacing: -1.8px; }
-  .mak-hero-meta { gap: 11px; }
-  .mak-hero-meta > span:first-child { letter-spacing: 1px; }
-  .mak-fleet-photo { height: 245px; }
-  .mak-fleet-body { margin-inline: 9px; }
-  .mak-tabs button { padding-inline: 11px; }
+  .mak-booking-panel .mak-finder { grid-template-columns: 1fr; gap: 18px; }
+  .mak-booking-panel .mak-finder > label { grid-column: auto; grid-row: auto; padding: 0; border: 0; }
+  .mak-booking-panel .mak-finder > button { grid-column: auto; grid-row: auto; }
   .mak-enquiry-form { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
   .mak-landing *, .mak-landing *::before, .mak-landing *::after { animation: none!important; transition: none!important; scroll-behavior: auto!important; }
   .mak-motion-ready [data-reveal] { opacity: 1; transform: none; }
   .mak-hero-images { transform: none; }
+  .mak-booking-background { transform: none; will-change: auto; }
 }

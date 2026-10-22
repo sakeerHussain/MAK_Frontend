@@ -1,9 +1,9 @@
-export const imageUrl = (id, width = 1100) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=85`
+export const imageUrl = (id, width = 1100) => id.startsWith('/') ? id : `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=85`
 
 export const heroSlides = [
-  { title: 'Every journey.', accent: 'Extraordinary.', label: 'A BETTER WAY TO MOVE', text: 'From your everyday drive to your next big escape. Find a rental that feels like you.', image: 'photo-1503376780353-7e6692767b70', alt: 'Black premium car photographed on the road', category: 'Premium', caption: 'For the journeys you remember.' },
-  { title: 'More room.', accent: 'More possibility.', label: 'SPACE FOR YOUR NEXT CHAPTER', text: 'Family weekends, longer stays and everything in between. Make room for the road ahead.', image: 'photo-1519641471654-76ce0107ad1b', alt: 'SUV ready for a road journey', category: 'SUV', caption: 'A little further. All together.' },
-  { title: 'Your business.', accent: 'In motion.', label: 'PERSONAL SERVICE. BUSINESS THINKING.', text: 'From one important meeting to a monthly transport plan. Travel around the way you work.', image: 'photo-1555215695-3004980ad54e', alt: 'Executive sedan photographed outdoors', category: 'Sedan', caption: 'A considered arrival, every time.' },
+  { title: 'Every journey.', accent: 'Extraordinary.', label: 'A BETTER WAY TO MOVE', text: 'From your everyday drive to your next big escape. Find a rental that feels like you.', image: '/images/hero/audi-desert.jpg', alt: 'White Audi SUV beside golden desert dunes', position: 'center 32%', mobilePosition: '25% center', category: 'Premium' },
+  { title: 'More room.', accent: 'More possibility.', label: 'SPACE FOR YOUR NEXT CHAPTER', text: 'Family weekends, longer stays and everything in between. Make room for the road ahead.', image: '/images/hero/suv-rain-detail.jpg', alt: 'Rear detail of a gold SUV with illuminated taillights in the rain', position: 'center center', mobilePosition: '30% center', category: 'SUV' },
+  { title: 'Your business.', accent: 'In motion.', label: 'PERSONAL SERVICE. BUSINESS THINKING.', text: 'From one important meeting to a monthly transport plan. Travel around the way you work.', image: '/images/hero/audi-city.jpg', alt: 'Black Audi SUV driving through a city street', position: 'center center', mobilePosition: '54% center', category: 'Sedan' },
 ]
 
 export const fleetCategories = ['All vehicles', 'Sedan', 'SUV', 'Premium']
@@ -17,12 +17,12 @@ export const fleet = [
 ]
 
 export const services = [
-  { title: 'Corporate rentals', description: 'Transport that works around your people and projects.', image: 'photo-1449965408869-eaa3f722e40d', icon: 'corporate', preference: 'Corporate rental' },
-  { title: 'With a driver', description: 'Set your destination. Let someone else take the wheel.', image: 'photo-1503376780353-7e6692767b70', icon: 'driver', preference: 'With a driver' },
-  { title: 'Daily & weekly', description: 'A better drive for everyday plans and weekend escapes.', image: 'photo-1555215695-3004980ad54e', icon: 'calendar', preference: 'Self-drive' },
-  { title: 'Monthly rentals', description: 'More time on the road, with a plan shaped around you.', image: 'photo-1519641471654-76ce0107ad1b', icon: 'clock', preference: 'Monthly rental' },
-  { title: 'Project transport', description: 'Plan multiple destinations and passenger journeys.', image: 'photo-1449965408869-eaa3f722e40d', icon: 'tracking', preference: 'Corporate rental' },
-  { title: 'Occasion travel', description: 'A considered arrival for the moments that matter.', image: 'photo-1503376780353-7e6692767b70', icon: 'reviews', preference: 'With a driver' },
+  { title: 'Corporate Car Rental', description: 'Transport that works around your people and projects.', image: 'photo-1449965408869-eaa3f722e40d', icon: 'corporate', preference: 'Corporate rental' },
+  { title: 'Car Rental with Driver', description: 'Set your destination. Let someone else take the wheel.', image: 'photo-1503376780353-7e6692767b70', icon: 'driver', preference: 'With a driver' },
+  { title: 'Airport Transfer', description: 'Airport pickups and drop-offs planned around your journey.', image: '/images/services/airport-transfer.jpg', icon: 'tracking', preference: 'With a driver' },
+  { title: 'Fleet Leasing', description: 'Long-term vehicle plans shaped around your business needs.', image: '/images/services/rental-key-handover.jpg', icon: 'fleet', preference: 'Corporate rental' },
+  { title: 'VIP Transfer', description: 'A premium journey for your important arrivals and occasions.', image: '/images/about/bentley-detail.jpg', icon: 'reviews', preference: 'With a driver' },
+  { title: 'Private Transfer', description: 'Travel between your chosen destinations with a dedicated driver.', image: '/images/about/suv-interior.jpg', icon: 'customer', preference: 'With a driver' },
 ]
 
 export const processSteps = [

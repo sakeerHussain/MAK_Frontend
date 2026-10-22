@@ -1,3 +1,4 @@
+import ActionIcon from '../../app/ActionIcon.jsx'
 import { useState } from 'react'
 import { DOCUMENT_TYPES, REQUIRED_DOCUMENT_TYPES, documentStatus, vehicleOwner } from './FleetData.js'
 import './VehicleDetailsPage.css'
@@ -33,7 +34,7 @@ export default function VehicleDetailsPage({ car, onBack, onEdit, onUploadDocume
   const today = new Date().toISOString().slice(0, 10)
   const features = Array.isArray(car.featureTags) ? car.featureTags : String(car.featureTags || '').split(',').map((tag) => tag.trim()).filter(Boolean)
   return <div className="vehicle-detail-page">
-    <div className="vehicle-detail-toolbar"><button type="button" className="vehicle-back-link" onClick={onBack}><span aria-hidden="true">←</span> Back to Fleet</button><span className="vehicle-record-note">Vehicle record · Saved in database</span></div>
+    <div className="vehicle-detail-toolbar"><button type="button" className="vehicle-back-link" onClick={onBack}><ActionIcon name="back" size={16} /> <ActionIcon name="back" size={16} /> Back to Fleet</button></div>
     <section className="vehicle-hero-card" aria-label="Vehicle overview">
       <div className="vehicle-gallery">
         <div className={`vehicle-gallery-main ${image ? '' : 'empty'}`}>{image ? <img src={image.previewUrl} alt={`${car.make} ${car.model} photo ${activeImage + 1}`} /> : <div className="vehicle-gallery-placeholder"><CarDrawing /><strong>No vehicle images yet</strong><span>Photos added in Edit Car will appear here.</span></div>}{images.length > 0 && <span className="vehicle-gallery-count">{Math.min(activeImage + 1, images.length)} / {images.length}</span>}</div>

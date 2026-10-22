@@ -1,3 +1,4 @@
+import ActionIcon from '../../app/ActionIcon.jsx'
 import Icon from '../../app/Icon.jsx'
 import { primaryContact } from './VendorData.js'
 import { downloadVendorAttachment } from './VendorFiles.js'
@@ -9,11 +10,11 @@ function DetailCard({ title, rows }) {
 }
 
 export default function VendorProfile({ vendor, onBack, onEdit, onStatus }) {
-  if (!vendor) return <div className="vendor-panel vendor-not-found"><h2>Vendor not found</h2><button type="button" className="vendor-secondary" onClick={onBack}>Back to Vendors</button></div>
+  if (!vendor) return <div className="vendor-panel vendor-not-found"><h2>Vendor not found</h2><button type="button" className="vendor-secondary" onClick={onBack}><ActionIcon name="back" size={16} /> Back to Vendors</button></div>
   const contact = primaryContact(vendor)
   return <div className="vendor-profile">
-    <button type="button" className="vendor-back" onClick={onBack}><Icon name="back" size={15} /> Back to Vendors</button>
-    <section className="vendor-panel vendor-profile-hero"><div className="vendor-profile-avatar"><Icon name="vendor" size={28} /></div><div><small>{vendor.vendorId} · {vendor.vendorType}</small><h2>{vendor.name}</h2><p>{vendor.classification || 'Classification not set'} · {contact.name || 'No contact'}</p><span className={`vendor-status ${vendor.status.toLowerCase()}`}>{vendor.status}</span></div><div className="vendor-profile-actions"><button type="button" className="vendor-secondary" onClick={onStatus}><Icon name="power" size={16} /> {vendor.status === 'Active' ? 'Deactivate' : 'Activate'}</button><button type="button" className="vendor-primary" onClick={onEdit}><Icon name="edit" size={16} /> Edit Vendor</button></div></section>
+    <button type="button" className="vendor-back" onClick={onBack}><ActionIcon name="back" size={15} /> Back to Vendors</button>
+    <section className="vendor-panel vendor-profile-hero"><div className="vendor-profile-avatar"><Icon name="vendor" size={28} /></div><div><small>{vendor.vendorId} · {vendor.vendorType}</small><h2>{vendor.name}</h2><p>{vendor.classification || 'Classification not set'} · {contact.name || 'No contact'}</p><span className={`vendor-status ${vendor.status.toLowerCase()}`}>{vendor.status}</span></div><div className="vendor-profile-actions"><button type="button" className="vendor-secondary" onClick={onStatus}><ActionIcon name="power" size={16} /> {vendor.status === 'Active' ? 'Deactivate' : 'Activate'}</button><button type="button" className="vendor-primary" onClick={onEdit}><ActionIcon name="edit" size={16} /> Edit Vendor</button></div></section>
     <div className="vendor-profile-grid">
       <DetailCard title="Vendor Details" rows={[
         ['Vendor ID', vendor.vendorId], ['Vendor Type', vendor.vendorType], ['Vendor Name', vendor.name], ['CR No.', vendor.crNumber], ['VAT No.', vendor.vatNumber], ['National Address', vendor.nationalAddress], ['Business Classification', vendor.classification], ['Commission', `${Number(vendor.commission || 0).toFixed(2)}%`], ['Status', vendor.status],

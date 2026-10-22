@@ -5,16 +5,19 @@ import Icon from '../../app/Icon.jsx'
 import LandingCarousel from './LandingCarousel.jsx'
 import RentalEnquiry from './RentalEnquiry.jsx'
 import { faqs, fleet, fleetCategories, heroSlides, imageUrl, locations, processSteps, rentalPreferences, services } from './LandingData.js'
+import { landingImageSources } from './LandingImages.js'
 import './LandingPage.css'
 
 function Brand({ onClick }) {
   return <a href="#/home" className="mak-brand" aria-label="MAK Rentals home" onClick={onClick}><span className="mak-brand-mark" aria-hidden="true">M<span /></span><span>MAK<span className="mak-brand-subtitle">CAR RENTALS</span></span></a>
 }
 
-function Photo({ id, alt, eager = false, className = '' }) {
+function Photo({ id, alt, eager = false, className = '', variant }) {
   const [failed, setFailed] = useState(false)
+  const responsive = landingImageSources(id, variant)
+  const image = <img src={imageUrl(id, eager ? 2200 : 1100)} width={responsive?.width} height={responsive?.height} alt={alt} loading={eager ? 'eager' : 'lazy'} fetchPriority={eager ? 'high' : 'auto'} decoding="async" onError={() => setFailed(true)} />
   return <div className={`mak-photo ${className} ${failed ? 'mak-photo-fallback' : ''}`}>
-    {failed ? <span><Icon name="fleet" size={42} /><span>MAK RENTALS</span><small>Illustrative vehicle image</small></span> : <img src={imageUrl(id, eager ? 2200 : 1100)} alt={alt} loading={eager ? 'eager' : 'lazy'} fetchPriority={eager ? 'high' : 'auto'} decoding="async" onError={() => setFailed(true)} />}
+    {failed ? <span><Icon name="fleet" size={42} /><span>MAK RENTALS</span><small>Illustrative vehicle image</small></span> : responsive ? <picture>{responsive.sources.map((source, index) => <source key={index} {...source} />)}{image}</picture> : image}
   </div>
 }
 
@@ -26,12 +29,12 @@ export default function LandingPage({ user }) {
   const root = useRef(null)
   const lenis = useRef(null)
   const menuButton = useRef(null)
+  const bookingSection = useRef(null)
   const [scrolled, setScrolled] = useState(() => window.scrollY > 70)
   const [menu, setMenu] = useState(false)
   const [slideIndex, setSlideIndex] = useState(0)
   const [category, setCategory] = useState('All vehicles')
   const [location, setLocation] = useState('Al Khobar')
-  const [preference, setPreference] = useState('Self-drive')
   const [pickup, setPickup] = useState('')
   const [returnDate, setReturnDate] = useState('')
   const [finderError, setFinderError] = useState('')
@@ -63,13 +66,23 @@ export default function LandingPage({ user }) {
       setScrolled(position > 70)
       element.style.setProperty('--mak-scroll-progress', Math.max(0, Math.min(1, distance > 0 ? position / distance : 0)))
       element.style.setProperty('--mak-hero-offset', `${media.matches ? 0 : Math.min(position * 0.15, 160)}px`)
+      const booking = bookingSection.current
+      if (booking) {
+        const bounds = booking.getBoundingClientRect()
+        if (media.matches || (bounds.top < window.innerHeight && bounds.bottom > 0)) {
+          const limit = window.innerWidth <= 640 ? 40 : 76
+          const travel = (window.innerHeight / 2 - bounds.top - bounds.height / 2) * 0.16
+          booking.style.setProperty('--mak-booking-offset', `${media.matches ? 0 : Math.max(-limit, Math.min(limit, travel))}px`)
+        }
+      }
       frame = null
     }
     const onScroll = () => { if (frame === null) frame = requestAnimationFrame(update) }
     update()
     window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', onScroll)
-    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); if (frame !== null) cancelAnimationFrame(frame) }
+    media.addEventListener('change', onScroll)
+    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); media.removeEventListener('change', onScroll); if (frame !== null) cancelAnimationFrame(frame) }
   }, [])
 
   useEffect(() => {
@@ -103,14 +116,13 @@ export default function LandingPage({ user }) {
   }
   const openEnquiry = (values = {}) => {
     setMenu(false)
-    setEnquiry({ category, location, preference, pickup, returnDate, ...values })
+    setEnquiry({ category, location, preference: 'Self-drive', pickup, returnDate, ...values })
   }
   const explore = (event) => {
     event.preventDefault()
     if (pickup && returnDate && returnDate < pickup) { setFinderError('Choose a return date on or after your pickup date.'); return }
     setFinderError(''); go('mak-fleet')
   }
-  const changeSlide = (offset) => setSlideIndex((current) => (current + offset + heroSlides.length) % heroSlides.length)
 
   return <div ref={root} className="mak-landing">
     <a className="mak-skip" href="#mak-main" onClick={(event) => { event.preventDefault(); document.getElementById('mak-main')?.focus(); go('mak-main') }}>Skip to content</a>
@@ -128,7 +140,7 @@ export default function LandingPage({ user }) {
 
     <main id="mak-main" tabIndex={-1}>
       <section className="mak-hero" id="mak-home" aria-label="Rental inspiration" aria-roledescription="carousel">
-        <div className="mak-hero-images" aria-hidden="true">{heroSlides.map((item, index) => <div key={item.image} className={`mak-hero-image ${slideIndex === index ? 'is-active' : ''}`}><Photo id={item.image} alt="" eager={index === 0} /></div>)}</div>
+        <div className="mak-hero-images" aria-hidden="true">{heroSlides.map((item, index) => <div key={item.image} className={`mak-hero-image ${slideIndex === index ? 'is-active' : ''}`} style={{ '--mak-slide-position': item.position, '--mak-slide-mobile-position': item.mobilePosition }}><Photo id={item.image} alt="" eager={index === 0} variant="hero" /></div>)}</div>
         <div className="mak-hero-overlay" />
         <div className="mak-container mak-hero-content">
           <div className="mak-hero-copy" key={slideIndex}>
@@ -136,47 +148,102 @@ export default function LandingPage({ user }) {
             <p>{slide.text}</p>
             <div className="mak-hero-buttons"><button type="button" className="mak-button" onClick={() => { setCategory(slide.category); go('mak-fleet') }}>Explore the collection <Icon name="arrow" size={18} /></button><button type="button" className="mak-button mak-button-outline" onClick={() => openEnquiry({ category: slide.category })}>Plan your journey <Icon name="arrow" size={18} /></button></div>
           </div>
-          <div className="mak-hero-meta"><span>PERSONAL JOURNEYS.<br /><strong>BUSINESS POSSIBILITIES.</strong></span><span className="mak-hero-rule" /><span>Daily & monthly rentals<br />Self-drive & with a driver</span></div>
         </div>
         <div className="mak-hero-pagination" role="group" aria-label="Choose hero slide">{heroSlides.map((item, index) => <button type="button" key={item.label} className={slideIndex === index ? 'is-active' : ''} aria-label={`Show slide ${index + 1}: ${item.title} ${item.accent}`} aria-pressed={slideIndex === index} onClick={() => setSlideIndex(index)}><span>0{index + 1}</span><i /></button>)}</div>
-        <div className="mak-container mak-hero-bottom"><button type="button" className="mak-scroll-cue" onClick={() => go('mak-finder')}><span><Icon name="arrow" size={17} /></span>SCROLL TO EXPLORE</button><span className="mak-hero-caption">{slide.caption}<small>Illustrative photography</small></span><div className="mak-hero-arrows"><button type="button" className="mak-round-button" aria-label="Previous hero slide" onClick={() => changeSlide(-1)}><Icon name="arrow" size={18} className="mak-flip" /></button><button type="button" className="mak-round-button" aria-label="Next hero slide" onClick={() => changeSlide(1)}><Icon name="arrow" size={18} /></button></div></div>
       </section>
 
-      <section className="mak-finder-area" id="mak-finder" aria-labelledby="mak-finder-title"><div className="mak-container">
-        <div className="mak-finder-top"><h2 id="mak-finder-title">Where will the road take you?</h2><span>YOUR JOURNEY, YOUR WAY</span></div>
-        <form className="mak-finder" onSubmit={explore}>
-          <label><span><Icon name="fleet" size={16} />Vehicle type</span><select value={category} onChange={(event) => setCategory(event.target.value)}>{fleetCategories.map((item) => <option key={item}>{item}</option>)}</select></label>
-          <label><span><Icon name="tracking" size={16} />Pickup location</span><input aria-label="Pickup location" list="mak-pickup-locations" value={location} required onChange={(event) => setLocation(event.target.value)} placeholder="City or address" autoComplete="off" /><datalist id="mak-pickup-locations">{locations.map((item) => <option key={item} value={item} />)}</datalist></label>
-          <label><span><Icon name="calendar" size={16} />Pickup date</span><input aria-label="Pickup date" type="date" min={today} value={pickup} onChange={(event) => { setPickup(event.target.value); setFinderError('') }} /></label>
-          <label><span><Icon name="calendar" size={16} />Return date</span><input aria-label="Return date" type="date" min={pickup || today} value={returnDate} onChange={(event) => { setReturnDate(event.target.value); setFinderError('') }} /></label>
-          <button type="submit" className="mak-button">Find my drive <Icon name="arrow" size={18} /></button>
-        </form>
-        <div className="mak-finder-bottom"><span><Icon name="document" size={13} />Sample collection. Availability and rates confirmed by our team.</span><label>Rental preference<select aria-label="Rental preference" value={preference} onChange={(event) => setPreference(event.target.value)}>{rentalPreferences.map((item) => <option key={item}>{item}</option>)}</select></label></div>
-        {finderError && <p className="mak-form-error" role="alert">{finderError}</p>}
-      </div></section>
-
-      <section className="mak-section mak-about mak-container" id="mak-about">
-        <div className="mak-about-copy" data-reveal><span className="mak-eyebrow">THE MAK EXPERIENCE</span><h2>More than a car.<br />A better way <em>to move.</em></h2><p>A great rental should fit your life, not the other way around. From a simple city drive to a business journey with multiple destinations, start with a plan that works for you.</p><p>Thoughtful choices. Flexible rental options. A more personal approach to every mile.</p><ul className="mak-check-list"><li><span><Icon name="check" size={14} /></span>Daily, monthly & corporate rental options</li><li><span><Icon name="check" size={14} /></span>Your choice of self-drive or a driver</li></ul><button type="button" className="mak-button" onClick={() => go('mak-services')}>Discover the difference <Icon name="arrow" size={18} /></button></div>
-        <div className="mak-about-visual" data-reveal style={{ '--mak-delay': '130ms' }}><Photo id="photo-1449965408869-eaa3f722e40d" alt="A driver's view of an open road through the countryside" /><span className="mak-photo-tag">A LITTLE FREEDOM.<br /><strong>A lot of possibility.</strong></span><div className="mak-about-stamp"><Icon name="tracking" size={26} /><span>Made for<br /><strong>your journey.</strong></span></div></div>
+      <section className="mak-section mak-about mak-container" id="mak-about" aria-labelledby="mak-about-title">
+        <div className="mak-about-copy" data-reveal>
+          <span className="mak-eyebrow">THE MAK EXPERIENCE</span>
+          <h2 id="mak-about-title">More than a car.<br />A better way <em>to move.</em></h2>
+          <p>From everyday drives to business trips, enjoy flexible daily, monthly and corporate rentals—with or without a driver.</p>
+          <button type="button" className="mak-button" onClick={() => go('mak-services')}>Discover our services <Icon name="arrow" size={18} /></button>
+        </div>
+        <div className="mak-about-visual" data-reveal style={{ '--mak-delay': '130ms' }}>
+          <div className="mak-about-portrait">
+            <Photo variant="about" id="/images/about/bentley-detail.jpg" alt="Close-up of a black Bentley headlight and grille" />
+          </div>
+          <div className="mak-about-stamp">
+            <strong>+10 years</strong>
+            <span>experience</span>
+          </div>
+          <div className="mak-about-detail">
+            <Photo variant="about" id="/images/about/suv-interior.jpg" alt="Premium SUV interior with black leather seats and red stitching" />
+          </div>
+        </div>
       </section>
 
       <section className="mak-section mak-services" id="mak-services"><div className="mak-container">
         <SectionHeading eyebrow="WHAT MOVES YOU?" text="One destination or many. A day or a month. Explore a rental experience built around your plans.">A service for <em>every journey.</em></SectionHeading>
-        <LandingCarousel label="rental services">{services.map((item, index) => <article className="mak-service-card" key={item.title}>
-          <Photo id={item.image} alt={`${item.title} illustrative photograph`} /><div className="mak-service-shade" /><span className="mak-service-index">0{index + 1}</span><div className="mak-service-copy"><Icon name={item.icon} size={25} /><h3>{item.title}</h3><p>{item.description}</p></div><div className="mak-card-cutout"><button type="button" className="mak-round-button" aria-label={`Enquire about ${item.title.toLowerCase()}`} onClick={() => openEnquiry({ preference: item.preference })}><Icon name="arrow" size={21} /></button></div>
+        <LandingCarousel label="rental services">{services.map((item) => <article className="mak-service-card" key={item.title}>
+          <Photo variant="service" id={item.image} alt={`${item.title} illustrative photograph`} /><div className="mak-service-shade" /><div className="mak-service-copy"><Icon name={item.icon} size={25} /><h3>{item.title}</h3><p>{item.description}</p></div><div className="mak-card-cutout"><button type="button" className="mak-round-button" aria-label={`Enquire about ${item.title.toLowerCase()}`} onClick={() => openEnquiry({ preference: item.preference })}><Icon name="arrow" size={21} /></button></div>
         </article>)}</LandingCarousel>
+      </div></section>
+
+      <section ref={bookingSection} className="mak-finder-area mak-booking-section" id="mak-finder" aria-labelledby="mak-finder-title">
+        <div className="mak-booking-background" aria-hidden="true">
+          <picture>
+            {/* Desktop omits unused image area; narrower screens retain the portrait composition. */}
+            <source media="(min-width: 1200px)" type="image/webp" srcSet="/images/booking/bmw-booking-desktop-1600.webp 1600w, /images/booking/bmw-booking-desktop-2560.webp 2560w, /images/booking/bmw-booking-desktop-3840.webp 3840w" sizes="100vw" />
+            <source type="image/webp" srcSet="/images/booking/bmw-booking-mobile-800.webp 800w, /images/booking/bmw-booking-mobile-1600.webp 1600w, /images/booking/bmw-booking-mobile-2000.webp 2000w, /images/booking/bmw-booking-mobile-2560.webp 2560w" sizes="(max-width: 370px) 800px, (max-width: 640px) 600px, 100vw" />
+            <img src="/images/booking/bmw-booking.jpg" width={4000} height={6000} alt="" loading="lazy" decoding="async" />
+          </picture>
+        </div>
+        <div className="mak-booking-shade" aria-hidden="true" />
+        <div className="mak-container mak-booking-content">
+        <div className="mak-finder-top"><h2 id="mak-finder-title">Where will the road take you?</h2><span>YOUR JOURNEY, YOUR WAY</span></div>
+        <div className="mak-booking-panel">
+          <form className="mak-finder" onSubmit={explore}>
+            <label><span><Icon name="fleet" size={16} />Vehicle type</span><select value={category} onChange={(event) => setCategory(event.target.value)}>{fleetCategories.map((item) => <option key={item}>{item}</option>)}</select></label>
+            <label><span><Icon name="tracking" size={16} />Pickup location</span><input aria-label="Pickup location" list="mak-pickup-locations" value={location} required onChange={(event) => setLocation(event.target.value)} placeholder="City or address" autoComplete="off" /><datalist id="mak-pickup-locations">{locations.map((item) => <option key={item} value={item} />)}</datalist></label>
+            <label><span><Icon name="calendar" size={16} />Pickup date</span><input aria-label="Pickup date" type="date" min={today} value={pickup} onChange={(event) => { setPickup(event.target.value); setFinderError('') }} /></label>
+            <label><span><Icon name="calendar" size={16} />Return date</span><input aria-label="Return date" type="date" min={pickup || today} value={returnDate} onChange={(event) => { setReturnDate(event.target.value); setFinderError('') }} /></label>
+            <button type="submit" className="mak-button">Find my drive <Icon name="arrow" size={18} /></button>
+          </form>
+          {finderError && <p className="mak-form-error" role="alert">{finderError}</p>}
+        </div>
       </div></section>
 
       <section className="mak-section mak-fleet mak-container" id="mak-fleet">
         <SectionHeading eyebrow="THE COLLECTION" text="A little practicality. A little luxury. Find the right starting point for your next journey.">Your next <em>great drive.</em></SectionHeading>
         <div className="mak-fleet-toolbar"><div className="mak-tabs" role="group" aria-label="Filter fleet by vehicle category">{fleetCategories.map((item) => <button type="button" key={item} className={category === item ? 'is-active' : ''} aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}</div><span aria-live="polite">{filteredFleet.length} {filteredFleet.length === 1 ? 'category' : 'categories'} to explore</span></div>
-        <div className="mak-fleet-grid">{filteredFleet.map((car) => <article key={car.id} className="mak-fleet-card"><div className="mak-fleet-photo"><Photo id={car.image} alt={`${car.subtitle}, illustrative vehicle`} /><span>{car.category}</span><button type="button" className="mak-round-button" aria-label={`Enquire about ${car.subtitle.toLowerCase()}`} onClick={() => openEnquiry({ category: car.category })}><Icon name="arrow" size={20} /></button></div><div className="mak-fleet-body"><span className="mak-kicker">{car.subtitle}</span><h3>{car.title}</h3><div className="mak-fleet-specs"><span><Icon name="users" size={16} />{car.seats}</span><span><Icon name="tracking" size={16} />{car.luggage}</span></div><div className="mak-fleet-price"><span>Personalised rates<small>Based on your rental requirements</small></span><button type="button" className="mak-text-button" onClick={() => openEnquiry({ category: car.category })}>Enquire <Icon name="arrow" size={17} /></button></div></div></article>)}</div>
+        <div className={`mak-fleet-grid ${filteredFleet.length === 1 ? 'mak-fleet-grid-filtered' : ''}`}>
+          {filteredFleet.map((car) => <article key={car.id} className="mak-fleet-card">
+            <div className="mak-fleet-photo">
+              <Photo id={car.image} alt={`${car.subtitle}, illustrative vehicle`} />
+              <span>{car.category}</span>
+              <button type="button" className="mak-round-button" aria-label={`Enquire about ${car.subtitle.toLowerCase()}`} onClick={() => openEnquiry({ category: car.category })}><Icon name="arrow" size={20} /></button>
+            </div>
+            <div className="mak-fleet-body">
+              <span className="mak-kicker">{car.subtitle}</span>
+              <h3>{car.title}</h3>
+              <div className="mak-fleet-specs">
+                <span><Icon name="users" size={16} />{car.seats}</span>
+                <span><Icon name="tracking" size={16} />{car.luggage}</span>
+              </div>
+              <div className="mak-fleet-price">
+                <span>Personalised rates<small>Based on your rental requirements</small></span>
+                <button type="button" className="mak-button mak-fleet-enquire" aria-label={`Enquire about ${car.subtitle.toLowerCase()}`} onClick={() => openEnquiry({ category: car.category })}>Enquire <Icon name="arrow" size={17} /></button>
+              </div>
+            </div>
+          </article>)}
+        </div>
         <p className="mak-collection-note">Illustrative collection. Specific models, seating, rates and availability will be confirmed with your quotation.</p>
       </section>
 
       <section className="mak-types mak-section"><div className="mak-container"><SectionHeading eyebrow="FIND YOUR FIT" centered>The right car. <em>Your kind of journey.</em></SectionHeading><div className="mak-type-grid">{fleet.map((car, index) => <button type="button" className="mak-type-card" key={car.id} onClick={() => { setCategory(car.category); go('mak-fleet') }}><Photo id={car.image} alt="" /><span className="mak-type-shade" /><span className="mak-type-number">0{index + 1}</span><span className="mak-type-label"><span>{car.category}<small>{car.description}</small></span><span className="mak-type-arrow"><Icon name="arrow" size={21} /></span></span></button>)}</div></div></section>
 
-      <section className="mak-section mak-process mak-container" id="mak-process"><SectionHeading eyebrow="SIMPLE BY DESIGN" centered>Less to arrange. <em>More to enjoy.</em></SectionHeading><div className="mak-process-grid">{processSteps.map((item, index) => <article key={item.title} data-reveal style={{ '--mak-delay': `${index * 100}ms` }}><span className="mak-step-number">0{index + 1}</span><span className="mak-step-icon"><Icon name={item.icon} size={27} /></span><h3>{item.title}</h3><p>{item.text}</p></article>)}</div><p className="mak-process-note"><span><Icon name="check" size={14} /></span>New to renting? Start with an enquiry and take it one step at a time.</p></section>
+      <section className="mak-section mak-process mak-container" id="mak-process">
+        <SectionHeading eyebrow="SIMPLE BY DESIGN" centered>Less to arrange. <em>More to enjoy.</em></SectionHeading>
+        <ol className="mak-process-grid" role="list" aria-label="Rental workflow">
+          {processSteps.map((item, index) => <li className="mak-process-card" key={item.title} data-reveal style={{ '--mak-delay': `${index * 100}ms` }}>
+            <h3>{item.title}</h3>
+            <p>{item.text}</p>
+            <span className="mak-step-cutout" aria-hidden="true"><span className="mak-step-number">{String(index + 1).padStart(2, '0')}.</span></span>
+          </li>)}
+        </ol>
+        <p className="mak-process-note"><span><Icon name="check" size={14} /></span>New to renting? Start with an enquiry and take it one step at a time.</p>
+      </section>
 
       <section className="mak-business" id="mak-business"><Photo id="photo-1449965408869-eaa3f722e40d" alt="Open-road scenery from a vehicle" /><div className="mak-business-overlay" /><div className="mak-container mak-business-inner"><div data-reveal><span className="mak-eyebrow">BUSINESS MOVES BETTER WITH MAK</span><h2>Your people.<br />Your projects.<br /><em>Our road ahead.</em></h2><p>From a single business trip to an ongoing transport plan, bring your team, destinations and rental requirements together.</p><button type="button" className="mak-button" onClick={() => openEnquiry({ preference: 'Corporate rental' })}>Let's talk business <Icon name="arrow" size={18} /></button></div><div className="mak-business-options" data-reveal style={{ '--mak-delay': '130ms' }}>{[['corporate', 'Corporate accounts', 'Customer-specific quotations and rental requirements.'], ['tracking', 'Multiple destinations', 'Plan pickup points, stops and passenger journeys.'], ['calendar', 'Monthly & project plans', 'Transport shaped around the way your business works.']].map(([icon, title, text]) => <div key={title}><span><Icon name={icon} size={22} /></span><div><h3>{title}</h3><p>{text}</p></div></div>)}</div></div></section>
 

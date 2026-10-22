@@ -1,0 +1,146 @@
+/* Shared admin action styles. Existing filter controls and filter buttons are excluded. */
+.app-shell {
+  --admin-action-primary: #ec5c8b;
+  --admin-action-primary-hover: #d94a7b;
+  --admin-action-border: #dfe5ed;
+  --admin-action-text: #647186;
+  --admin-action-danger: #ca536f;
+}
+
+.app-shell .workspace button:is(.primary-button, .fleet-add-button, .fleet-primary-button, .driver-primary, .vendor-primary, .maintenance-primary, .inspection-primary, .booking-primary, .customer-primary, .access-primary, .fleet-secondary-button, .driver-secondary, .vendor-secondary, .maintenance-secondary, .inspection-secondary, .booking-secondary, .customer-secondary, .admin-button-secondary, .driver-danger-button, .vendor-danger, .booking-danger):not(:where(.fleet-toolbar button, .driver-toolbar button, .vendor-toolbar button, .maintenance-toolbar button, .inspection-toolbar button, .booking-toolbar button, .booking-date-toolbar button, .customer-filters button, .invoice-toolbar button, .invoice-filters button, .billing-filters button, .access-toolbar button, .dashboard-toolbar button)) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  box-sizing: border-box;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--admin-action-border);
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+  vertical-align: middle;
+}
+
+.app-shell .workspace button:is(.primary-button, .fleet-add-button, .fleet-primary-button, .driver-primary, .vendor-primary, .maintenance-primary, .inspection-primary, .booking-primary, .customer-primary, .access-primary):not(:where(.fleet-toolbar button, .driver-toolbar button, .vendor-toolbar button, .maintenance-toolbar button, .inspection-toolbar button, .booking-toolbar button, .booking-date-toolbar button, .customer-filters button, .invoice-toolbar button, .invoice-filters button, .billing-filters button, .access-toolbar button, .dashboard-toolbar button)) {
+  border-color: var(--admin-action-primary);
+  background: var(--admin-action-primary);
+  color: #fff;
+  box-shadow: 0 3px 9px #ec5c8b24;
+}
+
+.app-shell .workspace button:is(.primary-button, .fleet-add-button, .fleet-primary-button, .driver-primary, .vendor-primary, .maintenance-primary, .inspection-primary, .booking-primary, .customer-primary, .access-primary):not(:where(.fleet-toolbar button, .driver-toolbar button, .vendor-toolbar button, .maintenance-toolbar button, .inspection-toolbar button, .booking-toolbar button, .booking-date-toolbar button, .customer-filters button, .invoice-toolbar button, .invoice-filters button, .billing-filters button, .access-toolbar button, .dashboard-toolbar button)):hover:not(:disabled) {
+  border-color: var(--admin-action-primary-hover);
+  background: var(--admin-action-primary-hover);
+  color: #fff;
+}
+
+.app-shell .workspace button:is(.fleet-secondary-button, .driver-secondary, .vendor-secondary, .maintenance-secondary, .inspection-secondary, .booking-secondary, .customer-secondary, .admin-button-secondary):not(:where(.fleet-toolbar button, .driver-toolbar button, .vendor-toolbar button, .maintenance-toolbar button, .inspection-toolbar button, .booking-toolbar button, .booking-date-toolbar button, .customer-filters button, .invoice-toolbar button, .invoice-filters button, .billing-filters button, .access-toolbar button, .dashboard-toolbar button)) {
+  border-color: var(--admin-action-border);
+  background: #fff;
+  color: var(--admin-action-text);
+  box-shadow: none;
+}
+
+.app-shell .workspace button:is(.fleet-secondary-button, .driver-secondary, .vendor-secondary, .maintenance-secondary, .inspection-secondary, .booking-secondary, .customer-secondary, .admin-button-secondary):not(:where(.fleet-toolbar button, .driver-toolbar button, .vendor-toolbar button, .maintenance-toolbar button, .inspection-toolbar button, .booking-toolbar button, .booking-date-toolbar button, .customer-filters button, .invoice-toolbar button, .invoice-filters button, .billing-filters button, .access-toolbar button, .dashboard-toolbar button)):hover:not(:disabled) {
+  border-color: #bfcbdc;
+  background: #f7f9fc;
+  color: #46566e;
+}
+
+.app-shell .workspace button:is(.driver-danger-button, .vendor-danger, .booking-danger):not(:where(.fleet-toolbar button, .driver-toolbar button, .vendor-toolbar button, .maintenance-toolbar button, .inspection-toolbar button, .booking-toolbar button, .booking-date-toolbar button, .customer-filters button, .invoice-toolbar button, .invoice-filters button, .billing-filters button, .access-toolbar button, .dashboard-toolbar button)) {
+  border-color: #edccd5;
+  background: #fff;
+  color: var(--admin-action-danger);
+  box-shadow: none;
+}
+
+.app-shell .workspace button:is(.driver-danger-button, .vendor-danger, .booking-danger):not(:where(.fleet-toolbar button, .driver-toolbar button, .vendor-toolbar button, .maintenance-toolbar button, .inspection-toolbar button, .booking-toolbar button, .booking-date-toolbar button, .customer-filters button, .invoice-toolbar button, .invoice-filters button, .billing-filters button, .access-toolbar button, .dashboard-toolbar button)):hover:not(:disabled) {
+  border-color: #d98b9e;
+  background: #fff4f7;
+  color: #b9415d;
+}
+
+.app-shell .workspace button:is(.primary-button, .fleet-add-button, .fleet-primary-button, .driver-primary, .vendor-primary, .maintenance-primary, .inspection-primary, .booking-primary, .customer-primary, .access-primary, .fleet-secondary-button, .driver-secondary, .vendor-secondary, .maintenance-secondary, .inspection-secondary, .booking-secondary, .customer-secondary, .admin-button-secondary, .driver-danger-button, .vendor-danger, .booking-danger):not(:where(.fleet-toolbar button, .driver-toolbar button, .vendor-toolbar button, .maintenance-toolbar button, .inspection-toolbar button, .booking-toolbar button, .booking-date-toolbar button, .customer-filters button, .invoice-toolbar button, .invoice-filters button, .billing-filters button, .access-toolbar button, .dashboard-toolbar button)):disabled {
+  opacity: .45;
+  cursor: default;
+}
+
+.app-shell .workspace :is(.fleet-row-actions, .maintenance-row-actions, .inspection-row-actions) > button:not([class$="more"]), .app-shell .workspace button:is(.customer-row-action, .admin-row-button), .app-shell .workspace .access-table-scroll td > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--admin-action-border);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--admin-action-text);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+  vertical-align: middle;
+}
+
+.app-shell .workspace button:is(.fleet-more, .driver-more, .vendor-more, .booking-more) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  min-height: 30px;
+  flex: 0 0 30px;
+  padding: 0;
+  border: 1px solid var(--admin-action-border);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--admin-action-text);
+}
+
+.app-shell .workspace :is(.fleet-action-menu, .driver-action-menu, .vendor-action-menu, .booking-action-menu) > button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 36px;
+  padding: 8px 10px;
+  color: #5a6577;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.app-shell .workspace :is(.fleet-action-menu, .driver-action-menu, .vendor-action-menu, .booking-action-menu) > button.danger {
+  color: var(--admin-action-danger);
+}
+
+.app-shell .workspace button:is(.vehicle-back-link, .driver-back, .vendor-back, .booking-back, .customer-back) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
+  color: #236dc9;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+:is(.app-shell .workspace button:is(.primary-button, .fleet-add-button, .fleet-primary-button, .driver-primary, .vendor-primary, .maintenance-primary, .inspection-primary, .booking-primary, .customer-primary, .access-primary, .fleet-secondary-button, .driver-secondary, .vendor-secondary, .maintenance-secondary, .inspection-secondary, .booking-secondary, .customer-secondary, .admin-button-secondary, .driver-danger-button, .vendor-danger, .booking-danger):not(:where(.fleet-toolbar button, .driver-toolbar button, .vendor-toolbar button, .maintenance-toolbar button, .inspection-toolbar button, .booking-toolbar button, .booking-date-toolbar button, .customer-filters button, .invoice-toolbar button, .invoice-filters button, .billing-filters button, .access-toolbar button, .dashboard-toolbar button)), .app-shell .workspace :is(.fleet-row-actions, .maintenance-row-actions, .inspection-row-actions) > button:not([class$="more"]), .app-shell .workspace button:is(.customer-row-action, .admin-row-button), .app-shell .workspace .access-table-scroll td > button, .app-shell .workspace button:is(.fleet-more, .driver-more, .vendor-more, .booking-more), .app-shell .workspace :is(.fleet-action-menu, .driver-action-menu, .vendor-action-menu, .booking-action-menu) > button, .app-shell .workspace button:is(.vehicle-back-link, .driver-back, .vendor-back, .booking-back, .customer-back)) > svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  margin: 0;
+  vertical-align: middle;
+}
+
+@media (max-width: 600px) {
+  .app-shell .workspace button:is(.primary-button, .fleet-add-button, .fleet-primary-button, .driver-primary, .vendor-primary, .maintenance-primary, .inspection-primary, .booking-primary, .customer-primary, .access-primary, .fleet-secondary-button, .driver-secondary, .vendor-secondary, .maintenance-secondary, .inspection-secondary, .booking-secondary, .customer-secondary, .admin-button-secondary, .driver-danger-button, .vendor-danger, .booking-danger):not(:where(.fleet-toolbar button, .driver-toolbar button, .vendor-toolbar button, .maintenance-toolbar button, .inspection-toolbar button, .booking-toolbar button, .booking-date-toolbar button, .customer-filters button, .invoice-toolbar button, .invoice-filters button, .billing-filters button, .access-toolbar button, .dashboard-toolbar button)) {
+    min-height: 40px;
+    max-width: 100%;
+    white-space: normal;
+  }
+}

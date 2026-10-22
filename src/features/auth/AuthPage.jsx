@@ -67,6 +67,6 @@ export default function AuthPage({ mode, onSignedIn }) {
       <p className="auth-switch"><a href="#/home">Back to home</a></p>
       <p className="auth-switch">{signup ? 'Already have an account?' : 'New here?'} <a href={signup ? '#/sign-in' : '#/sign-up'}>{signup ? 'Sign in' : 'Create an account'}</a></p>
 
-    </section><footer className="auth-footer">&copy; {new Date().getFullYear()} Rental Admin &middot; Rental operations</footer></div>
+    </section><footer className="auth-footer">&copy; {new Date().getFullYear()} MAK admin &middot; Rental operations</footer></div>
   </main>
 }

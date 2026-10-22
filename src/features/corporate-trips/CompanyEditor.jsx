@@ -1,3 +1,4 @@
+import ActionIcon from '../../app/ActionIcon.jsx'
 import { useState } from 'react'
 import { normalizeCompanyName } from './CompanyData.js'
 import FormFieldCaption from '../../shared/components/FormFieldCaption.jsx'
@@ -51,6 +52,6 @@ export default function CompanyEditor({ companies, onSave, onCancel, compact = f
       <label><FormFieldCaption required>Billing Increment (minutes)</FormFieldCaption><select required value={form.waitingBillingIncrementMinutes} onChange={(event) => set('waitingBillingIncrementMinutes', event.target.value)}>{[5, 15, 30, 60].map((value) => <option key={value} value={value}>{value} minutes</option>)}</select></label>
     </div><p className="booking-help">Waiting beyond the included minutes is rounded up to the next billing increment. These defaults can be adjusted on each trip.</p></section>
     {error && <p className="booking-error" role="alert">{error}</p>}
-    <div className="booking-dialog-actions"><button type="button" className="booking-secondary" onClick={onCancel}>Cancel</button><button type="button" className="booking-primary" disabled={saving} onClick={save}>{initial ? 'Save Billing Profile' : 'Save Company'}</button></div>
+    <div className="booking-dialog-actions"><button type="button" className="booking-secondary" onClick={onCancel}>Cancel</button><button type="button" className="booking-primary" disabled={saving} onClick={save}><ActionIcon name="check" size={16} /> {initial ? 'Save Billing Profile' : 'Save Company'}</button></div>
   </div>
 }

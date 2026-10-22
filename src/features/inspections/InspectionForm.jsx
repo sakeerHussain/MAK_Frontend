@@ -1,3 +1,4 @@
+import ActionIcon from '../../app/ActionIcon.jsx'
 import { useState } from 'react'
 import Icon from '../../app/Icon.jsx'
 import FormFieldCaption from '../../shared/components/FormFieldCaption.jsx'
@@ -57,7 +58,7 @@ export default function InspectionForm({ initial, vehicles, bookings, onCancel, 
       {form.photos.length > 0 && <div className="inspection-photo-grid">{form.photos.map((photo) => <div className="inspection-photo" key={photo.id}><img src={photo.previewUrl} alt={photo.name} /><span title={photo.name}>{photo.name}</span><button type="button" aria-label={`Remove ${photo.name}`} onClick={() => set('photos', form.photos.filter((item) => item.id !== photo.id))}><Icon name="close" size={13} /></button></div>)}</div>}
     </section>
     {error && <p className="inspection-error" role="alert">{error}</p>}
-    <div className="inspection-form-actions"><button type="button" className="inspection-secondary" onClick={onCancel}>Cancel</button><button type="submit" className="inspection-primary" disabled={uploading}><Icon name="check" size={16} /> {saving ? 'Saving...' : initial ? 'Save Changes' : 'Save Inspection'}</button></div>
+    <div className="inspection-form-actions"><button type="button" className="inspection-secondary" onClick={onCancel}>Cancel</button><button type="submit" className="inspection-primary" disabled={uploading}><ActionIcon name="check" size={16} /> {saving ? 'Saving...' : initial ? 'Save Changes' : 'Save Inspection'}</button></div>
     </fieldset>
   </form>
 }

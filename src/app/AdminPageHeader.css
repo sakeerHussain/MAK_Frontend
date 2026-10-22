@@ -1,0 +1,113 @@
+.app-shell .admin-page-heading {
+  margin: 0 0 23px;
+  min-width: 0;
+}
+
+.app-shell .admin-page-eyebrow {
+  display: block;
+  color: #8a91a1;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.45px;
+  line-height: 1.6;
+}
+
+.app-shell .admin-page-heading h1 {
+  margin: 3px 0;
+  color: #373a4a;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -.55px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.app-shell .admin-page-heading p {
+  max-width: 72ch;
+  margin: 0;
+  color: #788497;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.app-shell .admin-page-actions,
+.app-shell .admin-page-action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.app-shell .admin-page-actions {
+  margin: 0 0 17px;
+}
+
+.app-shell .admin-page-actions > .admin-page-action-buttons {
+  margin-left: auto;
+}
+
+.app-shell .admin-page-actions > button,
+.app-shell .admin-page-action-buttons > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.app-shell .admin-page-actions-with-context {
+  justify-content: space-between;
+}
+
+.app-shell .admin-page-context {
+  margin: 0 0 12px;
+  color: #788497;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.app-shell .access-panel > .admin-page-context {
+  padding: 18px 20px 0;
+}
+
+.app-shell .booking-panel > .admin-page-context {
+  padding: 0 20px;
+}
+
+.app-shell .invoice-draft-reference {
+  display: block;
+  margin: 6px 0;
+  color: #465064;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+@media (max-width: 600px) {
+  .app-shell .admin-page-heading {
+    margin-bottom: 17px;
+  }
+
+  .app-shell .admin-page-heading h1 {
+    font-size: 22px;
+  }
+
+  .app-shell .admin-page-actions,
+  .app-shell .admin-page-action-buttons {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .app-shell .admin-page-actions > .admin-page-action-buttons {
+    margin-left: 0;
+  }
+
+  .app-shell .admin-page-actions > button,
+  .app-shell .admin-page-action-buttons > button {
+    min-height: 40px;
+    max-width: 100%;
+    white-space: normal;
+  }
+}

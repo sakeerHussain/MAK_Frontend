@@ -1,3 +1,4 @@
+import ActionIcon from '../../app/ActionIcon.jsx'
 import { DOCUMENT_TYPES } from './FleetData.js'
 import FleetUploadField from './FleetUploadField.jsx'
 
@@ -8,6 +9,6 @@ export default function FleetDocumentDialog({ vehicle, documentType, setDocument
     <div className="fleet-document-picker"><FleetUploadField title="Choose document image or PDF" hint="Drag a file here or browse your device · PNG, JPG, WebP, PDF · 5 MB max" accept=".png,.jpg,.jpeg,.webp,.pdf" onFiles={chooseDocument} icon="document" /></div>
     {documentFile && <div className="fleet-document-selected">{documentFile.previewUrl ? <img src={documentFile.previewUrl} alt="Selected document preview" /> : <span className="fleet-document-file-icon">PDF</span>}<span><strong>{documentFile.name}</strong><small>Ready to attach as {documentType}</small></span><button type="button" onClick={() => setDocumentFile(null)}>Remove</button></div>}
     {documentError && <p className="fleet-form-error" role="alert">{documentError}</p>}
-    <div className="fleet-dialog-actions"><button type="button" className="fleet-secondary-button" disabled={busy} onClick={onCancel}>Cancel</button><button type="button" className="fleet-primary-button" disabled={!documentFile || busy} onClick={onSave}>{busy ? 'Uploading…' : 'Attach Document'}</button></div>
+    <div className="fleet-dialog-actions"><button type="button" className="fleet-secondary-button" disabled={busy} onClick={onCancel}>Cancel</button><button type="button" className="fleet-primary-button" disabled={!documentFile || busy} onClick={onSave}><ActionIcon name="upload" size={16} /> {busy ? 'Uploading…' : 'Attach Document'}</button></div>
   </div>
 }

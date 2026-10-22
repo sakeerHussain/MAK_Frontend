@@ -174,3 +174,20 @@ td:first-child,th:first-child{padding-left:21px}td:last-child,th:last-child{padd
  .sidebar-collapsed .sidebar:is(:hover,:has(:focus-visible)) .sidebar-bottom{justify-content:flex-start;padding:14px 18px}
 }
 @media(prefers-reduced-motion:reduce){.sidebar,.workspace{transition:none}}
+
+/* Sidebar wordmark */
+.sidebar .mak-brand-mark {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ec5c8b55;
+  border-radius: 7px;
+  background: #ec5c8b18;
+  color: #f582aa;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1;
+  transform: none;
+}

@@ -25,7 +25,7 @@ export default function AppRouter() {
     window.addEventListener('hashchange', update); window.addEventListener('popstate', update); window.addEventListener('auth-expired', expire)
     return () => { active = false; window.removeEventListener('hashchange', update); window.removeEventListener('popstate', update); window.removeEventListener('auth-expired', expire) }
   }, [])
-  useEffect(() => { document.title = screen === 'public' ? 'MAK Rentals | Welcome' : screen === 'admin' ? 'Rental Admin' : screen === 'sign-up' ? 'Create Account | Rental Admin' : 'Sign In | Rental Admin'; window.scrollTo(0, 0) }, [screen])
+  useEffect(() => { document.title = screen === 'public' ? 'MAK Rentals | Welcome' : screen === 'admin' ? 'MAK admin' : screen === 'sign-up' ? 'Create Account | MAK admin' : 'Sign In | MAK admin'; window.scrollTo(0, 0) }, [screen])
   useEffect(() => { if (session.user && ['sign-in', 'sign-up'].includes(screen)) window.location.hash = '/dashboard' }, [session.user, screen])
   const signedIn = (user) => { setSession({ loading: false, user, error: '' }); window.location.hash = '/dashboard' }
   const signOut = async () => { await logoutAccount(); setSession({ loading: false, user: null, error: '' }); window.location.hash = '/sign-in' }

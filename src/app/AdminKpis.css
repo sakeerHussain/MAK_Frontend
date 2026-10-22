@@ -1,0 +1,325 @@
+/* Presentation only: existing values, data sources, and KPI interactions stay in their modules. */
+.app-shell .workspace :is(.fleet-kpis, .booking-kpis, .customer-kpis, .maintenance-kpis, .inspection-kpis, .invoice-kpis, .access-kpis, .dashboard-kpi-grid, .dashboard-operation-counts, .dashboard-financial-grid) {
+  display: grid;
+  grid-template-columns: repeat(var(--admin-kpi-columns, 4), minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+  margin-bottom: 18px;
+}
+
+.app-shell .workspace :is(.fleet-kpis, .booking-kpis, .invoice-kpis):has(> :nth-child(5)) {
+  --admin-kpi-columns: 5;
+}
+
+.app-shell .workspace :is(.fleet-kpi, .booking-kpi, .customer-kpi, .maintenance-kpi, .inspection-kpi, .invoice-kpi, .access-kpi, .dashboard-kpi, .dashboard-operation-counts > div, .dashboard-financial-grid > div) {
+  --admin-kpi-color: #236dc9;
+  --admin-kpi-tint: #e8f1fe;
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  grid-template-rows: minmax(28px, auto) minmax(34px, auto) auto;
+  align-content: start;
+  align-items: center;
+  gap: 8px 9px;
+  min-width: 0;
+  min-height: 122px;
+  margin: 0;
+  padding: 13px 14px 12px;
+  border: 1px solid #e9ecf1;
+  border-radius: 5px;
+  background: #fff;
+  color: #4c4c5c;
+  text-align: left;
+  box-shadow: 0 2px 5px #1e2a4606;
+  font-family: inherit;
+}
+
+.app-shell .workspace :is(.fleet-kpi, .booking-kpi, .customer-kpi, .maintenance-kpi, .inspection-kpi, .invoice-kpi, .access-kpi, .dashboard-operation-counts > div, .dashboard-financial-grid > div):nth-child(2) {
+  --admin-kpi-color: #18b995;
+  --admin-kpi-tint: #dff8f1;
+}
+.app-shell .workspace :is(.fleet-kpi, .booking-kpi, .customer-kpi, .maintenance-kpi, .inspection-kpi, .invoice-kpi, .access-kpi, .dashboard-operation-counts > div, .dashboard-financial-grid > div):nth-child(3) {
+  --admin-kpi-color: #7b70ef;
+  --admin-kpi-tint: #efedff;
+}
+.app-shell .workspace :is(.fleet-kpi, .booking-kpi, .customer-kpi, .maintenance-kpi, .inspection-kpi, .invoice-kpi, .access-kpi, .dashboard-operation-counts > div, .dashboard-financial-grid > div):nth-child(4) {
+  --admin-kpi-color: #dba13b;
+  --admin-kpi-tint: #fff3db;
+}
+.app-shell .workspace :is(.fleet-kpi, .booking-kpi, .invoice-kpi):nth-child(5) {
+  --admin-kpi-color: #4bb6d1;
+  --admin-kpi-tint: #e1f6fb;
+}
+
+.app-shell .workspace :is(.invoice-kpi-rose, .dashboard-operation-counts > div:nth-child(3), .dashboard-financial-grid > div:last-child) {
+  --admin-kpi-color: #db6482;
+  --admin-kpi-tint: #ffeaf0;
+}
+
+.app-shell .workspace :is(.booking-kpi-head, .invoice-kpi-head, .fleet-kpi-main, .maintenance-kpi > div, .inspection-kpi > div, .dashboard-financial-label) {
+  display: contents;
+}
+
+.app-shell .workspace :is(.fleet-kpi-top, .booking-kpi-head > span, .invoice-kpi-head > span, .customer-kpi > span:not(.customer-kpi-icon), .maintenance-kpi > span, .inspection-kpi > span, .access-kpi > span, .dashboard-operation-counts > div > span, .dashboard-financial-label > span) {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  align-self: start;
+  min-width: 0;
+  margin: 0;
+  color: #5b6475;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+  text-transform: none;
+  letter-spacing: normal;
+  overflow-wrap: anywhere;
+}
+
+.app-shell .workspace .fleet-kpi-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.app-shell .workspace .fleet-kpi-top > svg {
+  flex: 0 0 14px;
+  width: 14px;
+  height: 14px;
+  color: #bdc8d8;
+}
+
+.app-shell .workspace :is(.fleet-kpi-icon, .customer-kpi-icon, .booking-kpi-head > svg, .invoice-kpi-head > svg, .maintenance-kpi > div > svg, .inspection-kpi > div > svg, .access-kpi > svg, .dashboard-operation-counts > div > svg, .dashboard-financial-label > svg) {
+  position: static;
+  grid-column: 1;
+  grid-row: 2;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  margin: 0;
+  border-radius: 50%;
+  background: var(--admin-kpi-tint);
+  color: var(--admin-kpi-color);
+}
+
+.app-shell .workspace :is(.booking-kpi-head > svg, .invoice-kpi-head > svg, .maintenance-kpi > div > svg, .inspection-kpi > div > svg, .access-kpi > svg, .dashboard-operation-counts > div > svg, .dashboard-financial-label > svg) {
+  padding: 8px;
+}
+.app-shell .workspace .booking-kpi .booking-kpi-head > svg {
+  background: var(--admin-kpi-tint);
+  color: var(--admin-kpi-color);
+}
+.app-shell .workspace :is(.fleet-kpi-icon, .customer-kpi-icon) > svg {
+  width: 18px;
+  height: 18px;
+}
+
+.app-shell .workspace :is(.fleet-kpi-main > strong, .booking-kpi-value, .invoice-kpi > strong, .customer-kpi > strong, .maintenance-kpi strong, .inspection-kpi strong, .access-kpi > strong, .dashboard-operation-counts strong, .dashboard-financial-grid strong) {
+  grid-column: 2;
+  grid-row: 2;
+  display: block;
+  min-width: 0;
+  margin: 0;
+  color: #3d4353;
+  font-size: 23px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -.4px;
+  font-variant-numeric: tabular-nums;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.app-shell .workspace :is(.booking-kpi-money, .invoice-kpi:last-child > strong, .billing-kpis .invoice-kpi:nth-child(3) > strong, .billing-kpis .invoice-kpi:nth-child(4) > strong, .dashboard-financial-grid strong) {
+  font-size: 20px;
+}
+
+.app-shell .workspace :is(.fleet-kpi-foot, .booking-kpi > p, .invoice-kpi > small, .customer-kpi > small, .dashboard-operation-counts small, .dashboard-financial-grid small) {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  min-width: 0;
+  margin: 0;
+  color: #8b96a8;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.app-shell .workspace .fleet-kpi-foot {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.app-shell .workspace .fleet-kpi-foot > i {
+  flex: 0 0 6px;
+  width: 6px;
+  height: 6px;
+}
+.app-shell .workspace :is(.booking-kpi > p, .invoice-kpi > small, .customer-kpi > small)::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--admin-kpi-color);
+}
+.app-shell .workspace .booking-kpi > small {
+  grid-column: 1 / -1;
+  grid-row: 4;
+  min-width: 0;
+  margin: 0;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.app-shell .workspace :is(.maintenance-kpi, .inspection-kpi)::after {
+  content: '';
+  position: absolute;
+  top: 18px;
+  right: 16px;
+  width: 6px;
+  height: 6px;
+  border-top: 1px solid #bdc8d8;
+  border-right: 1px solid #bdc8d8;
+  transform: rotate(45deg);
+}
+.app-shell .workspace :is(.maintenance-kpi, .inspection-kpi) > span {
+  padding-right: 17px;
+}
+
+/* Chart cards retain their charts, context badges, legends, and navigation. */
+.app-shell .workspace .dashboard-kpi-grid .dashboard-kpi {
+  --admin-kpi-color: var(--metric-color);
+  --admin-kpi-tint: color-mix(in srgb, var(--metric-color) 12%, white);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
+.app-shell .workspace .dashboard-kpi-heading {
+  min-height: 28px;
+  padding-right: 20px;
+  margin: 0;
+  color: #5b6475;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.app-shell .workspace .dashboard-kpi-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  min-height: 0;
+  margin: 8px 0;
+}
+.app-shell .workspace .dashboard-kpi-value {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px 9px;
+  min-width: 0;
+}
+.app-shell .workspace .dashboard-kpi-value > div {
+  display: contents;
+}
+.app-shell .workspace .dashboard-kpi-icon {
+  grid-column: 1;
+  grid-row: 1;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--admin-kpi-tint);
+  color: var(--admin-kpi-color);
+}
+.app-shell .workspace .dashboard-kpi-icon > svg {
+  width: 18px;
+  height: 18px;
+}
+.app-shell .workspace .dashboard-kpi-body strong {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  margin: 0;
+  color: #3d4353;
+  font-size: 23px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -.4px;
+  overflow-wrap: anywhere;
+}
+.app-shell .workspace .dashboard-kpi-body p {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin: 0;
+  color: #8b96a8;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.app-shell .workspace .dashboard-mini-chart {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  height: 88px;
+}
+.app-shell .workspace .dashboard-kpi-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  min-height: 0;
+  margin-top: auto;
+}
+.app-shell .workspace .dashboard-kpi-footer > small {
+  min-width: 0;
+  color: #8b96a8;
+  font-size: 10px;
+  line-height: 1.4;
+}
+.app-shell .workspace .dashboard-card-link {
+  position: absolute;
+  top: 13px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+}
+.app-shell .workspace .dashboard-financial-grid {
+  margin-bottom: 0;
+}
+.app-shell .workspace :is(.dashboard-operation-counts > div:nth-child(3), .dashboard-financial-grid > div:last-child) strong {
+  color: #db6482;
+}
+
+@media (max-width: 1150px) {
+  .app-shell .workspace :is(.fleet-kpis, .booking-kpis, .customer-kpis, .maintenance-kpis, .inspection-kpis, .invoice-kpis, .access-kpis, .dashboard-kpi-grid, .dashboard-operation-counts, .dashboard-financial-grid) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .app-shell .workspace :is(.fleet-kpis, .booking-kpis, .customer-kpis, .maintenance-kpis, .inspection-kpis, .invoice-kpis, .access-kpis, .dashboard-kpi-grid, .dashboard-operation-counts, .dashboard-financial-grid) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+}
+@media (max-width: 380px) {
+  .app-shell .workspace :is(.fleet-kpis, .booking-kpis, .customer-kpis, .maintenance-kpis, .inspection-kpis, .invoice-kpis, .access-kpis, .dashboard-kpi-grid, .dashboard-operation-counts, .dashboard-financial-grid) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Keep the Staff KPI grid within the viewport above its scrollable table. */
+.app-shell .workspace .access-page { grid-template-columns: minmax(0, 1fr); }
+.app-shell .workspace .access-panel { min-width: 0; }

@@ -1,3 +1,4 @@
+import ActionIcon from '../../app/ActionIcon.jsx'
 import { useState } from 'react'
 import Icon from '../../app/Icon.jsx'
 import FormFieldCaption from '../../shared/components/FormFieldCaption.jsx'
@@ -69,7 +70,7 @@ export default function MaintenanceForm({ initial, vehicles, bookings, trips, on
       <label>Next service odometer (km)<input type="number" min="0" step="1" value={form.nextServiceOdometerKm} onChange={(event) => set('nextServiceOdometerKm', event.target.value)} placeholder="Optional due reading" /></label>
     </div></section>}
     <section className="maintenance-form-section"><h3>Notes</h3><label className="maintenance-notes-label">Notes<textarea rows="3" value={form.notes} onChange={(event) => set('notes', event.target.value)} placeholder="Work performed, findings, or follow-up instructions" /></label></section>
-    <section className="maintenance-form-section"><div className="maintenance-section-heading"><div><h3>Expense Lines</h3><p className="maintenance-form-help">Add parts, labor, or other workshop costs. Amounts are in SAR.</p></div><button type="button" className="maintenance-secondary" onClick={addExpenseLine}><Icon name="plus" size={15} /> Add Line</button></div>
+    <section className="maintenance-form-section"><div className="maintenance-section-heading"><div><h3>Expense Lines</h3><p className="maintenance-form-help">Add parts, labor, or other workshop costs. Amounts are in SAR.</p></div><button type="button" className="maintenance-secondary" onClick={addExpenseLine}><ActionIcon name="plus" size={15} /> Add Line</button></div>
       <div className="maintenance-expense-lines">{form.expenseLines.map((line, index) => <div className="maintenance-expense-line" key={line.id}><div className="maintenance-expense-line-heading"><strong>Line {index + 1}</strong><button type="button" onClick={() => removeExpenseLine(line.id)}><Icon name="trash" size={14} /> Remove</button></div><div className="maintenance-form-grid">
         <label><FormFieldCaption required>Category</FormFieldCaption><select value={line.category} onChange={(event) => setExpenseLine(line.id, 'category', event.target.value)}>{EXPENSE_CATEGORIES.map((category) => <option key={category}>{category}</option>)}</select></label>
         <label><FormFieldCaption required>Amount (SAR)</FormFieldCaption><input type="number" min="0.01" step="0.01" value={line.amount} onChange={(event) => setExpenseLine(line.id, 'amount', event.target.value)} placeholder="0.00" /></label>
@@ -80,6 +81,6 @@ export default function MaintenanceForm({ initial, vehicles, bookings, trips, on
       <div className="maintenance-expense-total"><span>Total Amount</span><strong>{formatExpense(expenseTotal(form.expenseLines))}</strong></div>
     </section>
     {error && <p className="maintenance-form-error" role="alert">{error}</p>}
-    <div className="maintenance-form-actions"><button type="button" className="maintenance-secondary" onClick={onCancel}>Cancel</button><button type="submit" className="maintenance-primary" disabled={saving || Boolean(busyReceipt)}><Icon name="check" size={16} /> {initial ? 'Save Changes' : 'Save Job'}</button></div>
+    <div className="maintenance-form-actions"><button type="button" className="maintenance-secondary" onClick={onCancel}>Cancel</button><button type="submit" className="maintenance-primary" disabled={saving || Boolean(busyReceipt)}><ActionIcon name="check" size={16} /> {initial ? 'Save Changes' : 'Save Job'}</button></div>
   </form>
 }

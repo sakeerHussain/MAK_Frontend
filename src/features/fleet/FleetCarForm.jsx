@@ -1,3 +1,4 @@
+import ActionIcon from '../../app/ActionIcon.jsx'
 import { useState } from 'react'
 import { blankVehicle, CUSTODIANS, DOCUMENT_TYPES, FUEL_OPTIONS, STATUS_OPTIONS, TRANSMISSION_OPTIONS, TYPE_OPTIONS, documentStatus } from './FleetData.js'
 import { prepareUpload } from '../../shared/lib/upload.js'
@@ -115,11 +116,11 @@ export default function FleetCarForm({ initial, vehicles, vendors = [], maintena
       <div className="fleet-form-grid"><label>Document Type<select value={documentDraft.type} onChange={(event) => setDocumentDraft({ ...documentDraft, type: event.target.value })}>{DOCUMENT_TYPES.map((type) => <option key={type}>{type}</option>)}</select></label><label>Expiry Date (if applicable)<input type="date" value={documentDraft.expiryDate} onChange={(event) => setDocumentDraft({ ...documentDraft, expiryDate: event.target.value })} /></label></div>
       <div className="fleet-document-picker"><FleetUploadField title="Choose document image or PDF" hint="Drag a file here or browse your device · PNG, JPG, WebP, PDF · 5 MB max" accept=".png,.jpg,.jpeg,.webp,.pdf" onFiles={chooseDocument} icon="document" /></div>
       {documentDraft.file && <div className="fleet-document-selected">{documentDraft.file.previewUrl ? <img src={documentDraft.file.previewUrl} alt="Selected document preview" /> : <span className="fleet-document-file-icon">PDF</span>}<span><strong>{documentDraft.file.name}</strong><small>Ready to attach as {documentDraft.type}</small></span><button type="button" onClick={() => setDocumentDraft((current) => ({ ...current, file: null }))}>Remove</button></div>}
-      <button className="fleet-secondary-button fleet-attach-button" type="button" disabled={!documentDraft.file} onClick={addDocument}>Attach document</button>
+      <button className="fleet-secondary-button fleet-attach-button" type="button" disabled={!documentDraft.file} onClick={addDocument}><ActionIcon name="upload" size={16} /> Attach document</button>
       {uploadError?.section === 'documents' && <p className="fleet-form-error" role="alert">{uploadError.message}</p>}
     </section>
     {error && <p className="fleet-form-error" role="alert">{error}</p>}
     <p className="fleet-form-note">Saving this form updates the database and uploads attached files.</p>
-    <div className="fleet-dialog-actions"><button type="button" className="fleet-secondary-button" disabled={saving} onClick={onCancel}>Cancel</button><button type="submit" className="fleet-primary-button" disabled={saving}>{saving ? 'Saving…' : 'Save Car'}</button></div>
+    <div className="fleet-dialog-actions"><button type="button" className="fleet-secondary-button" disabled={saving} onClick={onCancel}>Cancel</button><button type="submit" className="fleet-primary-button" disabled={saving}><ActionIcon name="check" size={16} /> {saving ? 'Saving…' : 'Save Car'}</button></div>
   </form>
 }
