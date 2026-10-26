@@ -1,259 +1,72 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Lenis from 'lenis'
 import 'lenis/dist/lenis.css'
-import Icon from '../../app/Icon.jsx'
-import LandingCarousel from './LandingCarousel.jsx'
+import { IconArrowRight, IconCar, IconCarSuv, IconUsers, IconBriefcase, IconCalendar, IconSearch, IconHeart, IconMenu2, IconX, IconShieldCheck, IconRoute, IconSteeringWheel, IconBuildingAirport } from '@tabler/icons-react'
 import RentalEnquiry from './RentalEnquiry.jsx'
-import { faqs, fleet, fleetCategories, heroSlides, imageUrl, locations, processSteps, rentalPreferences, services } from './LandingData.js'
-import { landingImageSources } from './LandingImages.js'
+import Testimonials from './Testimonials.jsx'
+import RentalPlans from './RentalPlans.jsx'
+import RentalGuides from './RentalGuides.jsx'
+import FeaturedVehicles from './FeaturedVehicles.jsx'
+import PublicPage from './PublicPage.jsx'
+import FleetPage from './FleetPage.jsx'
+import { fleetCategories, locations, rentalPreferences, services } from './LandingData.js'
 import './LandingPage.css'
+import './RentalsLanding.css'
+import './RentalPlans.css'
+import './SectionTitles.css'
+import './FeaturedControls.css'
 
-function Brand({ onClick }) {
-  return <a href="#/home" className="mak-brand" aria-label="MAK Rentals home" onClick={onClick}><span className="mak-brand-mark" aria-hidden="true">M<span /></span><span>MAK<span className="mak-brand-subtitle">CAR RENTALS</span></span></a>
-}
+const publicNavigation=[['Our Fleet','our-fleet'],['About Us','about-us'],['Services','services'],['Home','home']]
+const serviceIcons=[IconBriefcase,IconSteeringWheel,IconBuildingAirport,IconCarSuv,IconShieldCheck,IconRoute]
+const vehicleBrands = [
+ {id:'toyota',name:'Toyota'}, {id:'honda',name:'Honda'}, {id:'ford',name:'Ford'},
+ {id:'bmw',name:'BMW'}, {id:'mercedes',name:'Mercedes-Benz'}, {id:'audi',name:'Audi'},
+ {id:'chevrolet',name:'Chevrolet'}, {id:'nissan',name:'Nissan'}, {id:'volkswagen',name:'Volkswagen'},
+]
+const vehicleBodies = [
+ {id:'suv',name:'SUV'}, {id:'sedan',name:'Sedan'}, {id:'truck',name:'Truck'},
+ {id:'coupe',name:'Coupe'}, {id:'hatchback',name:'Hatchback'}, {id:'convertible',name:'Convertible'},
+]
 
-function Photo({ id, alt, eager = false, className = '', variant }) {
-  const [failed, setFailed] = useState(false)
-  const responsive = landingImageSources(id, variant)
-  const image = <img src={imageUrl(id, eager ? 2200 : 1100)} width={responsive?.width} height={responsive?.height} alt={alt} loading={eager ? 'eager' : 'lazy'} fetchPriority={eager ? 'high' : 'auto'} decoding="async" onError={() => setFailed(true)} />
-  return <div className={`mak-photo ${className} ${failed ? 'mak-photo-fallback' : ''}`}>
-    {failed ? <span><Icon name="fleet" size={42} /><span>MAK RENTALS</span><small>Illustrative vehicle image</small></span> : responsive ? <picture>{responsive.sources.map((source, index) => <source key={index} {...source} />)}{image}</picture> : image}
-  </div>
-}
+function Brand({ full = false }) { return <a className="rent-brand" href="#/home" aria-label="MAK Rentals home"><img src={full ? "/images/rentals/mak-international-transparent.webp" : "/images/mak-admin-logo.jpg"} alt={full ? "MAK International" : ""} width={full ? 880 : 1280} height={full ? 161 : 339} />{!full && <span>MAK<span>RENTALS</span></span>}</a> }
 
-function SectionHeading({ eyebrow, children, text, centered = false }) {
-  return <div className={`mak-section-heading ${centered ? 'mak-centered' : ''}`} data-reveal><div><span className="mak-eyebrow">{eyebrow}</span><h2>{children}</h2></div>{text && <p>{text}</p>}</div>
-}
-
-export default function LandingPage({ user }) {
-  const root = useRef(null)
-  const lenis = useRef(null)
-  const menuButton = useRef(null)
-  const bookingSection = useRef(null)
-  const [scrolled, setScrolled] = useState(() => window.scrollY > 70)
-  const [menu, setMenu] = useState(false)
-  const [slideIndex, setSlideIndex] = useState(0)
-  const [category, setCategory] = useState('All vehicles')
-  const [location, setLocation] = useState('Al Khobar')
-  const [pickup, setPickup] = useState('')
-  const [returnDate, setReturnDate] = useState('')
-  const [finderError, setFinderError] = useState('')
-  const [enquiry, setEnquiry] = useState(null)
-  const slide = heroSlides[slideIndex]
-  const login = user ? '#/dashboard' : '#/sign-in'
-  const today = new Date().toLocaleDateString('en-CA')
-  const filteredFleet = fleet.filter((car) => category === 'All vehicles' || car.category === category)
-  const closeEnquiry = useCallback(() => setEnquiry(null), [])
-
-  useEffect(() => {
-    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const setup = () => {
-      lenis.current?.destroy()
-      lenis.current = media.matches ? null : new Lenis({ autoRaf: true, duration: 1.05, smoothWheel: true, anchors: false })
-    }
-    setup()
-    media.addEventListener('change', setup)
-    return () => { media.removeEventListener('change', setup); lenis.current?.destroy(); lenis.current = null }
-  }, [])
-
-  useEffect(() => {
-    const element = root.current
-    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
-    let frame = null
-    const update = () => {
-      const position = window.scrollY
-      const distance = document.documentElement.scrollHeight - window.innerHeight
-      setScrolled(position > 70)
-      element.style.setProperty('--mak-scroll-progress', Math.max(0, Math.min(1, distance > 0 ? position / distance : 0)))
-      element.style.setProperty('--mak-hero-offset', `${media.matches ? 0 : Math.min(position * 0.15, 160)}px`)
-      const booking = bookingSection.current
-      if (booking) {
-        const bounds = booking.getBoundingClientRect()
-        if (media.matches || (bounds.top < window.innerHeight && bounds.bottom > 0)) {
-          const limit = window.innerWidth <= 640 ? 40 : 76
-          const travel = (window.innerHeight / 2 - bounds.top - bounds.height / 2) * 0.16
-          booking.style.setProperty('--mak-booking-offset', `${media.matches ? 0 : Math.max(-limit, Math.min(limit, travel))}px`)
-        }
-      }
-      frame = null
-    }
-    const onScroll = () => { if (frame === null) frame = requestAnimationFrame(update) }
-    update()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onScroll)
-    media.addEventListener('change', onScroll)
-    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); media.removeEventListener('change', onScroll); if (frame !== null) cancelAnimationFrame(frame) }
-  }, [])
-
-  useEffect(() => {
-    const element = root.current
-    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
-    if (media.matches || !('IntersectionObserver' in window)) return
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target) } })
-    }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' })
-    element.querySelectorAll('[data-reveal]').forEach((item) => observer.observe(item))
-    element.classList.add('mak-motion-ready')
-    return () => { observer.disconnect(); element.classList.remove('mak-motion-ready') }
-  }, [])
-
-  useEffect(() => {
-    if (!menu) return
-    const handleKey = (event) => { if (event.key === 'Escape') { setMenu(false); menuButton.current?.focus() } }
-    const media = window.matchMedia('(min-width: 961px)')
-    const handleResize = () => { if (media.matches) setMenu(false) }
-    document.addEventListener('keydown', handleKey)
-    media.addEventListener('change', handleResize)
-    return () => { document.removeEventListener('keydown', handleKey); media.removeEventListener('change', handleResize) }
-  }, [menu])
-
-  const go = (id) => {
-    setMenu(false)
-    const target = document.getElementById(id)
-    if (!target) return
-    if (lenis.current) lenis.current.scrollTo(target, { offset: -98 })
-    else window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 98, behavior: 'instant' })
-  }
-  const openEnquiry = (values = {}) => {
-    setMenu(false)
-    setEnquiry({ category, location, preference: 'Self-drive', pickup, returnDate, ...values })
-  }
-  const explore = (event) => {
-    event.preventDefault()
-    if (pickup && returnDate && returnDate < pickup) { setFinderError('Choose a return date on or after your pickup date.'); return }
-    setFinderError(''); go('mak-fleet')
-  }
-
-  return <div ref={root} className="mak-landing">
-    <a className="mak-skip" href="#mak-main" onClick={(event) => { event.preventDefault(); document.getElementById('mak-main')?.focus(); go('mak-main') }}>Skip to content</a>
-    <header className={`mak-header ${scrolled ? 'is-scrolled' : ''} ${menu ? 'is-open' : ''}`}>
-      <div className="mak-container mak-header-inner">
-        <Brand onClick={(event) => { event.preventDefault(); go('mak-home') }} />
-        <nav id="mak-navigation" className={menu ? 'is-open' : ''} aria-label="Main navigation">
-          {[['Home', 'mak-home'], ['About', 'mak-about'], ['Services', 'mak-services'], ['Our fleet', 'mak-fleet'], ['For business', 'mak-business']].map(([label, id]) => <button type="button" key={id} onClick={() => go(id)}>{label}</button>)}
-          <a className="mak-nav-login" href={login}>{user ? 'Dashboard' : 'Sign in'}<Icon name="arrow" size={15} /></a>
-        </nav>
-        <button type="button" className="mak-button mak-header-cta" onClick={() => openEnquiry()}>Plan a rental <Icon name="arrow" size={16} /></button>
-        <button type="button" ref={menuButton} className="mak-menu-button" aria-label={menu ? 'Close navigation' : 'Open navigation'} aria-expanded={menu} aria-controls="mak-navigation" onClick={() => setMenu((value) => !value)}><Icon name={menu ? 'close' : 'menu'} size={23} /></button>
-      </div>
-    </header>
-
-    <main id="mak-main" tabIndex={-1}>
-      <section className="mak-hero" id="mak-home" aria-label="Rental inspiration" aria-roledescription="carousel">
-        <div className="mak-hero-images" aria-hidden="true">{heroSlides.map((item, index) => <div key={item.image} className={`mak-hero-image ${slideIndex === index ? 'is-active' : ''}`} style={{ '--mak-slide-position': item.position, '--mak-slide-mobile-position': item.mobilePosition }}><Photo id={item.image} alt="" eager={index === 0} variant="hero" /></div>)}</div>
-        <div className="mak-hero-overlay" />
-        <div className="mak-container mak-hero-content">
-          <div className="mak-hero-copy" key={slideIndex}>
-            <h1>{slide.title}<br /><em>{slide.accent}</em></h1>
-            <p>{slide.text}</p>
-            <div className="mak-hero-buttons"><button type="button" className="mak-button" onClick={() => { setCategory(slide.category); go('mak-fleet') }}>Explore the collection <Icon name="arrow" size={18} /></button><button type="button" className="mak-button mak-button-outline" onClick={() => openEnquiry({ category: slide.category })}>Plan your journey <Icon name="arrow" size={18} /></button></div>
-          </div>
-        </div>
-        <div className="mak-hero-pagination" role="group" aria-label="Choose hero slide">{heroSlides.map((item, index) => <button type="button" key={item.label} className={slideIndex === index ? 'is-active' : ''} aria-label={`Show slide ${index + 1}: ${item.title} ${item.accent}`} aria-pressed={slideIndex === index} onClick={() => setSlideIndex(index)}><span>0{index + 1}</span><i /></button>)}</div>
-      </section>
-
-      <section className="mak-section mak-about mak-container" id="mak-about" aria-labelledby="mak-about-title">
-        <div className="mak-about-copy" data-reveal>
-          <span className="mak-eyebrow">THE MAK EXPERIENCE</span>
-          <h2 id="mak-about-title">More than a car.<br />A better way <em>to move.</em></h2>
-          <p>From everyday drives to business trips, enjoy flexible daily, monthly and corporate rentals—with or without a driver.</p>
-          <button type="button" className="mak-button" onClick={() => go('mak-services')}>Discover our services <Icon name="arrow" size={18} /></button>
-        </div>
-        <div className="mak-about-visual" data-reveal style={{ '--mak-delay': '130ms' }}>
-          <div className="mak-about-portrait">
-            <Photo variant="about" id="/images/about/bentley-detail.jpg" alt="Close-up of a black Bentley headlight and grille" />
-          </div>
-          <div className="mak-about-stamp">
-            <strong>+10 years</strong>
-            <span>experience</span>
-          </div>
-          <div className="mak-about-detail">
-            <Photo variant="about" id="/images/about/suv-interior.jpg" alt="Premium SUV interior with black leather seats and red stitching" />
-          </div>
-        </div>
-      </section>
-
-      <section className="mak-section mak-services" id="mak-services"><div className="mak-container">
-        <SectionHeading eyebrow="WHAT MOVES YOU?" text="One destination or many. A day or a month. Explore a rental experience built around your plans.">A service for <em>every journey.</em></SectionHeading>
-        <LandingCarousel label="rental services">{services.map((item) => <article className="mak-service-card" key={item.title}>
-          <Photo variant="service" id={item.image} alt={`${item.title} illustrative photograph`} /><div className="mak-service-shade" /><div className="mak-service-copy"><Icon name={item.icon} size={25} /><h3>{item.title}</h3><p>{item.description}</p></div><div className="mak-card-cutout"><button type="button" className="mak-round-button" aria-label={`Enquire about ${item.title.toLowerCase()}`} onClick={() => openEnquiry({ preference: item.preference })}><Icon name="arrow" size={21} /></button></div>
-        </article>)}</LandingCarousel>
-      </div></section>
-
-      <section ref={bookingSection} className="mak-finder-area mak-booking-section" id="mak-finder" aria-labelledby="mak-finder-title">
-        <div className="mak-booking-background" aria-hidden="true">
-          <picture>
-            {/* Desktop omits unused image area; narrower screens retain the portrait composition. */}
-            <source media="(min-width: 1200px)" type="image/webp" srcSet="/images/booking/bmw-booking-desktop-1600.webp 1600w, /images/booking/bmw-booking-desktop-2560.webp 2560w, /images/booking/bmw-booking-desktop-3840.webp 3840w" sizes="100vw" />
-            <source type="image/webp" srcSet="/images/booking/bmw-booking-mobile-800.webp 800w, /images/booking/bmw-booking-mobile-1600.webp 1600w, /images/booking/bmw-booking-mobile-2000.webp 2000w, /images/booking/bmw-booking-mobile-2560.webp 2560w" sizes="(max-width: 370px) 800px, (max-width: 640px) 600px, 100vw" />
-            <img src="/images/booking/bmw-booking.jpg" width={4000} height={6000} alt="" loading="lazy" decoding="async" />
-          </picture>
-        </div>
-        <div className="mak-booking-shade" aria-hidden="true" />
-        <div className="mak-container mak-booking-content">
-        <div className="mak-finder-top"><h2 id="mak-finder-title">Where will the road take you?</h2><span>YOUR JOURNEY, YOUR WAY</span></div>
-        <div className="mak-booking-panel">
-          <form className="mak-finder" onSubmit={explore}>
-            <label><span><Icon name="fleet" size={16} />Vehicle type</span><select value={category} onChange={(event) => setCategory(event.target.value)}>{fleetCategories.map((item) => <option key={item}>{item}</option>)}</select></label>
-            <label><span><Icon name="tracking" size={16} />Pickup location</span><input aria-label="Pickup location" list="mak-pickup-locations" value={location} required onChange={(event) => setLocation(event.target.value)} placeholder="City or address" autoComplete="off" /><datalist id="mak-pickup-locations">{locations.map((item) => <option key={item} value={item} />)}</datalist></label>
-            <label><span><Icon name="calendar" size={16} />Pickup date</span><input aria-label="Pickup date" type="date" min={today} value={pickup} onChange={(event) => { setPickup(event.target.value); setFinderError('') }} /></label>
-            <label><span><Icon name="calendar" size={16} />Return date</span><input aria-label="Return date" type="date" min={pickup || today} value={returnDate} onChange={(event) => { setReturnDate(event.target.value); setFinderError('') }} /></label>
-            <button type="submit" className="mak-button">Find my drive <Icon name="arrow" size={18} /></button>
-          </form>
-          {finderError && <p className="mak-form-error" role="alert">{finderError}</p>}
-        </div>
-      </div></section>
-
-      <section className="mak-section mak-fleet mak-container" id="mak-fleet">
-        <SectionHeading eyebrow="THE COLLECTION" text="A little practicality. A little luxury. Find the right starting point for your next journey.">Your next <em>great drive.</em></SectionHeading>
-        <div className="mak-fleet-toolbar"><div className="mak-tabs" role="group" aria-label="Filter fleet by vehicle category">{fleetCategories.map((item) => <button type="button" key={item} className={category === item ? 'is-active' : ''} aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}</div><span aria-live="polite">{filteredFleet.length} {filteredFleet.length === 1 ? 'category' : 'categories'} to explore</span></div>
-        <div className={`mak-fleet-grid ${filteredFleet.length === 1 ? 'mak-fleet-grid-filtered' : ''}`}>
-          {filteredFleet.map((car) => <article key={car.id} className="mak-fleet-card">
-            <div className="mak-fleet-photo">
-              <Photo id={car.image} alt={`${car.subtitle}, illustrative vehicle`} />
-              <span>{car.category}</span>
-              <button type="button" className="mak-round-button" aria-label={`Enquire about ${car.subtitle.toLowerCase()}`} onClick={() => openEnquiry({ category: car.category })}><Icon name="arrow" size={20} /></button>
-            </div>
-            <div className="mak-fleet-body">
-              <span className="mak-kicker">{car.subtitle}</span>
-              <h3>{car.title}</h3>
-              <div className="mak-fleet-specs">
-                <span><Icon name="users" size={16} />{car.seats}</span>
-                <span><Icon name="tracking" size={16} />{car.luggage}</span>
-              </div>
-              <div className="mak-fleet-price">
-                <span>Personalised rates<small>Based on your rental requirements</small></span>
-                <button type="button" className="mak-button mak-fleet-enquire" aria-label={`Enquire about ${car.subtitle.toLowerCase()}`} onClick={() => openEnquiry({ category: car.category })}>Enquire <Icon name="arrow" size={17} /></button>
-              </div>
-            </div>
-          </article>)}
-        </div>
-        <p className="mak-collection-note">Illustrative collection. Specific models, seating, rates and availability will be confirmed with your quotation.</p>
-      </section>
-
-      <section className="mak-types mak-section"><div className="mak-container"><SectionHeading eyebrow="FIND YOUR FIT" centered>The right car. <em>Your kind of journey.</em></SectionHeading><div className="mak-type-grid">{fleet.map((car, index) => <button type="button" className="mak-type-card" key={car.id} onClick={() => { setCategory(car.category); go('mak-fleet') }}><Photo id={car.image} alt="" /><span className="mak-type-shade" /><span className="mak-type-number">0{index + 1}</span><span className="mak-type-label"><span>{car.category}<small>{car.description}</small></span><span className="mak-type-arrow"><Icon name="arrow" size={21} /></span></span></button>)}</div></div></section>
-
-      <section className="mak-section mak-process mak-container" id="mak-process">
-        <SectionHeading eyebrow="SIMPLE BY DESIGN" centered>Less to arrange. <em>More to enjoy.</em></SectionHeading>
-        <ol className="mak-process-grid" role="list" aria-label="Rental workflow">
-          {processSteps.map((item, index) => <li className="mak-process-card" key={item.title} data-reveal style={{ '--mak-delay': `${index * 100}ms` }}>
-            <h3>{item.title}</h3>
-            <p>{item.text}</p>
-            <span className="mak-step-cutout" aria-hidden="true"><span className="mak-step-number">{String(index + 1).padStart(2, '0')}.</span></span>
-          </li>)}
-        </ol>
-        <p className="mak-process-note"><span><Icon name="check" size={14} /></span>New to renting? Start with an enquiry and take it one step at a time.</p>
-      </section>
-
-      <section className="mak-business" id="mak-business"><Photo id="photo-1449965408869-eaa3f722e40d" alt="Open-road scenery from a vehicle" /><div className="mak-business-overlay" /><div className="mak-container mak-business-inner"><div data-reveal><span className="mak-eyebrow">BUSINESS MOVES BETTER WITH MAK</span><h2>Your people.<br />Your projects.<br /><em>Our road ahead.</em></h2><p>From a single business trip to an ongoing transport plan, bring your team, destinations and rental requirements together.</p><button type="button" className="mak-button" onClick={() => openEnquiry({ preference: 'Corporate rental' })}>Let's talk business <Icon name="arrow" size={18} /></button></div><div className="mak-business-options" data-reveal style={{ '--mak-delay': '130ms' }}>{[['corporate', 'Corporate accounts', 'Customer-specific quotations and rental requirements.'], ['tracking', 'Multiple destinations', 'Plan pickup points, stops and passenger journeys.'], ['calendar', 'Monthly & project plans', 'Transport shaped around the way your business works.']].map(([icon, title, text]) => <div key={title}><span><Icon name={icon} size={22} /></span><div><h3>{title}</h3><p>{text}</p></div></div>)}</div></div></section>
-
-      <section className="mak-section mak-faq mak-container" id="mak-faq"><div data-reveal><span className="mak-eyebrow">A LITTLE CLARITY</span><h2>Before you<br />hit <em>the road.</em></h2><p>Good journeys begin with the right information. Here are a few helpful things to know.</p><button type="button" className="mak-text-button" onClick={() => openEnquiry()}>Prepare your rental enquiry <Icon name="arrow" size={18} /></button></div><div className="mak-faq-list" data-reveal style={{ '--mak-delay': '100ms' }}>{faqs.map((item, index) => <details key={item.question}><summary><span className="mak-faq-number">0{index + 1}</span><span>{item.question}</span><span className="mak-faq-toggle"><Icon name="plus" size={18} /></span></summary><p>{item.answer}</p></details>)}</div></section>
-
-      <section className="mak-cta"><div className="mak-container"><div data-reveal><span className="mak-eyebrow">THE ROAD IS CALLING</span><h2>Let's make your<br />next move <em>a great one.</em></h2><p>Personal plans or business possibilities. Start your journey with MAK.</p></div><button type="button" className="mak-button" onClick={() => openEnquiry()}>Plan my rental <Icon name="arrow" size={19} /></button></div><span className="mak-cta-watermark" aria-hidden="true">MAK</span></section>
-    </main>
-
-    <footer className="mak-footer"><div className="mak-container"><div className="mak-footer-top"><Brand onClick={(event) => { event.preventDefault(); go('mak-home') }} /><p>For everyday journeys.<br />For the road ahead.</p><span><Icon name="tracking" size={17} />Saudi Arabia</span></div><div className="mak-footer-grid"><div><span className="mak-eyebrow">YOUR JOURNEY STARTS HERE</span><h2>A better drive.<br /><em>A little more freedom.</em></h2><button type="button" className="mak-text-button" onClick={() => openEnquiry()}>Prepare an enquiry <Icon name="arrow" size={18} /></button></div><div><h3>Explore MAK</h3>{[['About us', 'mak-about'], ['Rental services', 'mak-services'], ['Our collection', 'mak-fleet'], ['Rental process', 'mak-process'], ['Common questions', 'mak-faq']].map(([label, id]) => <button type="button" key={id} onClick={() => go(id)}>{label}</button>)}</div><div><h3>Your way to travel</h3>{rentalPreferences.map((item) => <button type="button" key={item} onClick={() => openEnquiry({ preference: item })}>{item}</button>)}</div><div><h3>MAK workspace</h3><p>Secure access for our team.</p><a href={login}>{user ? 'Open dashboard' : 'Staff sign in'}<Icon name="arrow" size={16} /></a>{!user && <a href="#/sign-up">Create staff account</a>}<small>New accounts require admin approval.</small></div></div><div className="mak-footer-bottom"><span>&copy; {new Date().getFullYear()} MAK Rentals.</span><span>Public website preview <span aria-hidden="true">&middot;</span> Online reservations coming soon</span><button type="button" onClick={() => go('mak-home')}>Back to top <Icon name="arrow" size={15} /></button></div></div></footer>
-    {scrolled && <button type="button" className="mak-back-top" aria-label="Back to top" onClick={() => go('mak-home')}><svg viewBox="0 0 48 48" aria-hidden="true"><circle className="mak-progress-track" cx="24" cy="24" r="21" /><circle className="mak-progress-value" cx="24" cy="24" r="21" pathLength="100" /></svg><Icon name="arrow" size={19} /></button>}
-    {enquiry && <RentalEnquiry initial={enquiry} lenisRef={lenis} onClose={closeEnquiry} />}
-  </div>
+export default function LandingPage({user,page='home'}) {
+ const lenis=useRef(null), menuButton=useRef(null)
+ const [menu,setMenu]=useState(false),[scrolled,setScrolled]=useState(false),[category,setCategory]=useState('All vehicles'),[location,setLocation]=useState('Al Khobar'),[preference,setPreference]=useState('Self-drive'),[pickup,setPickup]=useState(''),[returnDate,setReturnDate]=useState(''),[error,setError]=useState(''),[enquiry,setEnquiry]=useState(null),[saved,setSaved]=useState([]),[savedOnly,setSavedOnly]=useState(false)
+ const closeEnquiry=useCallback(()=>setEnquiry(null),[])
+ const login=user?'#/dashboard':'#/sign-in'
+ const today=new Date().toLocaleDateString('en-CA')
+ useEffect(()=>{
+  const media=window.matchMedia('(prefers-reduced-motion: reduce)')
+  const setup=()=>{lenis.current?.destroy();lenis.current=media.matches?null:new Lenis({autoRaf:true,duration:1.05})}
+  const scroll=()=>setScrolled(window.scrollY>24)
+  setup();scroll();media.addEventListener('change',setup);window.addEventListener('scroll',scroll,{passive:true})
+  return ()=>{lenis.current?.destroy();media.removeEventListener('change',setup);window.removeEventListener('scroll',scroll)}
+ },[])
+ useEffect(()=>{if(!menu)return;const key=e=>{if(e.key==='Escape'){setMenu(false);menuButton.current?.focus()}};document.addEventListener('keydown',key);return()=>document.removeEventListener('keydown',key)},[menu])
+ const go=id=>{setMenu(false);const target=document.getElementById(id);if(!target){if(id==='rent-home'){if(lenis.current)lenis.current.scrollTo(0);else window.scrollTo({top:0,behavior:'instant'})}return;}if(lenis.current)lenis.current.scrollTo(target,{offset:-95});else target.scrollIntoView({behavior:'instant'})}
+ const open=(values={})=>{setMenu(false);setEnquiry({category,location,preference,pickup,returnDate,...values})}
+ const search=e=>{e.preventDefault();if(pickup&&returnDate&&returnDate<pickup){setError('Return date must be on or after pickup.');return}setError('');setSavedOnly(false);go('rent-collection')}
+ return <div className="mak-landing rent-site">
+  <a className="mak-skip" href="#rent-main" onClick={e=>{e.preventDefault();document.getElementById('rent-main')?.focus()}}>Skip to content</a>
+  <header className={`rent-header ${scrolled||page!=='home'?'is-scrolled':''} ${menu?'is-open':''}`}><div className="rent-container rent-header-inner"><Brand full /><nav id="rent-navigation" aria-label="Main navigation" className={menu?'is-open':''}>{publicNavigation.map(([name,route])=><a key={route} href={`#/${route}`} aria-current={page===route?'page':undefined} onClick={()=>setMenu(false)}>{name}</a>)}<a className="rent-mobile-contact" href="#/contact-us" aria-current={page==='contact-us'?'page':undefined} onClick={()=>setMenu(false)}>Contact Us</a></nav><div className="rent-header-actions"><button className="rent-icon" type="button" aria-label={`Saved vehicles, ${saved.length}`} aria-pressed={savedOnly} onClick={()=>{if(page==='our-fleet'){setSavedOnly(v=>!v);return}if(page!=='home'){window.location.hash='/home';return}setSavedOnly(v=>!v);go('rent-collection')}}><IconHeart size={21} />{saved.length>0&&<small>{saved.length}</small>}</button><a className="rent-login" href={login}>{user?'Dashboard':'Sign in'}</a><a className="rent-button rent-nav-cta" href="#/contact-us" aria-current={page==='contact-us'?'page':undefined}>Contact Us</a><button ref={menuButton} className="rent-icon rent-menu" aria-label={menu?'Close navigation':'Open navigation'} aria-expanded={menu} aria-controls="rent-navigation" type="button" onClick={()=>setMenu(v=>!v)}>{menu?<IconX />:<IconMenu2 />}</button></div></div></header>
+  <main id="rent-main" tabIndex={-1}>
+   {page==='home'?<>
+   <section className="rent-hero" id="rent-home"><picture className="rent-hero-art"><source media="(max-width:650px)" srcSet="/images/rentals/hero-clear-900.webp" /><img src="/images/rentals/hero-clear-1800.webp" width="1774" height="887" alt="Blue executive sedan with two premium white vehicles against a Saudi city skyline" fetchPriority="high" /></picture><div className="rent-container rent-hero-inner"><div className="rent-hero-copy"><span className="rent-eyebrow">YOUR JOURNEY. OUR DRIVE.</span><h1>Find your perfect car.<br />Drive your <em>own story.</em></h1><p>Everyday freedom. Exceptional arrivals. Discover car rentals for wherever life takes you.</p><div className="rent-actions"><button type="button" className="rent-button" onClick={()=>go('rent-collection')}>Explore the fleet <IconArrowRight size={17}/></button><button type="button" className="rent-button rent-outline" onClick={()=>open({preference:'Corporate rental'})}>For your business</button></div><div className="rent-hero-benefits">{[[IconCar,'Your kind of car','Sedan, SUV & premium'],[IconUsers,'Your way to travel','Self-drive or with a driver'],[IconCalendar,'Your kind of plan','Daily & monthly enquiries']].map(([Symbol,title,text])=><div key={title}><Symbol size={25} stroke={1.5}/><span><strong>{title}</strong><small>{text}</small></span></div>)}</div></div></div></section>
+   <div className="rent-container"><form className="rent-finder" onSubmit={search} aria-labelledby="rent-finder-title"><div className="rent-finder-heading"><h2 id="rent-finder-title">Find your next drive</h2></div><div className="rent-finder-fields"><label>Vehicle category<select value={category} onChange={e=>setCategory(e.target.value)}>{fleetCategories.map(v=><option key={v}>{v}</option>)}</select></label><label>Rental preference<select value={preference} onChange={e=>setPreference(e.target.value)}>{rentalPreferences.map(v=><option key={v}>{v}</option>)}</select></label><label>Pickup location<select value={location} onChange={e=>setLocation(e.target.value)}>{locations.map(v=><option key={v}>{v}</option>)}</select></label><label>Pickup date<input type="date" min={today} value={pickup} onChange={e=>setPickup(e.target.value)}/></label><label>Return date<input type="date" min={pickup||today} value={returnDate} onChange={e=>setReturnDate(e.target.value)}/></label><button className="rent-button" type="submit"><IconSearch size={17}/> Explore cars</button></div>{error&&<p className="rent-error" role="alert">{error}</p>}</form></div>
+   <FeaturedVehicles category={category} setCategory={setCategory} saved={saved} setSaved={setSaved} savedOnly={savedOnly} setSavedOnly={setSavedOnly} onEnquire={open}/>
+   <section className="rent-container rent-browse rent-browse-directory" aria-label="Browse vehicles">
+    <div className="rent-brands-panel"><h2>Browse by Brand</h2><div className="rent-brand-grid">{vehicleBrands.map(brand=><button type="button" key={brand.id} aria-label={`Enquire about ${brand.name}`} onClick={()=>open({notes:`Preferred vehicle brand: ${brand.name}.`})}><span className="rent-brand-emblem"><img src={`/images/rentals/brands/${brand.id}.png`} alt="" width="192" height="192" loading="lazy" decoding="async" /></span><span>{brand.name}</span></button>)}</div></div>
+    <div className="rent-category-panel"><h2>Browse by Category</h2><div className="rent-body-grid">{vehicleBodies.map(body=><button type="button" key={body.id} onClick={()=>{if(fleetCategories.includes(body.name)){setCategory(body.name);setSavedOnly(false);go('rent-collection')}else{open({category:'All vehicles',notes:`Preferred vehicle category: ${body.name}. Please confirm availability.`})}}}><img src={`/images/rentals/categories/${body.id}.png`} alt="" width="256" height="160" loading="lazy" decoding="async" /><span>{body.name}</span></button>)}</div><button className="rent-white-link" type="button" onClick={()=>{setCategory('All vehicles');setSavedOnly(false);go('rent-collection')}}>View all categories</button></div>
+   </section>
+   <section className="rent-container rent-section" id="rent-services"><div className="rent-section-head rent-uniform-heading"><div><h2 className="rent-section-title">Wherever you’re headed.</h2></div></div><div className="rent-services">{services.map((service,i)=>{const Symbol=serviceIcons[i];return <button type="button" key={service.title} onClick={()=>open({preference:service.preference})}><span className="rent-service-icon" aria-hidden="true"><Symbol size={20} stroke={1.5}/></span><span className="rent-service-copy"><h3>{service.title}</h3><p>{service.description}</p></span></button>})}</div></section>
+   <RentalPlans onEnquire={open} />
+   <Testimonials />
+   <section className="rent-container rent-rental-cta" id="rent-plan" aria-labelledby="rent-plan-title"><div className="rent-business rent-consultation"><picture><source media="(max-width:650px)" srcSet="/images/rentals/rental-consultation-mobile.webp"/><img src="/images/rentals/rental-consultation-desktop.webp" alt="Travellers discussing their rental plans with a car rental advisor" width="1400" height="640" loading="lazy" decoding="async"/></picture><div><span className="rent-eyebrow">CAR RENTAL, MADE SIMPLE</span><h2 id="rent-plan-title">Your next drive starts here.</h2><p>From daily drives to monthly rentals, find a plan that fits. Share your dates and travel needs for a tailored rental quote.</p><button className="rent-button rent-white" type="button" onClick={()=>open()}>Get a rental quote</button></div></div></section>
+   <RentalGuides lenisRef={lenis} />
+   </>:page==='our-fleet'?<FleetPage saved={saved} setSaved={setSaved} savedOnly={savedOnly} setSavedOnly={setSavedOnly} onEnquire={open}/>:<PublicPage page={page}/>}
+  </main>
+  <footer className="rent-footer"><div className="rent-container"><div className="rent-footer-grid"><div><Brand full /><p>For everyday freedom.<br />For exceptional arrivals.<br />For the road ahead.</p></div><div><h3>Explore MAK</h3>{[...publicNavigation,['Contact Us','contact-us']].map(([label,route])=><a key={route} href={`#/${route}`}>{label}</a>)}</div><div><h3>Your way to travel</h3>{rentalPreferences.map(v=><button type="button" key={v} onClick={()=>open({preference:v})}>{v}</button>)}</div><div><h3>Need a little help?</h3><button type="button" onClick={()=>open()}>Prepare an enquiry</button><a href={login}>{user?'Open dashboard':'Staff sign in'}</a>{!user&&<a href="#/sign-up">Create staff account</a>}</div></div><div className="rent-footer-bottom"><span>© {new Date().getFullYear()} MAK Rentals.</span><span>Public preview · Enquiries download locally; no online reservations.</span><button type="button" onClick={()=>go('rent-home')}>Back to top <IconArrowRight size={15}/></button></div></div></footer>
+  {enquiry&&<RentalEnquiry initial={enquiry} lenisRef={lenis} onClose={closeEnquiry}/>}
+ </div>
 }

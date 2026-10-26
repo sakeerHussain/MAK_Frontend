@@ -30,7 +30,7 @@ test('sends form values in the backend request shape', async () => {
     const sent = JSON.parse(captured.options.body)
     assert.equal(captured.url, '/api/vehicles')
     assert.equal(captured.options.method, 'POST')
-    assert.equal(sent.rateCurrency, 'USD')
+    assert.equal(sent.rateCurrency, 'SAR')
     assert.equal(sent.dailyRate, 72)
     assert.deepEqual(sent.featureTags, ['GPS', 'Bluetooth'])
     assert.equal('carImages' in sent, false)

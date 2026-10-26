@@ -1,0 +1,36 @@
+.rent-site .fleet-page { padding-block:104px 64px; width:min(1310px,calc(100% - 128px)); }
+.rent-site .fleet-heading h1 { color:#102a43; font-size:46px; line-height:1.2; font-weight:700; letter-spacing:-1.4px; }
+.rent-site .fleet-heading p { margin-top:3px; color:#7b8c9d; font-size:20px; line-height:1.6; }
+.fleet-filters { display:grid; grid-template-columns:1.5fr 1fr 1fr .95fr .7fr; gap:14px; margin-top:22px; }
+.rent-site .fleet-filters label { min-width:0; position:relative; display:block; padding:0; border:0; background:none; height:auto; }
+.fleet-filters input,.fleet-filters select { width:100%; min-width:0; height:48px; background:#fff; border:1px solid #dce5ee; border-radius:6px; padding:0 14px; color:#213b55; font-size:13px; }
+.fleet-filters input::placeholder { color:#7c8fa4; opacity:1; }
+.fleet-filters .fleet-search input { padding-left:40px; }
+.fleet-search > svg { position:absolute; left:14px; top:14px; color:#6b829b; pointer-events:none; }
+.fleet-results { display:flex; align-items:center; justify-content:space-between; min-height:24px; margin:20px 0 14px; }
+.rent-site .fleet-results p { color:#213b55; font-size:14px; }
+.fleet-results button { border:0; background:none; color:#007fbd; font-size:13px; min-height:32px; padding:0; }
+.fleet-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }
+.fleet-card { min-width:0; border:1px solid #e2e9f0; border-radius:7px; overflow:hidden; background:#fff; }
+.fleet-photo { position:relative; aspect-ratio:1.98; overflow:hidden; background:#eef4f8; }
+.fleet-photo > img { display:block; height:100%; width:100%; object-fit:cover; }
+.fleet-save { position:absolute; top:10px; right:10px; width:40px; height:40px; display:grid; place-items:center; border:1px solid #edf1f5; border-radius:50%; color:#203a53; background:#fff; }
+.fleet-save:hover,.fleet-save.is-saved { color:#007fbd; background:#eef8fd; }
+.fleet-save.is-saved svg { fill:#bce8fb; }
+.fleet-card-copy { padding:15px 20px 13px; }
+.rent-site .fleet-card h2 { font-size:18px; line-height:1.4; font-weight:700; color:#102a43; letter-spacing:-.4px; }
+.rent-site .fleet-card-copy > p { color:#7b8c9d; font-size:14px; margin-top:1px; }
+.fleet-specs { display:flex; justify-content:space-between; gap:8px; margin-block:16px; color:#70869c; font-size:12px; }
+.fleet-specs span { display:inline-flex; align-items:center; gap:8px; white-space:nowrap; }
+.fleet-card-bottom { border-top:1px solid #e6edf3; padding-top:10px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.fleet-price { white-space:nowrap; line-height:1.3; }
+.fleet-price strong { color:#0085bb; font-size:21px; font-weight:700; letter-spacing:-.5px; }
+.fleet-price span { color:#70869c; font-size:12px; }
+.fleet-price small { display:block; color:#70869c; font-size:10px; margin-top:2px; }
+.rent-site .fleet-card-bottom > .rent-button { padding:10px 14px; font-size:12px; min-height:40px; white-space:nowrap; }
+.fleet-empty { padding:70px 20px; text-align:center; color:#70869c; }
+.rent-site .fleet-empty h2 { color:#102a43; font-size:24px; margin-top:12px; }
+.rent-site .fleet-empty p { margin:8px 0 20px; }
+@media(min-width:651px) { .rent-header nav a[aria-current=page] { position:relative; } .rent-header nav a[aria-current=page]::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:#007fbd; } }
+@media(max-width:1100px) { .rent-site .fleet-page { width:calc(100% - 56px); } .fleet-filters { grid-template-columns:1.4fr 1fr 1fr; }.fleet-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:650px) { .rent-site .fleet-page { padding-block:98px 40px; width:calc(100% - 36px); }.rent-site .fleet-heading h1 { font-size:32px; letter-spacing:-.7px; }.rent-site .fleet-heading p { font-size:16px; margin-top:7px; }.fleet-filters { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:20px; }.fleet-search { grid-column:1/-1; }.fleet-filters input,.fleet-filters select { height:46px; font-size:13px; padding-inline:10px; }.fleet-grid { grid-template-columns:minmax(0,1fr); gap:18px; }.fleet-card-copy { padding:15px 16px; }.fleet-photo { aspect-ratio:1.65; }.fleet-save { width:44px; height:44px; }.fleet-results { margin-top:16px; }.fleet-specs { font-size:12px; }.rent-site .fleet-card-bottom > .rent-button { min-height:44px; } }

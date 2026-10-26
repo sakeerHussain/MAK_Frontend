@@ -5,7 +5,7 @@ const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
 const money = (value, period) => value === '' || value === null || value === undefined ? '—' : `SAR ${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / ${period}`
 const display = (value) => value === '' || value === null || value === undefined ? '—' : value
 
-export function PersonnelPersonalFields({ form, setField, kind, onPhoto, onRemovePhoto }) {
+export function PersonnelPersonalFields({ form, setField, kind, onPhoto, onRemovePhoto, removePhotoPermission, removePhotoLabel = 'Remove Photo' }) {
   const designationKey = kind === 'driver' ? 'designation' : 'jobTitle'
   return <div className="driver-form-section"><h3>Personal Details</h3><div className="driver-form-grid">
     <label><FormFieldCaption required>Employee ID</FormFieldCaption><input required value={form.employeeId} onChange={(event) => setField('employeeId', event.target.value)} placeholder={kind === 'driver' ? 'DRV-1013' : 'EMP-1011'} /></label>
@@ -19,7 +19,7 @@ export function PersonnelPersonalFields({ form, setField, kind, onPhoto, onRemov
     <label>Years of Experience<input type="number" min="0" max="80" step="1" value={form.yearsExperience ?? ''} onChange={(event) => setField('yearsExperience', event.target.value)} placeholder="0" /></label>
     <label>Blood Group<select value={form.bloodGroup || ''} onChange={(event) => setField('bloodGroup', event.target.value)}><option value="">Select blood group</option>{BLOOD_GROUPS.map((group) => <option key={group}>{group}</option>)}</select></label>
     <label className="personnel-address-field">Home Address<textarea rows="3" value={form.homeAddress || ''} onChange={(event) => setField('homeAddress', event.target.value)} placeholder="Enter the full home address" /></label>
-  </div><div className="personnel-photo-row"><label className="personnel-photo-upload"><span className="personnel-photo-preview">{form.photo?.previewUrl ? <img src={form.photo.previewUrl} alt="Selected profile" /> : <span aria-hidden="true">＋</span>}</span><span className="personnel-photo-copy"><strong>{form.photo?.name || 'Upload Profile Photo'}</strong><small>PNG, JPG, or WebP · max 5 MB</small></span><em>Choose Photo</em><input type="file" accept=".png,.jpg,.jpeg,.webp" aria-label={`Upload ${kind} photo`} onChange={(event) => { if (event.target.files?.[0]) onPhoto(event.target.files[0]); event.target.value = '' }} /></label>{form.photo && <button type="button" className="personnel-remove-photo" onClick={onRemovePhoto}>Remove Photo</button>}</div></div>
+  </div><div className="personnel-photo-row"><label className="personnel-photo-upload"><span className="personnel-photo-preview">{form.photo?.previewUrl ? <img src={form.photo.previewUrl} alt="Selected profile" /> : <span aria-hidden="true">＋</span>}</span><span className="personnel-photo-copy"><strong>{form.photo?.name || 'Upload Profile Photo'}</strong><small>PNG, JPG, or WebP · max 5 MB</small></span><em>Choose Photo</em><input type="file" accept=".png,.jpg,.jpeg,.webp" aria-label={`Upload ${kind} photo`} onChange={(event) => { if (event.target.files?.[0]) onPhoto(event.target.files[0]); event.target.value = '' }} /></label>{form.photo && <button type="button" data-permission={removePhotoPermission} className="personnel-remove-photo" onClick={onRemovePhoto}>{removePhotoLabel}</button>}</div></div>
 }
 
 export function PersonnelChargesFields({ form, setField, kind }) {

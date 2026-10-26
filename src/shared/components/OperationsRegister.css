@@ -1,0 +1,80 @@
+/* Selected Unified Registers design. Scoped to these four modules only. */
+.app-shell.mak-admin .operations-page { --admin-action-primary:#008dca; --admin-action-primary-hover:#007bb7; color:#102a43; }
+.app-shell.mak-admin .operations-heading { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:20px; }
+.app-shell.mak-admin .operations-heading .admin-page-heading { margin:0; }
+.app-shell.mak-admin .operations-heading h1 { color:#102a43; font-size:28px; font-weight:700; }
+.app-shell.mak-admin .operations-heading .admin-page-heading p { color:#60758c; font-size:14px; font-weight:400; }
+.app-shell.mak-admin .operations-heading .admin-page-actions { margin:0; flex-shrink:0; }
+.app-shell.mak-admin .operations-page :is(.driver-primary,.vendor-primary,.maintenance-primary,.inspection-primary) { border-color:#008dca; background:#008dca; color:white; box-shadow:none; }
+.app-shell.mak-admin .operations-page :is(.driver-primary,.vendor-primary,.maintenance-primary,.inspection-primary):hover:not(:disabled) { border-color:#007bb7; background:#007bb7; }
+.app-shell.mak-admin .operations-page :is(.driver-primary,.vendor-primary,.maintenance-primary,.inspection-primary,.driver-secondary,.vendor-secondary,.maintenance-secondary,.inspection-secondary) { min-height:40px; padding:9px 15px; border-radius:6px; font-size:14px; font-weight:600; }
+.app-shell.mak-admin .operations-page :is(button,input,select,textarea) { font-family:inherit; }
+.app-shell.mak-admin .operations-page :is(button,input,select,textarea):focus-visible { outline:2px solid #008dca; outline-offset:3px; }
+.app-shell.mak-admin .operations-kpis { display:grid; grid-template-columns:repeat(var(--operations-kpi-count),minmax(0,1fr)); gap:12px; margin-bottom:20px; }
+.app-shell.mak-admin .operations-kpi { position:relative; display:flex; align-items:flex-start; gap:14px; min-width:0; min-height:112px; padding:18px; background:white; border:1px solid #e3e9ef; border-radius:8px; text-align:left; color:#102a43; }
+.app-shell.mak-admin button.operations-kpi { cursor:pointer; }
+.app-shell.mak-admin button.operations-kpi:hover { border-color:#8bcce6; background:#fcfeff; }
+.app-shell.mak-admin .operations-kpi-icon { display:grid; place-items:center; flex:0 0 40px; width:40px; height:40px; border-radius:50%; background:#e4f5fd; color:#008dca; }
+.app-shell.mak-admin .operations-kpi-icon.green { background:#def7ee; color:#00775c; }
+.app-shell.mak-admin .operations-kpi-icon.amber { background:#fff4dd; color:#9a6207; }
+.app-shell.mak-admin .operations-kpi-icon.purple { background:#f0ebff; color:#7561ce; }
+.app-shell.mak-admin .operations-kpi-icon.red { background:#fff0f2; color:#bc334b; }
+.app-shell.mak-admin .operations-kpi-copy { display:flex; flex-direction:column; gap:5px; min-width:0; }
+.app-shell.mak-admin .operations-kpi-copy > span { padding-right:8px; font-size:13px; font-weight:500; line-height:1.4; }
+.app-shell.mak-admin .operations-kpi-copy strong { font-size:27px; line-height:1.2; font-weight:600; font-variant-numeric:tabular-nums; }
+.app-shell.mak-admin .operations-kpi-copy small { color:#60758c; font-size:12px; line-height:1.5; }
+.app-shell.mak-admin .operations-kpi-arrow { position:absolute; right:12px; top:19px; color:#8199ae; }
+.app-shell.mak-admin .operations-page :is(.driver-list,.vendor-list,.maintenance-panel,.inspection-panel) { min-width:0; border:1px solid #e3e9ef; border-radius:8px; background:white; box-shadow:none; overflow:hidden; }
+.app-shell.mak-admin .operations-page :is(.driver-list-heading,.vendor-list-heading,.maintenance-panel-heading,.inspection-panel-heading) { display:none; }
+.app-shell.mak-admin .operations-page :is(.driver-toolbar,.vendor-toolbar,.maintenance-toolbar,.inspection-toolbar) { display:flex; align-items:center; flex-wrap:wrap; gap:10px; padding:16px; }
+.app-shell.mak-admin .operations-page :is(.driver-search,.vendor-search,.maintenance-search,.inspection-search) { display:flex; align-items:center; gap:9px; flex:1 1 250px; min-width:190px; height:42px; padding:0 12px; border:1px solid #dce5ed; border-radius:6px; color:#74899f; }
+.app-shell.mak-admin .operations-page :is(.driver-search,.vendor-search,.maintenance-search,.inspection-search):focus-within { border-color:#008dca; box-shadow:0 0 0 3px #008dca14; }
+.app-shell.mak-admin .operations-page :is(.driver-search,.vendor-search,.maintenance-search,.inspection-search) input { width:100%; min-width:0; height:100%; padding:0; border:0; outline:0; box-shadow:none; background:transparent; color:#34546f; font-size:14px; font-weight:400; }
+.app-shell.mak-admin .operations-page :is(.driver-toolbar,.vendor-toolbar,.maintenance-toolbar,.inspection-toolbar) select { height:42px; min-width:125px; max-width:190px; padding:0 28px 0 11px; border:1px solid #dce5ed; border-radius:6px; background:white; color:#34546f; font-size:13px; font-weight:400; }
+.app-shell.mak-admin .operations-page :is(.driver-table-scroll,.vendor-table-scroll,.maintenance-table-scroll,.inspection-table-scroll) { overflow:auto; scrollbar-width:thin; }
+.app-shell.mak-admin .operations-page :is(.driver-table,.vendor-table,.maintenance-table,.inspection-table) { width:100%; min-width:1120px; border-collapse:separate; border-spacing:0; text-align:left; table-layout:auto; }
+.app-shell.mak-admin .operations-page .vendor-table { min-width:940px; }
+.app-shell.mak-admin .operations-page :is(.driver-table,.vendor-table,.maintenance-table,.inspection-table) th { height:44px; padding:11px 14px; background:#f5f8fb; border-bottom:1px solid #e8edf2; color:#5d738a; font-size:12px; font-weight:500; line-height:1.5; letter-spacing:0; text-align:left; white-space:nowrap; }
+.app-shell.mak-admin .operations-page :is(.driver-table,.vendor-table,.maintenance-table,.inspection-table) td { height:66px; padding:12px 14px; border:0; border-bottom:1px solid #e8edf2; background:white; color:#48627b; font-size:14px; font-weight:400; line-height:1.5; vertical-align:middle; }
+.app-shell.mak-admin .operations-page :is(.driver-table,.vendor-table,.maintenance-table,.inspection-table) tr:last-child td { border-bottom:0; }
+.app-shell.mak-admin .operations-page :is(.driver-table,.vendor-table,.maintenance-table,.inspection-table) tr:hover td { background:#f8fcfe; }
+.app-shell.mak-admin .operations-page :is(.driver-table,.vendor-table,.maintenance-table,.inspection-table) :is(th,td):last-child { position:sticky; right:0; z-index:1; width:70px; min-width:70px; padding:8px; text-align:center; box-shadow:-4px 0 5px #102a4306; }
+.app-shell.mak-admin .operations-page :is(.driver-table,.vendor-table,.maintenance-table,.inspection-table) :is(th,td):first-child { padding-left:16px; white-space:nowrap; }
+.app-shell.mak-admin .operations-page :is(.driver-table,.vendor-table,.maintenance-table,.inspection-table) td strong { font-size:14px; font-weight:500; color:#24445f; }
+.app-shell.mak-admin .operations-page :is(.driver-table,.vendor-table,.maintenance-table,.inspection-table) td small { display:block; margin-top:3px; font-size:12px; font-weight:400; color:#60758c; }
+.app-shell.mak-admin .operations-page :is(.driver-id,.vendor-id,.maintenance-job-id,.inspection-id) { color:#007bb7!important; font-size:13px; font-weight:600!important; }
+.app-shell.mak-admin .operations-page :is(.driver-name-link,.vendor-name-link,.maintenance-car-link,.inspection-car-link) { min-width:0; max-width:none; font-size:14px; font-weight:400; }
+.app-shell.mak-admin .operations-page :is(.driver-name-link,.vendor-name-link,.maintenance-car-link,.inspection-car-link):hover strong { color:#007bb7; }
+.app-shell.mak-admin .operations-page :is(.driver-name-link,.vendor-name-link) strong { color:#007bb7; text-decoration:underline; text-underline-offset:3px; }
+.app-shell.mak-admin .operations-page :is(.driver-table,.vendor-table) :is(.driver-avatar,.vendor-avatar) { display:none; }
+.app-shell.mak-admin .operations-page :is(.driver-rate,.maintenance-amount,.vendor-commission) { color:#24445f!important; font-weight:500!important; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.app-shell.mak-admin .operations-page :is(.driver-status,.vendor-status,.maintenance-status,.inspection-condition,.resource-indicator) { display:inline-flex; align-items:center; gap:5px; padding:4px 8px; border-radius:5px; font-size:12px; line-height:1.4; font-weight:500; white-space:nowrap; }
+.app-shell.mak-admin .operations-page :is(.driver-status.active,.vendor-status.active,.maintenance-status.completed,.inspection-condition.excellent,.inspection-condition.good) { color:#00775c; background:#e1f6ee; }
+.app-shell.mak-admin .operations-page :is(.driver-status.inactive,.vendor-status.inactive,.maintenance-status.cancelled) { color:#607083; background:#edf1f5; }
+.app-shell.mak-admin .operations-page :is(.maintenance-status.open,.inspection-condition.fair) { color:#9a6207; background:#fff3db; }
+.app-shell.mak-admin .operations-page .maintenance-status.in-progress { color:#7561ce; background:#f0ebff; }
+.app-shell.mak-admin .operations-page :is(.inspection-condition.poor,.inspection-condition.damaged) { color:#bc334b; background:#fff0f2; }
+.app-shell.mak-admin .operations-page :is(.driver-more,.vendor-more,.operations-more) { display:grid; place-items:center; width:36px; height:36px; min-height:36px; margin:auto; padding:0; border:1px solid #dce5ed; border-radius:6px; background:white; color:#48627b; cursor:pointer; }
+.app-shell.mak-admin .operations-page :is(.driver-more,.vendor-more,.operations-more):hover { border-color:#9ccfe6; background:#eaf6fc; color:#007bb7; }
+.app-shell.mak-admin .operations-page :is(.driver-pagination,.vendor-pagination,.maintenance-pagination,.inspection-pagination) { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; padding:14px 16px; border-top:1px solid #e8edf2; color:#60758c; font-size:13px; font-weight:400; }
+.app-shell.mak-admin .operations-page :is(.driver-pagination,.vendor-pagination,.maintenance-pagination,.inspection-pagination) > div { display:flex; align-items:center; gap:10px; }
+.app-shell.mak-admin .operations-page :is(.driver-pagination,.vendor-pagination,.maintenance-pagination,.inspection-pagination) button { width:34px; height:34px; border-radius:6px; }
+.app-shell.mak-admin .operations-page :is(.driver-dialog-actions,.vendor-form-actions,.maintenance-form-actions,.inspection-form-actions) { position:sticky; bottom:0; z-index:2; margin:0; padding:16px 24px; border-top:1px solid #e3e9ef; background:white; }
+.app-shell.mak-admin .operations-page :is(.driver-form-grid,.vendor-form-grid,.maintenance-form-grid,.inspection-form-grid) :is(input,select,textarea) { font-size:14px; font-weight:400; }
+@media(max-width:1100px) { .app-shell.mak-admin .operations-page :is(.driver-toolbar,.vendor-toolbar,.maintenance-toolbar,.inspection-toolbar) select { flex:1 1 130px; max-width:none; } }
+@media(max-width:700px) {
+  .app-shell.mak-admin .operations-heading { flex-direction:column; align-items:stretch; gap:14px; margin-bottom:16px; }
+  .app-shell.mak-admin .operations-heading .admin-page-actions { justify-content:flex-start; }
+  .app-shell.mak-admin .operations-heading h1 { font-size:26px; }
+  .app-shell.mak-admin .operations-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-bottom:16px; }
+  .app-shell.mak-admin .operations-kpi { gap:10px; min-height:104px; padding:14px 12px; }
+  .app-shell.mak-admin .operations-kpi-icon { flex-basis:32px; width:32px; height:32px; }
+  .app-shell.mak-admin .operations-kpi-copy > span { font-size:12px; }
+  .app-shell.mak-admin .operations-kpi-copy strong { font-size:25px; }
+  .app-shell.mak-admin .operations-kpi-copy small { font-size:11px; }
+  .app-shell.mak-admin .operations-page :is(.driver-toolbar,.vendor-toolbar,.maintenance-toolbar,.inspection-toolbar) { gap:8px; padding:12px; }
+  .app-shell.mak-admin .operations-page :is(.driver-search,.vendor-search,.maintenance-search,.inspection-search) { flex-basis:100%; min-width:0; }
+  .app-shell.mak-admin .operations-page :is(.driver-pagination,.vendor-pagination,.maintenance-pagination,.inspection-pagination) { align-items:flex-start; flex-direction:column; padding:12px; }
+  .app-shell.mak-admin .operations-page :is(.driver-pagination,.vendor-pagination,.maintenance-pagination,.inspection-pagination) > div { width:100%; justify-content:space-between; }
+}
+@media(max-width:380px) { .app-shell.mak-admin .operations-kpi { flex-direction:column; gap:6px; } }

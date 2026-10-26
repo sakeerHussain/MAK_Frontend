@@ -1,0 +1,60 @@
+/* Build 2 management workspace. Existing API calls and permission rules are retained. */
+.app-shell.mak-admin .management-page { min-width:0; }
+.app-shell.mak-admin .management-page .finance-heading { margin-bottom:20px; }
+.app-shell.mak-admin .management-page .finance-kpis { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.management-layout { grid-template-columns:minmax(0,7fr) minmax(290px,3fr); }
+.management-toolbar { display:flex; align-items:end; flex-wrap:wrap; gap:12px; padding:16px; }
+.management-toolbar .finance-search { min-height:40px; margin:0; }
+.management-toolbar > label:not(.finance-search),.management-form-fields > label { display:flex; flex-direction:column; gap:6px; color:#60758c; font-size:11px; font-weight:500; min-width:0; }
+.management-toolbar select { width:100%; }
+.management-context { margin:0; padding:0 16px 14px; color:#60758c; font-size:12px; line-height:1.6; }
+.management-audit-context { padding:16px; }
+.management-users-table { min-width:850px; }
+.management-audit-table { min-width:780px; }
+.management-page .management-users-table :is(th,td):last-child { width:130px; }
+.management-page .management-audit-table :is(th,td):last-child { position:static; width:auto; box-shadow:none; text-align:left; }
+.management-page .management-audit-table td:last-child { min-width:210px; white-space:normal; }
+.app-shell.mak-admin .management-page .management-edit { padding:7px 9px; min-height:36px; font-size:12px; white-space:nowrap; }
+.management-page .access-status { display:inline-block; font-size:11px; font-weight:500; line-height:1.5; }
+.management-account { display:flex; flex-direction:column; gap:5px; margin-bottom:20px; overflow-wrap:anywhere; }
+.management-account strong { color:#102a43; font-size:14px; font-weight:600; }
+.management-account span { color:#60758c; font-size:12px; }
+.management-form-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.management-form-fields select { width:100%; }
+.management-permissions { display:flex; flex-wrap:wrap; gap:6px; margin:12px 0 20px; }
+.management-permissions span { padding:5px 7px; border-radius:4px; background:#edf3f8; color:#48627b; font-size:11px; line-height:1.4; overflow-wrap:anywhere; }
+.management-warning { display:flex; align-items:start; gap:8px; padding:12px; margin:16px 0; border:1px solid #f2dfb5; border-radius:6px; background:#fff8e9; color:#8c600e; font-size:12px; line-height:1.6; }
+.management-warning svg { flex-shrink:0; margin-top:1px; }
+.management-form-actions { display:flex; gap:8px; padding-top:14px; border-top:1px solid #e3e9ef; }
+.management-form-actions > button { flex:1; }
+.management-page .finance-review-footer .management-form-actions { padding:0; border:0; }
+.management-page .finance-review-body .access-error { margin:12px 0; }
+.management-settings-layout { display:grid; grid-template-columns:220px minmax(0,1fr); gap:16px; align-items:stretch; }
+.management-settings-nav { padding:16px 12px; background:white; border:1px solid #e3e9ef; border-radius:8px; }
+.management-settings-nav h2 { margin:0 4px 14px; font-size:14px; font-weight:600; color:#102a43; }
+.management-settings-nav > button { display:flex; align-items:center; gap:10px; width:100%; margin:4px 0; padding:12px; border:0; border-radius:6px; background:white; color:#48627b; font:inherit; font-size:13px; cursor:pointer; text-align:left; }
+.management-settings-nav > button:hover { background:#f5f8fb; }
+.management-settings-nav > button[aria-current=page] { background:#e4f5fd; color:#007bb7; }
+.management-unconfigured { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; min-height:360px; padding:30px 24px; text-align:center; }
+.management-unconfigured > svg { color:#008dca; }
+.management-unconfigured h2 { margin:0; font-size:21px; font-weight:600; color:#102a43; }
+.management-unconfigured p { max-width:44ch; margin:0; color:#60758c; font-size:13px; line-height:1.7; }
+.app-shell.mak-admin .management-page .management-unconfigured .booking-secondary { border-color:#bddced; color:#007bb7; }
+@media(max-width:1200px) {
+  .management-layout { grid-template-columns:minmax(0,1fr); }
+  .app-shell.mak-admin .management-page .finance-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:700px) {
+  .management-toolbar { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; padding:12px; }
+  .management-toolbar .finance-search { grid-column:1/-1; min-width:0; min-height:44px; }
+  .management-context { padding-left:12px; padding-right:12px; }
+  .management-settings-layout { grid-template-columns:minmax(0,1fr); }
+  .management-settings-nav { display:flex; flex-wrap:wrap; gap:6px; padding:12px; }
+  .management-settings-nav h2 { flex-basis:100%; margin:0 0 6px; }
+  .management-settings-nav > button { width:auto; flex:1 1 120px; min-height:44px; margin:0; padding:10px; }
+  .management-unconfigured { min-height:280px; padding:24px 16px; }
+  .app-shell.mak-admin .management-page .management-edit,.app-shell.mak-admin .management-page .management-form-actions > button { min-height:44px; }
+  .management-form-fields { grid-template-columns:minmax(0,1fr); }
+  .management-page .finance-review-body { padding-bottom:max(24px,env(safe-area-inset-bottom)); }
+}
+@media(max-width:380px) { .app-shell.mak-admin .management-page .finance-kpis { grid-template-columns:minmax(0,1fr); } }

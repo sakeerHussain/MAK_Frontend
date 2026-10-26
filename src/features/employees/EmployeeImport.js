@@ -1,8 +1,10 @@
-import { blankEmployee, EMPLOYEE_DEPARTMENTS, EMPLOYEE_STATUSES, EMPLOYEE_TYPES } from './EmployeeData.js'
+import { blankEmployee, EMPLOYEE_CATEGORIES, EMPLOYEE_DEPARTMENTS, EMPLOYEE_STATUSES, EMPLOYEE_TYPES } from './EmployeeData.js'
+import { PERSONNEL_PROFILE_COLUMNS, personnelProfile, normalizePersonnelExcelDates } from '../../shared/lib/personnelImport.js'
 
 export const EMPLOYEE_IMPORT_COLUMNS = [
   'Employee ID', 'Name', 'Phone', 'Email', 'Department', 'Job Title', 'Employment Type',
   'Monthly Salary (SAR)', 'Status', 'Join Date', 'Manager', 'ID / Iqama No.',
+  ...Object.keys(PERSONNEL_PROFILE_COLUMNS), 'Category', 'Vendor', 'Daily Rate (SAR)',
 ]
 const REQUIRED = ['Employee ID', 'Name', 'Phone', 'Department', 'Job Title', 'Monthly Salary (SAR)']
 const EXAMPLE = ['EMP-9001', 'Layla Hassan', '+966 50 123 4567', 'layla@example.com', 'Operations', 'Dispatch Coordinator', 'Full-time', '7200.00', 'Active', '2026-01-15', 'Mariam Al-Harbi', 'IQ-9001']
@@ -20,7 +22,7 @@ const normalizeDate = (value) => {
   return validIsoDate(date) ? date : null
 }
 
-export const employeeTemplateCsv = () => csv([EMPLOYEE_IMPORT_COLUMNS, EXAMPLE])
+export const employeeTemplateCsv = () => csv([EMPLOYEE_IMPORT_COLUMNS, [...EXAMPLE, ...Array(EMPLOYEE_IMPORT_COLUMNS.length - EXAMPLE.length).fill('')]])
 export const employeeErrorCsv = (rows) => csv([['Row', 'Employee ID', 'Name', 'Phone', 'Errors'], ...rows.filter((row) => row.errors.length).map((row) => [row.rowNumber, row.employee.employeeId, row.employee.name, row.employee.phone, row.errors.join('; ')])])
 
 export async function parseEmployeeImportFile(file) {
@@ -30,6 +32,7 @@ export async function parseEmployeeImportFile(file) {
   const workbook = XLSX.read(await file.arrayBuffer(), { type: 'array', cellDates: false, raw: /\.csv$/i.test(file.name) })
   if (!workbook.SheetNames.length) throw new Error('The workbook has no sheets.')
   const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1, defval: '', raw: false, blankrows: false })
+  if (/\.xlsx?$/i.test(file.name)) normalizePersonnelExcelDates(rows, workbook, XLSX)
   if (rows.length < 2) throw new Error('The file needs a header row and at least one employee.')
   if (rows.length > 2001) throw new Error('Import up to 2,000 employees at a time.')
   return rows
@@ -51,7 +54,11 @@ export function validateEmployeeImport(rows, existing) {
       monthlySalary: Number(values['Monthly Salary (SAR)']), status: values.Status || 'Active',
       joinedOn: normalizeDate(values['Join Date']) ?? values['Join Date'], manager: values.Manager, idNumber: values['ID / Iqama No.'],
     }
-    const errors = []
+    const profile = personnelProfile(values, { Category: ['category', 'text'], Vendor: ['vendor', 'text'], 'Daily Rate (SAR)': ['dailyRate', 'number'] })
+    Object.assign(employee, profile.fields)
+    const errors = [...profile.errors]
+    if (values.Category && !EMPLOYEE_CATEGORIES.includes(employee.category)) errors.push(`Category must be one of: ${EMPLOYEE_CATEGORIES.join(', ')}`)
+    if (employee.employmentType === 'Vendor' && !employee.vendor) errors.push('Vendor is required for vendor employees')
     REQUIRED.forEach((column) => { if (!values[column]) errors.push(`${column} is required`) })
     if (employee.employeeId && (existingIds.has(employee.employeeId) || seenIds.has(employee.employeeId))) errors.push('Duplicate Employee ID')
     const phoneKey = normalizedPhone(employee.phone)

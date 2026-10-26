@@ -41,7 +41,7 @@ export default function VendorForm({ initial, vendors, onCancel, onSave }) {
     } catch (reason) { setError(reason.message) }
     finally { setBusy(false) }
   }
-  return <form className="vendor-form" onSubmit={save} noValidate>
+  return <form data-permission-scope={initial ? 'vendors.edit' : 'vendors.create'} className="vendor-form" onSubmit={save} noValidate>
     <section className="vendor-form-section"><h3>Vendor Overview</h3><div className="vendor-form-grid">
       <label>Vendor Type<select value={form.vendorType} onChange={(event) => setField('vendorType', event.target.value)}>{VENDOR_TYPES.map((option) => <option key={option}>{option}</option>)}</select></label>
       <label><FormFieldCaption required>Vendor Name</FormFieldCaption><input value={form.name} onChange={(event) => setField('name', event.target.value)} placeholder="Registered or individual name" /></label>

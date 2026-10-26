@@ -1,0 +1,16 @@
+/* Selected photo-edge carousel navigation; categories remain available in the finder. */
+.rent-featured .rent-featured-heading { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px 24px; }
+.rent-featured-view-all { display:inline-flex; justify-content:center; align-items:center; gap:11px; flex-shrink:0; min-height:44px; padding:10px 17px; border:1px solid #007fbd; border-radius:6px; background:#fff; color:#007fbd; font:inherit; font-size:13px; font-weight:600; cursor:pointer; }
+.rent-featured-view-all:hover { background:#edf8fd; }
+.rent-featured-stage { position:relative; min-width:0; }
+.rent-edge-navigation { position:absolute; z-index:3; top:var(--rent-arrow-y); left:-22px; right:-22px; display:flex; align-items:center; justify-content:space-between; transform:translateY(-50%); pointer-events:none; }
+.rent-edge-navigation button { display:grid; place-items:center; pointer-events:auto; width:44px; height:44px; padding:0; border:1px solid #dce4ed; border-radius:50%; background:#fff; color:#007fbd; box-shadow:0 3px 12px #102a4324; cursor:pointer; }
+.rent-edge-navigation button:hover:not(:disabled) { background:#edf8fd; border-color:#acd4e9; }
+.rent-edge-navigation button:disabled { color:#a3afbc; background:#fff; cursor:default; }
+.rent-featured-view-all:focus-visible,.rent-edge-navigation button:focus-visible { outline:2px solid #007fbd; outline-offset:4px; }
+.rent-featured .rent-featured-dots { margin-top:12px; }
+@media(max-width:650px) {
+ .rent-featured .rent-featured-heading { align-items:flex-start; gap:12px; }
+ .rent-featured-view-all { font-size:12px; padding:10px 14px; }
+ .rent-edge-navigation { left:0; right:0; }
+}

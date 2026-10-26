@@ -97,3 +97,13 @@
 .fleet-document-selected{margin-top:11px;padding:8px;border:1px solid #e8ecf2;border-radius:6px;background:#fafbfe}.fleet-document-selected>span:nth-child(2){flex:1}.fleet-document-selected button{border:0;background:transparent;color:#236dc9;font-size:10px;font-weight:900}
 .fleet-detail-images{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:13px 0}.fleet-detail-images img{width:100%;height:85px;border-radius:5px;object-fit:cover}
 @media(max-width:520px){.fleet-image-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.fleet-detail-images{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.fleet-import-table td small { display: block; white-space: normal; margin-top: 4px; }
+.fleet-import-table .fleet-import-warning { color: #9a4f00; }
+
+.fleet-import-drafts { margin-top: 24px; padding: 22px; background: var(--admin-surface, #fff); border: 1px solid var(--admin-border, #dfe7ee); border-radius: 14px; }
+.fleet-import-drafts h2 { margin: 0 0 6px; font-size: 19px; }
+.fleet-import-drafts .fleet-bulk-actions { align-items: flex-start; }
+.fleet-draft-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.fleet-import-drafts .booking-dialog.wide { max-width: 940px; }
+.fleet-import-drafts .booking-dialog > .fleet-form-help { margin: 10px 24px; }

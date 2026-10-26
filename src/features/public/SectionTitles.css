@@ -1,0 +1,16 @@
+/* Shared public section-title style, selected without the blue eyebrow labels. */
+.rent-site section h2.rent-section-title {
+ font-family:Inter,'Segoe UI',sans-serif;
+ font-size:32px;
+ font-weight:700;
+ line-height:1.25;
+ letter-spacing:-.6px;
+ text-align:left;
+ color:#102a43;
+ margin:0;
+}
+.rent-site .rent-uniform-heading { margin:0 0 24px; }
+@media(max-width:650px) {
+ .rent-site section h2.rent-section-title { font-size:26px; letter-spacing:-.4px; }
+ .rent-site .rent-uniform-heading { margin-bottom:22px; }
+}

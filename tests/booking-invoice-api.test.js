@@ -3,7 +3,7 @@ setCsrfToken({ token: 'contract-test-token', headerName: 'X-CSRF-TOKEN' })
 import assert from 'node:assert/strict'
 import { listBookings, saveBookingRecord, assignBooking, bookingPayment } from '../src/features/bookings/BookingApi.js'
 import { listCorporateTrips, saveCorporateTrip, corporateStatus } from '../src/features/corporate-trips/CorporateTripApi.js'
-import { listInvoices, saveInvoice, issueInvoice, invoicePayment } from '../src/features/invoices/InvoiceApi.js'
+import { getBillingProfile, saveBillingProfile, issueCreditNote, discardInvoice, listInvoices, saveInvoice, issueInvoice, invoicePayment } from '../src/features/invoices/InvoiceApi.js'
 import { balanceDue, paymentStatus } from '../src/features/bookings/BookingData.js'
 
 const requests = []
@@ -33,6 +33,18 @@ await saveInvoice({ currency: 'SAR', sources: [{ kind: 'Individual', id: 7 }] },
 assert.equal(requests.at(-1).url, '/api/invoices?issue=true')
 await issueInvoice(7)
 assert.equal(requests.at(-1).url, '/api/invoices/7/issue')
+await getBillingProfile()
+assert.equal(requests.at(-1).url,'/api/invoices/billing-profile')
+await saveBillingProfile({version:1,issuer:{name:'Test Seller'}})
+assert.equal(requests.at(-1).method,'PUT')
+assert.equal(requests.at(-1).data.version,1)
+await issueCreditNote(7,{requestId:'contract-credit',reason:'Rental reduced',lines:[{lineIndex:0,amount:20}]})
+assert.equal(requests.at(-1).url,'/api/invoices/7/credit-notes')
+assert.equal(requests.at(-1).method,'POST')
+assert.equal(requests.at(-1).data.lines[0].amount,20)
+await discardInvoice(7)
+assert.equal(requests.at(-1).url, '/api/invoices/7/discard')
+assert.equal(requests.at(-1).method, 'POST')
 await invoicePayment(7, { kind: 'Payment', amount: 50, date: '2026-10-05', method: 'Cash' })
 assert.equal(requests.at(-1).data.method, 'Cash')
 assert.equal(balanceDue({ status: 'Completed', totalAmount: 100, invoicedAmount: 150, receivedAmount: 120 }), 30)

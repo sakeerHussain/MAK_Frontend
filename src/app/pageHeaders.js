@@ -14,7 +14,7 @@ const PAGE_HEADERS = {
   Invoices: ['Invoices', 'Create, issue, and track individual and corporate invoices.'],
   Billings: ['Billings', 'Review completed work and prepare invoice drafts.'],
   Reviews: ['Reviews', 'Review customer feedback and rental experiences.'],
-  'Staff & Users': ['Staff & Users', 'Manage staff accounts, roles, and access.'],
+  'Staff & Users': ['Users & Roles', 'Manage staff accounts, roles, and access.'],
   'Audit Log': ['Audit Log', 'Review account activity and security events.'],
   Settings: ['Settings', 'Manage workspace settings and preferences.'],
 }

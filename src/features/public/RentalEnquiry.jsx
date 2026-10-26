@@ -56,7 +56,7 @@ export default function RentalEnquiry({ initial, lenisRef, onClose }) {
         <label className="mak-form-wide"><span>Pickup location</span><input name="location" list="mak-enquiry-locations" autoComplete="off" defaultValue={initial.location || 'Al Khobar'} placeholder="City or pickup address" /><datalist id="mak-enquiry-locations">{locations.map((item) => <option key={item} value={item} />)}</datalist></label>
         <label><span>Pickup date</span><input name="pickupDate" type="date" min={today} value={pickup} onChange={(event) => { setPickup(event.target.value); setDownloaded(false) }} /></label>
         <label><span>Return date</span><input name="returnDate" type="date" min={pickup || today} defaultValue={initial.returnDate || ''} /></label>
-        <label className="mak-form-wide"><span>Tell us about your journey <small>Optional</small></span><textarea name="notes" rows={3} placeholder="Destinations, passengers, driver requirements or project details" /></label>
+        <label className="mak-form-wide"><span>Tell us about your journey <small>Optional</small></span><textarea name="notes" rows={3} defaultValue={initial.notes || ''} placeholder="Destinations, passengers, driver requirements or project details" /></label>
         <p className="mak-form-note mak-form-wide"><Icon name="document" size={17} />Only share journey details here. Leave out identity documents and payment information.</p>
         {error && <p role="alert" className="mak-form-error mak-form-wide">{error}</p>}
         {downloaded && <p role="status" className="mak-download-status mak-form-wide"><Icon name="check" size={18} />Your enquiry has been prepared for download. It has not been sent to MAK.</p>}

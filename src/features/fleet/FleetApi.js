@@ -39,14 +39,16 @@ const fields = ['make', 'model', 'registration', 'year', 'color', 'vehicleId', '
   'type', 'seats', 'transmission', 'fuelType', 'featureTags', 'hourlyRate', 'dailyRate', 'monthlyRate',
   'rateCurrency', 'ownership', 'vendor', 'status', 'custodian', 'onSite', 'listedForBooking',
   'showOnPublicSite', 'serviceIntervalKm', 'lastServiceKm', 'currentOdometerKm', 'oilIntervalKm',
-  'lastOilKm', 'tyreIntervalKm', 'lastTyreKm', 'brakeIntervalKm', 'lastBrakeKm']
+  'lastOilKm', 'tyreIntervalKm', 'lastTyreKm', 'brakeIntervalKm', 'lastBrakeKm',
+  'registrationExpiryDate', 'insuranceExpiryDate', 'inspectionExpiryDate']
 
 export function vehiclePayload(car) {
-  const source = { ...car, rateCurrency: car.rateCurrency || 'USD' }
+  const source = { ...car, rateCurrency: car.rateCurrency || 'SAR' }
   const result = Object.fromEntries(fields.map((field) => [field, source[field] ?? null]))
-  result.year = Number(result.year)
-  result.seats = Number(result.seats || 5)
-  result.dailyRate = Number(result.dailyRate)
+  for (const field of ['year', 'seats', 'dailyRate']) {
+    result[field] = result[field] === '' || result[field] == null ? null : Number(result[field])
+  }
+  for (const field of ['registrationExpiryDate', 'insuranceExpiryDate', 'inspectionExpiryDate']) result[field] = result[field] || null
   result.featureTags = Array.isArray(result.featureTags)
     ? result.featureTags : String(result.featureTags || '').split(',').map((tag) => tag.trim()).filter(Boolean)
   optionalNumbers.forEach((field) => { result[field] = result[field] === '' || result[field] == null ? null : Number(result[field]) })
@@ -97,5 +99,19 @@ export async function saveVehicleFiles(id, draft, previous) {
   for (const item of removedDocuments) await deleteVehicleFile(id, item.id)
   return getVehicle(id)
 }
+
+// Unlike ordinary form booleans, a missing on-site answer in an import draft stays unknown.
+export function vehicleDraftPayload(car) {
+  const payload = vehiclePayload(car)
+  Object.keys(payload).forEach(key => { if (payload[key] === '') payload[key] = null })
+  payload.onSite = car.onSite === '' || car.onSite == null ? null : Boolean(car.onSite)
+  payload.status = 'Inactive'; payload.listedForBooking = false; payload.showOnPublicSite = false
+  return payload
+}
+export function listVehicleImportDrafts() { return request(`${VEHICLES}/import-drafts`) }
+export function saveVehicleImportDrafts(cars) { return request(`${VEHICLES}/import-drafts`, json('POST', cars.map(car => ({ details: vehicleDraftPayload(car) })))) }
+export function updateVehicleImportDraft(draft, car) { return request(`${VEHICLES}/import-drafts/${draft.id}`, json('PUT', { details: vehicleDraftPayload(car), version: draft.version })) }
+export async function completeVehicleImportDraft(draft, car) { return mapVehicle(await request(`${VEHICLES}/import-drafts/${draft.id}/complete`, json('POST', { details: vehiclePayload(car), version: draft.version }))) }
+export function discardVehicleImportDraft(draft) { return request(`${VEHICLES}/import-drafts/${draft.id}?version=${draft.version}`, { method: 'DELETE' }) }
 
 export async function importVehicles(cars) { return request(`${VEHICLES}/import`, json('POST', cars.map(vehiclePayload))) }

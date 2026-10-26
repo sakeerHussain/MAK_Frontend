@@ -1,4 +1,7 @@
-import ActionIcon from '../../app/ActionIcon.jsx'
+import ActionIcon from '../../shared/components/ResourceIcon.jsx'
+import Icon from '../../shared/components/ResourceIcon.jsx'
+import AdminPageHeader from '../../app/AdminPageHeader.jsx'
+import { ResourceFilters, ResourcePresets, ResourceIndicator, ResourceMenu } from '../../shared/components/ResourceRegister.jsx'
 import { useMemo, useState } from 'react'
 import { blankDriver, driverCompliance, DRIVER_CATEGORIES, DRIVER_DOCUMENT_TYPES, DRIVER_STATUSES, EMPLOYMENT_TYPES, REQUIRED_DRIVER_DOCUMENTS } from './DriverData.js'
 import { prepareUpload } from '../../shared/lib/upload.js'
@@ -8,16 +11,6 @@ import { PersonnelChargesFields, PersonnelPersonalFields, PersonnelProfileCards,
 import { archiveDriver, createDriver, getDriver, importDrivers as importDriverRows, saveDriverFiles, updateDriver, updateDriverStatus, uploadDriverDocument } from './DriverApi.js'
 import './DriverPage.css'
 
-const paths = {
-  plus: 'M12 4v16 M4 12h16', search: 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M17 17l4 4',
-  more: 'M5 12h.01 M12 12h.01 M19 12h.01', close: 'M5 5l14 14 M19 5L5 19',
-  upload: 'M12 16V4 M7 9l5-5 5 5 M4 17v3h16v-3', left: 'M15 5l-7 7 7 7',
-  right: 'M9 5l7 7-7 7', edit: 'M4 20l4-.8L20 7l-3-3L5 16z M14.5 6.5l3 3',
-  power: 'M12 3v9 M6.3 6.3a8 8 0 1 0 11.4 0', trash: 'M4 7h16 M9 7V4h6v3 M7 7l1 14h8l1-14 M10 11v6 M14 11v6',
-  document: 'M6 3h9l4 4v14H6z M15 3v5h4 M9 12h7 M9 16h7',
-  eye: 'M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
-}
-function Icon({ name, size = 17 }) { return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[name]} /></svg> }
 const rate = (value) => `SAR ${Number(value || 0).toFixed(2)}`
 const initials = (name) => name.split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase()
 const docStatus = (record) => !record ? 'Missing' : record.expiryDate && record.expiryDate < new Date().toISOString().slice(0, 10) ? 'Expired' : record.expiryDate ? 'Valid' : 'Expiry needed'
@@ -105,7 +98,7 @@ function DriverForm({ initial, drivers, onCancel, onSave }) {
     catch (reason) { setError(reason.message || 'Could not save this driver.') }
     finally { setBusy(false) }
   }
-  return <form className="driver-form" onSubmit={save} noValidate>
+  return <form data-permission-scope={initial ? 'drivers.edit' : 'drivers.create'} className="driver-form" onSubmit={save} noValidate>
     <PersonnelPersonalFields form={form} setField={setField} kind="driver" onPhoto={choosePhoto} onRemovePhoto={() => setField('photo', null)} />
     <div className="driver-form-section"><h3>Category & Employment</h3><div className="driver-form-grid">
       <label>Category<select value={form.category} onChange={(event) => setField('category', event.target.value)}>{DRIVER_CATEGORIES.map((option) => <option key={option}>{option}</option>)}</select></label>
@@ -222,20 +215,61 @@ export default function DriverPage({ drivers, setDrivers, loading = false, loadE
     } catch (reason) { setActionError(reason.message) }
     finally { setBusy(false) }
   }
-  const showMenu = (event, driver) => { if (menu?.id === driver.id) { setMenu(null); return }; const rect = event.currentTarget.getBoundingClientRect(); setMenu({ id: driver.id, driver, x: Math.max(8, Math.min(rect.right - 207, window.innerWidth - 218)), y: Math.max(8, Math.min(rect.bottom + 5, window.innerHeight - 218)) }) }
-  const reset = () => { setQuery(''); setStatusFilter('All statuses'); setCategoryFilter('All categories'); setComplianceFilter('All compliance'); setPage(1) }
+  const showMenu = (event, driver) => { if (menu?.id === driver.id) { setMenu(null); return }; const rect = event.currentTarget.getBoundingClientRect(); setMenu({ id: driver.id, trigger: event.currentTarget, driver, x: Math.max(8, Math.min(rect.right - 220, window.innerWidth - 228)), y: Math.max(8, Math.min(rect.bottom + 5, window.innerHeight - 240)) }) }
+  const reset = () => { setQuery(''); setStatusFilter('All statuses'); setCategoryFilter('All categories'); setComplianceFilter('All compliance'); setPage(1); setMenu(null) }
   const counts = { total: drivers.length, active: drivers.filter((item) => item.status === 'Active').length, attention: drivers.filter((item) => driverCompliance(item) !== 'Complete').length }
-  return <div className="driver-page">
+  const activeFilters = [query.trim(), statusFilter !== 'All statuses', categoryFilter !== 'All categories', complianceFilter !== 'All compliance'].filter(Boolean).length
+  const complianceCounts = drivers.reduce((result, driver) => { const value = driverCompliance(driver); result[value] += 1; return result }, { Complete: 0, Missing: 0, Expired: 0 })
+  return <div className={`driver-page resource-page ${viewDriverId ? '' : 'resource-register'}`}>
     {(loadError || actionError) && <div className="driver-form-error" role="alert">{loadError || actionError} <button type="button" onClick={() => { setActionError(''); onReload().catch((reason) => setActionError(reason.message)) }}>Retry</button></div>}
-    {loading && <p className="driver-form-help" role="status">Loading drivers from the backend…</p>}
+    {loading && <p className="driver-form-help" role="status">Loading drivers...</p>}
     {viewDriverId ? loading ? null : <DriverProfile key={viewDriverId} driver={profile} onBack={onBackDrivers} onEdit={() => openDialog('edit', profile)} onStatus={() => toggleStatus(profile)} onDocuments={() => openDialog('documents', profile)} /> : <>
-      <div className="admin-page-actions" role="group" aria-label="Driver actions"><div className="admin-page-action-buttons"><button type="button" className="driver-secondary" disabled={loading || Boolean(loadError)} onClick={() => openDialog('bulk')}><ActionIcon name="upload" /> Bulk Upload</button><button type="button" className="driver-primary" disabled={loading || Boolean(loadError)} onClick={() => openDialog('add')}><ActionIcon name="plus" /> Add Driver</button></div></div>
-      <section className="driver-panel driver-list" aria-labelledby="driver-list-title"><div className="driver-list-heading"><div><h2 id="driver-list-title">All Drivers <span>{counts.total}</span></h2></div><div className="driver-mini-stats"><span><i className="active" />{counts.active} active</span><span><i className="attention" />{counts.attention} need attention</span></div></div>
-        <div className="driver-toolbar"><label className="driver-search"><Icon name="search" /><input type="search" placeholder="Search ID, name, phone..." aria-label="Search drivers" value={query} onChange={(event) => { setQuery(event.target.value); setPage(1) }} /></label><select aria-label="Filter by category" value={categoryFilter} onChange={(event) => { setCategoryFilter(event.target.value); setPage(1) }}><option>All categories</option>{DRIVER_CATEGORIES.map((option) => <option key={option}>{option}</option>)}</select><select aria-label="Filter by status" value={statusFilter} onChange={(event) => { setStatusFilter(event.target.value); setPage(1) }}><option>All statuses</option>{DRIVER_STATUSES.map((option) => <option key={option}>{option}</option>)}</select><select aria-label="Filter by compliance" value={complianceFilter} onChange={(event) => { setComplianceFilter(event.target.value); setPage(1) }}><option>All compliance</option><option>Complete</option><option>Missing</option><option>Expired</option></select><select aria-label="Rows per page" value={pageSize} onChange={(event) => { setPageSize(Number(event.target.value)); setPage(1) }}><option value={8}>8 rows</option><option value={12}>12 rows</option><option value={20}>20 rows</option></select></div>
-        <div className="driver-table-scroll"><table className="driver-table"><thead><tr><th>Employee ID</th><th>Name</th><th>Phone</th><th>Category</th><th>Employment Type</th><th>Daily Rate</th><th>Status</th><th>Compliance</th><th>Actions</th></tr></thead><tbody>{visible.map((driver) => { const compliance = driverCompliance(driver); return <tr key={driver.id}><td className="driver-id">{driver.employeeId}</td><td><button className="driver-name-link" type="button" onClick={() => onViewDriver(driver.id)} aria-label={`View profile for ${driver.name}`}><span className="driver-avatar">{initials(driver.name)}</span><strong>{driver.name}</strong></button></td><td>{driver.phone}</td><td>{driver.category}</td><td>{driver.employmentType}</td><td className="driver-rate">{rate(driver.dailyRate)} <small>/ day</small></td><td><span className={`driver-status ${driver.status.toLowerCase()}`}>{driver.status}</span></td><td><span className={`driver-compliance ${compliance.toLowerCase()}`}><i />{compliance}</span></td><td><button className="driver-more" type="button" aria-label={`More actions for ${driver.name}`} aria-expanded={menu?.id === driver.id} onClick={(event) => showMenu(event, driver)}><ActionIcon name="more" size={20} /></button></td></tr> })}</tbody></table>{!visible.length && !loading && !loadError && <div className="driver-empty"><strong>No drivers found</strong><p>Try another search or clear the filters.</p><button type="button" onClick={reset}>Clear filters</button></div>}</div>
-        <div className="driver-pagination"><span>{filtered.length ? `Showing ${(safePage - 1) * pageSize + 1}–${Math.min(safePage * pageSize, filtered.length)} of ${filtered.length} drivers` : 'Showing 0 drivers'}</span><div><button type="button" aria-label="Previous page" disabled={safePage === 1} onClick={() => setPage(safePage - 1)}><Icon name="left" size={15} /></button><span>Page {safePage} of {pageCount}</span><button type="button" aria-label="Next page" disabled={safePage === pageCount} onClick={() => setPage(safePage + 1)}><Icon name="right" size={15} /></button></div></div>
+      <div className="resource-heading">
+        <AdminPageHeader title="Drivers" description="Manage drivers, rates, and compliance." />
+        <div className="admin-page-actions" role="group" aria-label="Driver actions"><div className="admin-page-action-buttons">
+          <button type="button" className="driver-secondary" disabled={loading || Boolean(loadError)} onClick={() => openDialog('bulk')}><Icon name="upload" /> Bulk Upload</button>
+          <button type="button" className="driver-primary" disabled={loading || Boolean(loadError)} onClick={() => openDialog('add')}><Icon name="plus" /> Add Driver</button>
+        </div></div>
+      </div>
+      <div className="resource-driver-summary" aria-label="Driver overview">
+        <div><span className="resource-kpi-icon"><Icon name="users" size={21} /></span><span className="resource-summary-copy"><small>All drivers</small><strong>{counts.total}</strong></span></div>
+        <div><span className="resource-kpi-icon green"><Icon name="driver" size={21} /></span><span className="resource-summary-copy"><small>Active drivers</small><strong>{counts.active}</strong></span></div>
+        <div><span className="resource-kpi-icon amber"><Icon name="alert" size={21} /></span><span className="resource-summary-copy"><small>Need attention</small><strong>{counts.attention}</strong></span></div>
+      </div>
+      <ResourcePresets label="Driver compliance shortcuts" value={complianceFilter} onChange={(value) => { setComplianceFilter(value); setPage(1); setMenu(null) }} items={[
+        { label: 'All drivers', value: 'All compliance', count: counts.total },
+        ...['Complete', 'Missing', 'Expired'].map((value) => ({ label: value, value, count: complianceCounts[value] })),
+      ]} />
+      <section className="driver-panel driver-list" aria-label="Drivers">
+        <ResourceFilters activeCount={activeFilters} onReset={reset} search={<label className="driver-search"><Icon name="search" /><input type="search" placeholder="Search ID, name, phone..." aria-label="Search drivers" value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); setMenu(null) }} /></label>}>
+          <select aria-label="Filter by category" value={categoryFilter} onChange={(event) => { setCategoryFilter(event.target.value); setPage(1); setMenu(null) }}><option>All categories</option>{DRIVER_CATEGORIES.map((option) => <option key={option}>{option}</option>)}</select>
+          <select aria-label="Filter by status" value={statusFilter} onChange={(event) => { setStatusFilter(event.target.value); setPage(1); setMenu(null) }}><option>All statuses</option>{DRIVER_STATUSES.map((option) => <option key={option}>{option}</option>)}</select>
+          <select aria-label="Filter by compliance" value={complianceFilter} onChange={(event) => { setComplianceFilter(event.target.value); setPage(1); setMenu(null) }}><option>All compliance</option><option>Complete</option><option>Missing</option><option>Expired</option></select>
+        </ResourceFilters>
+        <p className="resource-scroll-hint">Scroll the table sideways to see all driver details.</p>
+        <div className="driver-table-scroll" role="region" aria-label="Driver records" tabIndex={0}>
+          <table className="driver-table"><thead><tr>{['Employee ID', 'Name', 'Phone', 'Category', 'Employment Type', 'Daily Rate', 'Status', 'Compliance', 'Actions'].map((heading) => <th scope="col" key={heading}>{heading}</th>)}</tr></thead><tbody>
+            {visible.map((driver) => { const compliance = driverCompliance(driver); return <tr key={driver.id}>
+              <td className="driver-id">{driver.employeeId}</td><td><button className="driver-name-link" type="button" onClick={() => onViewDriver(driver.id)} aria-label={`View profile for ${driver.name}`}><strong>{driver.name}</strong></button></td>
+              <td>{driver.phone}</td><td>{driver.category}</td><td>{driver.employmentType}</td><td className="driver-rate">{rate(driver.dailyRate)}<small>/ day</small></td>
+              <td><span className={`driver-status ${driver.status.toLowerCase()}`}>{driver.status}</span></td><td><ResourceIndicator value={compliance} /></td>
+              <td><button className="driver-more" type="button" aria-label={`More actions for ${driver.name}`} aria-haspopup="menu" aria-expanded={menu?.id === driver.id} onClick={(event) => showMenu(event, driver)}><Icon name="more" size={20} /></button></td>
+            </tr> })}
+          </tbody></table>
+          {!visible.length && !loading && !loadError && <div className="driver-empty"><Icon name={drivers.length ? 'search' : 'users'} size={28} /><strong>{drivers.length ? 'No matching drivers' : 'No drivers added yet'}</strong><p>{drivers.length ? 'Try another search or reset the filters.' : 'Add your first driver or use Bulk Upload to build your team.'}</p>{drivers.length ? <button type="button" onClick={reset}>Reset filters</button> : <button className="resource-empty-add" type="button" onClick={() => openDialog('add')}>Add Driver</button>}</div>}
+        </div>
+        <div className="driver-pagination"><span aria-live="polite">{filtered.length ? `Showing ${(safePage - 1) * pageSize + 1}–${Math.min(safePage * pageSize, filtered.length)} of ${filtered.length} drivers` : 'Showing 0 drivers'}</span><div>
+          <select aria-label="Rows per page" value={pageSize} onChange={(event) => { setPageSize(Number(event.target.value)); setPage(1); setMenu(null) }}><option value={8}>8 rows</option><option value={12}>12 rows</option><option value={20}>20 rows</option></select>
+          <button type="button" aria-label="Previous page" disabled={safePage === 1} onClick={() => { setPage(safePage - 1); setMenu(null) }}><Icon name="left" size={16} /></button><span>Page {safePage} of {pageCount}</span><button type="button" aria-label="Next page" disabled={safePage === pageCount} onClick={() => { setPage(safePage + 1); setMenu(null) }}><Icon name="right" size={16} /></button>
+        </div></div>
       </section>
-      {menu && <><button className="driver-menu-backdrop" type="button" aria-label="Close driver actions" onClick={() => setMenu(null)} /><div className="driver-action-menu" role="menu" style={{ left: menu.x, top: menu.y }}><button role="menuitem" type="button" onClick={() => { onViewDriver(menu.driver.id); setMenu(null) }}><ActionIcon name="eye" /> View Profile</button><button role="menuitem" type="button" onClick={() => openDialog('edit', menu.driver)}><ActionIcon name="edit" /> Edit</button><button role="menuitem" type="button" onClick={() => toggleStatus(menu.driver)}><ActionIcon name="power" /> {menu.driver.status === 'Active' ? 'Deactivate' : 'Activate'}</button><button role="menuitem" type="button" onClick={() => openDialog('documents', menu.driver)}><ActionIcon name="upload" /> Upload Documents</button><div className="driver-menu-separator" /><button role="menuitem" type="button" className="danger" onClick={() => requestDelete(menu.driver)}><ActionIcon name="trash" /> Delete</button></div></>}
+      {menu && <ResourceMenu menu={menu} onClose={() => setMenu(null)} label={`Driver actions for ${menu.driver.name}`} className="driver-action-menu">
+        <button role="menuitem" type="button" onClick={() => { onViewDriver(menu.driver.id); setMenu(null) }}><Icon name="eye" /> View Profile</button>
+        <button role="menuitem" type="button" onClick={() => openDialog('edit', menu.driver)}><Icon name="edit" /> Edit</button>
+        <button role="menuitem" type="button" disabled={busy} onClick={() => toggleStatus(menu.driver)}><Icon name="power" /> {menu.driver.status === 'Active' ? 'Deactivate' : 'Activate'}</button>
+        <button role="menuitem" type="button" onClick={() => openDialog('documents', menu.driver)}><Icon name="upload" /> Upload Documents</button>
+        <div className="driver-menu-separator" role="separator" /><button role="menuitem" type="button" className="danger" onClick={() => requestDelete(menu.driver)}><Icon name="trash" /> Delete</button>
+      </ResourceMenu>}
     </>}
     {dialog && <div className="driver-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !busy) closeDialog() }}><div className={`driver-dialog ${dialog === 'add' || dialog === 'edit' || dialog === 'bulk' ? 'wide' : ''}`} role="dialog" aria-modal="true" aria-labelledby="driver-dialog-title"><div className="driver-dialog-heading"><div><span className="fleet-demo-mark">CONNECTED TO BACKEND</span><h2 id="driver-dialog-title">{({ add: 'Add Driver', edit: 'Edit Driver', bulk: 'Bulk Upload Drivers', documents: 'Upload Documents', delete: 'Delete Driver' })[dialog]}</h2></div><button type="button" aria-label="Close dialog" disabled={busy} onClick={closeDialog}><Icon name="close" size={20} /></button></div>
       {(dialog === 'add' || dialog === 'edit') && <DriverForm key={selected?.id || 'new'} initial={selected} drivers={drivers} onCancel={closeDialog} onSave={saveDriver} />}

@@ -1,3 +1,4 @@
+import { rentalDate } from '../../shared/lib/rentalTime.js'
 import { dayKey, localDateTime, shiftDays } from '../bookings/BookingData.js'
 
 export const CORPORATE_STATUSES = ['Pending', 'Confirmed', 'Active', 'Completed', 'Cancelled']
@@ -27,7 +28,7 @@ export function tripCharges({ unitPrice, quantity, waitingRatePerHour, includedW
   return { base, waiting, subtotal, taxAmount, totalAmount: roundMoney(subtotal + taxAmount) }
 }
 
-const overlaps = (aStart, aEnd, bStart, bEnd) => new Date(aStart) < new Date(bEnd) && new Date(aEnd) > new Date(bStart)
+const overlaps = (aStart, aEnd, bStart, bEnd) => rentalDate(aStart) < rentalDate(bEnd) && rentalDate(aEnd) > rentalDate(bStart)
 export function resourceConflict(kind, id, pickupAt, returnAt, currentTripId, trips, bookings) {
   if (!id) return false
   const field = kind === 'vehicle' ? 'vehicleId' : 'driverId'
@@ -37,7 +38,7 @@ export function resourceConflict(kind, id, pickupAt, returnAt, currentTripId, tr
 
 export function corporatePriority(trip, now = new Date()) {
   const today = dayKey(now)
-  if (trip.status === 'Active' && new Date(trip.returnAt) < now) return { score: 100, label: 'Overdue return', tone: 'danger' }
+  if (trip.status === 'Active' && rentalDate(trip.returnAt) < now) return { score: 100, label: 'Overdue return', tone: 'danger' }
   if (trip.status === 'Confirmed' && dayKey(trip.pickupAt) <= today && (!trip.vehicleId || (trip.serviceMode === 'With driver' && !trip.driverId))) return { score: 95, label: 'Assignment needed', tone: 'danger' }
   if (trip.status === 'Confirmed' && dayKey(trip.pickupAt) <= today) return { score: 90, label: 'Handover pending', tone: 'warning' }
   if (trip.status === 'Pending' && dayKey(trip.pickupAt) <= today) return { score: 85, label: 'Confirm urgently', tone: 'danger' }

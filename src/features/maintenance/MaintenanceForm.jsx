@@ -52,7 +52,7 @@ export default function MaintenanceForm({ initial, vehicles, bookings, trips, on
     } catch (failure) { setError(failure.message) }
     finally { setSaving(false) }
   }
-  return <form className="maintenance-form" onSubmit={submit} noValidate>
+  return <form data-permission-scope={initial ? 'maintenance.edit' : 'maintenance.create'} data-upload-permission={initial ? 'maintenance.edit' : 'maintenance.create'} className="maintenance-form" onSubmit={submit} noValidate>
     <section className="maintenance-form-section"><h3>Vehicle & Job</h3><div className="maintenance-form-grid">
       <div className="maintenance-vehicle-picker"><label>Search Fleet<input type="search" value={vehicleSearch} onChange={(event) => setVehicleSearch(event.target.value)} placeholder="Make, model, reg no., vehicle ID" /></label><label><FormFieldCaption required>Car</FormFieldCaption><select value={form.vehicleId} onChange={(event) => set('vehicleId', event.target.value)}><option value="">Select a car</option>{shownVehicles.map((vehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.make} {vehicle.model} ({vehicle.registration})</option>)}</select></label><small>{matchingVehicles.length > 30 ? `Showing first 30 of ${matchingVehicles.length} matches. Refine your search.` : `${matchingVehicles.length} matching cars`}</small></div>
       <label><FormFieldCaption required>Work type</FormFieldCaption><select value={form.workType} onChange={(event) => changeWorkType(event.target.value)}>{WORK_TYPES.map((type) => <option key={type}>{type}</option>)}</select></label>

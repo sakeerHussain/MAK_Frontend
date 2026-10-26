@@ -1,4 +1,6 @@
 import ActionIcon from '../../app/ActionIcon.jsx'
+import { COMPLIANCE_DATE_FIELDS } from '../../shared/lib/rentalPolicy.js'
+import { rentalDay } from '../../shared/lib/rentalTime.js'
 import { useState } from 'react'
 import { DOCUMENT_TYPES, REQUIRED_DOCUMENT_TYPES, documentStatus, vehicleOwner } from './FleetData.js'
 import './VehicleDetailsPage.css'
@@ -31,7 +33,7 @@ export default function VehicleDetailsPage({ car, onBack, onEdit, onUploadDocume
   const images = car.carImages || []
   const image = images[Math.min(activeImage, images.length - 1)]
   const docs = documentStatus(car)
-  const today = new Date().toISOString().slice(0, 10)
+  const today = rentalDay(new Date())
   const features = Array.isArray(car.featureTags) ? car.featureTags : String(car.featureTags || '').split(',').map((tag) => tag.trim()).filter(Boolean)
   return <div className="vehicle-detail-page">
     <div className="vehicle-detail-toolbar"><button type="button" className="vehicle-back-link" onClick={onBack}><ActionIcon name="back" size={16} /> <ActionIcon name="back" size={16} /> Back to Fleet</button></div>
@@ -80,8 +82,10 @@ export default function VehicleDetailsPage({ car, onBack, onEdit, onUploadDocume
       })}</tbody></table></div></section>
       <section className="vehicle-detail-card vehicle-card-wide" aria-labelledby="vehicle-documents-title"><div className="vehicle-card-heading"><div><h3 id="vehicle-documents-title">Documents</h3><p>Istimara, Insurance, and Fahas are required for a complete record</p></div><button type="button" className="vehicle-card-action" onClick={onUploadDocuments}>Upload Documents</button></div><div className="vehicle-document-grid">{DOCUMENT_TYPES.map((type) => {
         const record = (car.documentRecords || []).find((item) => item.type === type)
-        const expired = Boolean(record?.expiryDate && record.expiryDate < today)
-        return <div className="vehicle-document-card" key={type}>{record?.previewUrl ? <img className="vehicle-document-thumbnail" src={record.previewUrl} alt={`${type} document preview`} /> : <span className="vehicle-document-placeholder">{record ? 'PDF' : '—'}</span>}<div><strong>{type}</strong><small>{REQUIRED_DOCUMENT_TYPES.includes(type) ? 'Required' : 'Optional'}</small><span className={expired ? 'expired' : record ? 'complete' : 'missing'}>{expired ? 'Expired' : record ? 'Uploaded' : REQUIRED_DOCUMENT_TYPES.includes(type) ? 'Missing' : 'Not uploaded'}</span>{record && <p title={record.name}>{record.name}{record.expiryDate && <><br />Expires {record.expiryDate}</>}</p>}</div></div>
+        const registerDate = car[COMPLIANCE_DATE_FIELDS[type]]
+        const expiryDate = record ? record.expiryDate : registerDate
+        const expired = Boolean(expiryDate && expiryDate < today)
+        return <div className="vehicle-document-card" key={type}>{record?.previewUrl ? <img className="vehicle-document-thumbnail" src={record.previewUrl} alt={`${type} document preview`} /> : <span className="vehicle-document-placeholder">{record ? 'PDF' : '—'}</span>}<div><strong>{type}</strong><small>{REQUIRED_DOCUMENT_TYPES.includes(type) ? 'Required' : 'Optional'}</small><span className={expired ? 'expired' : record ? 'complete' : 'missing'}>{expired ? 'Expired' : record ? 'Uploaded' : REQUIRED_DOCUMENT_TYPES.includes(type) ? 'Missing' : 'Not uploaded'}</span>{record ? <p title={record.name}>{record.name}{expiryDate && <><br />Expires {expiryDate}</>}</p> : registerDate && <p>Register expiry: {registerDate}<br />Document file missing</p>}</div></div>
       })}</div></section>
     </div>
   </div>

@@ -39,7 +39,7 @@ export default function InspectionForm({ initial, vehicles, bookings, onCancel, 
     finally { setSaving(false) }
   }
 
-  return <form className="inspection-form" onSubmit={submit} noValidate>
+  return <form data-permission-scope={initial ? 'inspections.edit' : 'inspections.create'} data-upload-permission={initial ? 'inspections.edit' : 'inspections.create'} className="inspection-form" onSubmit={submit} noValidate>
     <fieldset disabled={saving} style={{ border: 0, margin: 0, padding: 0, minWidth: 0 }}>
     <section className="inspection-form-section"><h3>Vehicle & Inspection</h3><div className="inspection-form-grid">
       <div className="inspection-vehicle-picker"><label>Search Fleet<input type="search" value={vehicleSearch} onChange={(event) => setVehicleSearch(event.target.value)} placeholder="Make, model, reg no., vehicle ID" /></label><label><FormFieldCaption required>Car</FormFieldCaption><select value={form.vehicleId} onChange={(event) => changeVehicle(event.target.value)}><option value="">Select a car</option>{shownVehicles.map((vehicle) => <option value={vehicle.id} key={vehicle.id}>{vehicle.make} {vehicle.model} ({vehicle.registration})</option>)}</select></label><small>{matchingVehicles.length > 30 ? `Showing first 30 of ${matchingVehicles.length} cars. Refine your search.` : `${matchingVehicles.length} matching cars`}</small></div>

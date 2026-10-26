@@ -1,3 +1,5 @@
+import PaymentTermsControl from '../invoices/PaymentTermsControl.jsx'
+import { normalizePaymentTerms } from '../invoices/PaymentTerms.js'
 import ActionIcon from '../../app/ActionIcon.jsx'
 import { useState } from 'react'
 import { normalizeCompanyName } from './CompanyData.js'
@@ -6,7 +8,7 @@ import FormFieldCaption from '../../shared/components/FormFieldCaption.jsx'
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const initialForm = {
   name: '', registrationNumber: '', taxNumber: '', billingContactName: '', billingEmail: '', billingPhone: '',
-  billingAddress: '', billingCity: '', billingCountry: '', paymentTerms: '',
+  billingAddress: '', billingCity: '', billingCountry: '', paymentTerms: 'Net 30',
   waitingRatePerHour: '0', includedWaitingMinutes: '0', waitingBillingIncrementMinutes: '15',
 }
 
@@ -18,6 +20,7 @@ export default function CompanyEditor({ companies, onSave, onCancel, compact = f
   const save = async () => {
     if (saving) return
     const company = Object.fromEntries(Object.entries(form).map(([key, value]) => [key, value.trim()]))
+    company.paymentTerms = normalizePaymentTerms(company.paymentTerms)
     if (!company.name || !company.billingEmail || !company.billingPhone || !company.billingAddress || !company.billingCity || !company.billingCountry) { setError('Complete the required company and billing fields.'); return }
     if (!emailPattern.test(company.billingEmail)) { setError('Enter a valid billing email.'); return }
     if (companies.some((item) => item.id !== initial?.id && normalizeCompanyName(item.name) === normalizeCompanyName(company.name))) { setError('This company already exists. Choose it from the suggestions.'); return }
@@ -30,7 +33,7 @@ export default function CompanyEditor({ companies, onSave, onCancel, compact = f
     catch (cause) { setError(cause.message) }
     finally { setSaving(false) }
   }
-  return <div className={`booking-form company-editor ${compact ? 'compact' : ''}`} onKeyDown={(event) => { if (event.key === 'Enter' && event.target.tagName !== 'TEXTAREA') { event.preventDefault(); save() } }}>
+  return <div data-permission-scope={initial ? 'customers.edit' : 'customers.create'} className={`booking-form company-editor ${compact ? 'compact' : ''}`} onKeyDown={(event) => { if (event.key === 'Enter' && event.target.tagName !== 'TEXTAREA') { event.preventDefault(); save() } }}>
     <p className="booking-form-lead">{initial ? 'Update the billing profile used for future invoice drafts.' : 'Save company billing details and waiting defaults.'} The contact coordinating each trip is entered on that booking.</p>
     <section className="booking-form-section"><h3>Company</h3><div className="booking-form-grid">
       <label><FormFieldCaption required>Company Name</FormFieldCaption><input required value={form.name} onChange={(event) => set('name', event.target.value)} placeholder="Company or account name" /></label>
@@ -44,7 +47,7 @@ export default function CompanyEditor({ companies, onSave, onCancel, compact = f
       <label><FormFieldCaption required>Billing Address</FormFieldCaption><input required value={form.billingAddress} onChange={(event) => set('billingAddress', event.target.value)} placeholder="Street and building" /></label>
       <label><FormFieldCaption required>City</FormFieldCaption><input required value={form.billingCity} onChange={(event) => set('billingCity', event.target.value)} placeholder="Riyadh" /></label>
       <label><FormFieldCaption required>Country</FormFieldCaption><input required value={form.billingCountry} onChange={(event) => set('billingCountry', event.target.value)} placeholder="Saudi Arabia" /></label>
-      <label>Payment Terms<input value={form.paymentTerms} onChange={(event) => set('paymentTerms', event.target.value)} placeholder="e.g. Due on receipt or Net 30" /></label>
+      <PaymentTermsControl value={form.paymentTerms} onChange={(value)=>set('paymentTerms',value)} allowEmpty /><p className="booking-help">Net terms calculate from the KSA invoice issue date. Unrecognized custom terms require a manual due date on the invoice. Blank terms use the visible Net 30 corporate default.</p>
     </div></section>
     <section className="booking-form-section"><h3>Booking Defaults</h3><div className="booking-form-grid">
       <label><FormFieldCaption required>Default Waiting Rate (SAR/hour)</FormFieldCaption><input required type="number" min="0" step="0.01" value={form.waitingRatePerHour} onChange={(event) => set('waitingRatePerHour', event.target.value)} /></label>

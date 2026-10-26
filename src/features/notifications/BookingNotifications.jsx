@@ -15,7 +15,7 @@ function AlertCard({ item, onRead, onAck, onOpen }) {
  </article>
 }
 export default function BookingNotifications({ user, onOpenBooking, onOpen }) {
- const eligible = user.permissions?.some(p => ['bookings.write', 'corporate-trips.write'].includes(p))
+ const eligible = user.permissions?.some(p => ['bookings.write','bookings.create','bookings.edit','bookings.archive','corporate-trips.write','corporate-trips.create','corporate-trips.edit','corporate-trips.archive'].includes(p))
  const [open,setOpen] = useState(false),[centre,setCentre] = useState(false),[status,setStatus] = useState('Connecting'),[error,setError] = useState('')
  const [summary,setSummary] = useState({unread:0,critical:0,unresolved:0}),[recent,setRecent] = useState([]),[critical,setCritical] = useState([]),[toasts,setToasts] = useState([])
  const [result,setResult] = useState({items:[],total:0}),[loading,setLoading] = useState(false)

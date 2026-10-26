@@ -1,0 +1,152 @@
+/* Fleet and Driver only. Existing admin pages and public styles remain independent. */
+.app-shell.mak-admin .resource-page {
+  --admin-action-primary: #008dca;
+  --admin-action-primary-hover: #007bb7;
+  --admin-action-text: #34546f;
+  color: var(--mak-navy, #102a43);
+}
+.app-shell.mak-admin .resource-page :is(.fleet-add-button, .fleet-primary-button, .driver-primary) { box-shadow: none; }
+.app-shell.mak-admin .resource-page .resource-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+.app-shell.mak-admin .resource-heading .admin-page-heading { margin-bottom: 0; }
+.app-shell.mak-admin .resource-heading h1 { font-size: 28px; font-weight: 700; }
+.app-shell.mak-admin .resource-heading .admin-page-heading p { font-size: 13px; font-weight: 400; color: #60758c; }
+.app-shell.mak-admin .resource-heading .admin-page-actions { margin: 0; flex-shrink: 0; }
+.app-shell.mak-admin .resource-heading .admin-page-action-buttons > button { min-height: 40px; padding: 0 16px; font-size: 13px; font-weight: 600; border-radius: 6px; }
+.app-shell.mak-admin .resource-register :is(button, input, select) { font-family: inherit; }
+.app-shell.mak-admin .resource-register :is(button, select, input):focus-visible,
+.app-shell.mak-admin .resource-action-menu button:focus-visible { outline: 2px solid #008dca; outline-offset: 3px; }
+.app-shell.mak-admin .resource-kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 22px; }
+.app-shell.mak-admin .resource-kpi { position: relative; display: flex; align-items: flex-start; gap: 12px; min-width: 0; min-height: 122px; padding: 18px 16px; border: 1px solid #e3e9ef; border-radius: 7px; background: #fff; color: #102a43; text-align: left; cursor: pointer; transition: border-color .15s, background .15s; }
+.app-shell.mak-admin .resource-kpi:hover:not(:disabled) { border-color: #8bccE6; background: #fcfeff; }
+.app-shell.mak-admin .resource-kpi:disabled { cursor: default; opacity: 1; }
+.app-shell.mak-admin .resource-kpi-icon { display: grid; place-items: center; flex: 0 0 38px; width: 38px; height: 38px; border-radius: 50%; color: #008dca; background: #e4f5fd; }
+.app-shell.mak-admin .resource-kpi-icon.green { color: #00866c; background: #def7ee; }
+.app-shell.mak-admin .resource-kpi-icon.purple { color: #7561ce; background: #f0ebff; }
+.app-shell.mak-admin .resource-kpi-icon.amber { color: #ac6c09; background: #fff4dd; }
+.app-shell.mak-admin .resource-kpi-copy { min-width: 0; display: flex; flex: 1; flex-direction: column; gap: 7px; }
+.app-shell.mak-admin .resource-kpi-copy > span { font-size: 12px; font-weight: 600; line-height: 1.4; padding-right: 7px; }
+.app-shell.mak-admin .resource-kpi strong { font-size: 27px; font-weight: 600; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.app-shell.mak-admin .resource-kpi small { color: #60758c; font-size: 11px; line-height: 1.5; }
+.app-shell.mak-admin .resource-kpi-arrow { position: absolute; right: 9px; top: 18px; color: #8094a9; }
+.app-shell.mak-admin .resource-presets { display: flex; align-items: stretch; gap: 12px; overflow-x: auto; margin-bottom: 0; padding: 0 4px; scrollbar-width: thin; }
+.app-shell.mak-admin .resource-presets > button { display: flex; align-items: center; gap: 9px; flex-shrink: 0; min-height: 48px; padding: 10px 8px 12px; border: 0; border-bottom: 3px solid transparent; border-radius: 0; background: transparent; color: #60758c; font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer; }
+.app-shell.mak-admin .resource-presets > button:hover { color: #007bb7; background: #edf6fb; }
+.app-shell.mak-admin .resource-presets > button[aria-pressed="true"] { color: #007bb7; border-bottom-color: #008dca; font-weight: 600; }
+.app-shell.mak-admin .resource-count { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; padding: 2px 6px; border-radius: 5px; color: #45647f; background: #edf2f7; font-size: 11px; line-height: 1.3; font-weight: 600; }
+.app-shell.mak-admin .resource-presets > button[aria-pressed="true"] .resource-count { color: #007bb7; background: #ddf2fc; }
+.app-shell.mak-admin .resource-register :is(.fleet-table-panel, .driver-list) { min-width: 0; border: 1px solid #e3e9ef; border-radius: 7px; box-shadow: none; overflow: hidden; }
+.app-shell.mak-admin .resource-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 16px; }
+.app-shell.mak-admin .resource-toolbar :is(.fleet-search, .driver-search) { display: flex; align-items: center; gap: 9px; flex: 1 1 220px; min-width: 180px; height: 42px; border: 1px solid #dce5ed; border-radius: 6px; padding: 0 12px; color: #758ca3; }
+.app-shell.mak-admin .resource-toolbar :is(.fleet-search, .driver-search):focus-within { border-color: #008dca; box-shadow: 0 0 0 3px #008dca14; }
+.app-shell.mak-admin .resource-toolbar input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: #24445f; font-size: 13px; font-weight: 400; }
+.app-shell.mak-admin .resource-toolbar input::placeholder { color: #74899f; }
+.app-shell.mak-admin .resource-filter-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.app-shell.mak-admin .resource-filter-controls[hidden] { display: none; }
+.app-shell.mak-admin .resource-register select { height: 42px; max-width: 180px; min-width: 110px; padding: 0 28px 0 11px; border: 1px solid #dce5ed; border-radius: 6px; background: #fff; color: #34546f; font-size: 12px; font-weight: 400; }
+.app-shell.mak-admin .resource-filter-toggle { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 42px; padding: 0 12px; border: 1px solid #b5d9ec; border-radius: 6px; background: #fff; color: #007bb7; font-size: 13px; font-weight: 500; cursor: pointer; }
+.app-shell.mak-admin .resource-filter-toggle[aria-expanded="true"] { background: #eff8fd; }
+.app-shell.mak-admin .resource-filter-summary { display: flex; align-items: center; gap: 12px; padding: 0 16px 12px; color: #60758c; font-size: 12px; }
+.app-shell.mak-admin .resource-filter-summary button { padding: 2px 0; border: 0; background: transparent; color: #007bb7; font-size: 12px; font-weight: 500; cursor: pointer; }
+.app-shell.mak-admin .resource-register :is(.fleet-table, .driver-table) { table-layout: fixed; min-width: 1160px; text-align: left; }
+.app-shell.mak-admin .resource-register :is(.fleet-table, .driver-table) th { height: 44px; padding: 10px 12px; border-color: #e8edf2; background: #f5f8fb; color: #5d738a; font-size: 12px; font-weight: 500; letter-spacing: 0; line-height: 1.4; text-align: left; }
+.app-shell.mak-admin .resource-register :is(.fleet-table, .driver-table) td { height: 70px; padding: 12px; border-bottom: 1px solid #e8edf2; color: #48627b; font-size: 13px; font-weight: 400; line-height: 1.5; }
+.app-shell.mak-admin .resource-register :is(.fleet-table, .driver-table) tr:last-child td { border-bottom: 0; }
+.app-shell.mak-admin .resource-register :is(.fleet-table, .driver-table) tr:hover td { background: #f8fcfe; }
+.app-shell.mak-admin .resource-register :is(.fleet-table, .driver-table) :is(td, th):first-child { width: 120px; padding-left: 16px; }
+.app-shell.mak-admin .resource-register :is(.fleet-table, .driver-table) :is(td, th):last-child { width: 70px; padding: 8px; text-align: center; }
+.app-shell.mak-admin .resource-register .fleet-table th:nth-child(2) { width: 195px; }
+.app-shell.mak-admin .resource-register .fleet-table th:nth-child(3) { width: 90px; }
+.app-shell.mak-admin .resource-register .fleet-table th:nth-child(4) { width: 130px; }
+.app-shell.mak-admin .resource-register .fleet-table th:nth-child(5) { width: 140px; }
+.app-shell.mak-admin .resource-register .fleet-table th:nth-child(6) { width: 160px; }
+.app-shell.mak-admin .resource-register .fleet-table th:nth-child(7) { width: 80px; }
+.app-shell.mak-admin .resource-register .fleet-table th:nth-child(8) { width: 115px; }
+.app-shell.mak-admin .resource-register .driver-table th:nth-child(2) { width: 180px; }
+.app-shell.mak-admin .resource-register .driver-table th:nth-child(3) { width: 150px; }
+.app-shell.mak-admin .resource-register .driver-table th:nth-child(4) { width: 130px; }
+.app-shell.mak-admin .resource-register .driver-table th:nth-child(5) { width: 145px; }
+.app-shell.mak-admin .resource-register .driver-table th:nth-child(6) { width: 130px; }
+.app-shell.mak-admin .resource-register .driver-table th:nth-child(7) { width: 95px; }
+.app-shell.mak-admin .resource-register .driver-table th:nth-child(8) { width: 120px; }
+.app-shell.mak-admin .resource-register :is(.fleet-reg, .driver-id) { color: #007bb7 !important; font-weight: 600 !important; }
+.app-shell.mak-admin .resource-register :is(.fleet-vehicle-cell strong, .driver-name-link strong) { color: #24445f; font-size: 13px; font-weight: 500; }
+.app-shell.mak-admin .resource-register .fleet-vehicle-cell { gap: 10px; }
+.app-shell.mak-admin .resource-register .fleet-car-icon { width: 32px; height: 32px; flex: 0 0 32px; background: #eaf6fc; color: #008dca; }
+.app-shell.mak-admin .resource-register :is(.fleet-vehicle-cell small, .fleet-rate small, .driver-rate small) { display: block; margin-top: 2px; color: #60758c; font-size: 12px; font-weight: 400; }
+.app-shell.mak-admin .resource-register :is(.fleet-rate, .driver-rate) { color: #24445f !important; font-weight: 500 !important; font-variant-numeric: tabular-nums; }
+.app-shell.mak-admin .resource-register .driver-name-link strong { color: #007bb7; text-decoration: underline; text-underline-offset: 3px; }
+.app-shell.mak-admin .resource-register :is(.fleet-status, .driver-status) { display: inline-flex; align-items: center; max-width: 100%; padding: 4px 7px; border-radius: 5px; font-size: 12px; font-weight: 500; line-height: 1.35; }
+.app-shell.mak-admin .resource-register :is(.fleet-status.available, .driver-status.active) { background: #e1f6ee; color: #00775c; }
+.app-shell.mak-admin .resource-register .fleet-status.under-maintenance { background: #fff3db; color: #9a6207; }
+.app-shell.mak-admin .resource-register .fleet-status.in-use { background: #eaf2ff; color: #3567a4; }
+.app-shell.mak-admin .resource-register :is(.fleet-status.inactive, .driver-status.inactive) { background: #edf1f5; color: #607083; }
+.app-shell.mak-admin .resource-register .fleet-site { color: #60758c; font-size: 13px; font-weight: 400; }
+.app-shell.mak-admin .resource-indicator { display: inline-flex; align-items: center; gap: 5px; padding: 4px 7px; border-radius: 5px; font-size: 12px; font-weight: 500; line-height: 1.35; }
+.app-shell.mak-admin .resource-indicator.complete { color: #00775c; background: #e1f6ee; }
+.app-shell.mak-admin .resource-indicator.missing { color: #9a6207; background: #fff3db; }
+.app-shell.mak-admin .resource-indicator.expired { color: #bc334b; background: #fff0f2; }
+.app-shell.mak-admin .resource-register :is(.fleet-more, .driver-more) { display: grid; place-items: center; width: 36px; height: 36px; min-height: 36px; margin: auto; border: 1px solid #dce5ed; border-radius: 6px; background: #fff; color: #48627b; cursor: pointer; }
+.app-shell.mak-admin .resource-register :is(.fleet-more, .driver-more):hover { background: #eaf6fc; border-color: #9ccfe6; color: #007bb7; }
+.app-shell.mak-admin .resource-register :is(.fleet-pagination, .driver-pagination) { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 14px 16px; border-top: 1px solid #e8edf2; color: #60758c; font-size: 12px; font-weight: 400; }
+.app-shell.mak-admin .resource-register :is(.fleet-pagination, .driver-pagination) > div { display: flex; align-items: center; gap: 10px; }
+.app-shell.mak-admin .resource-register :is(.fleet-pagination, .driver-pagination) button { width: 32px; height: 32px; }
+.app-shell.mak-admin .resource-register :is(.fleet-pagination, .driver-pagination) select { min-width: 90px; height: 36px; }
+/* Option 2: compact grouped Driver KPIs, independent of Fleet's responsive icon sizing. */
+.app-shell.mak-admin .resource-driver-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; box-sizing: border-box; width: min(100%, 660px); min-height: 76px; margin-bottom: 18px; padding: 12px 0; border: 1px solid #e3e9ef; border-radius: 7px; background: #fff; }
+.app-shell.mak-admin .resource-driver-summary > div { display: flex; align-items: center; min-width: 0; gap: 12px; padding: 0 16px; }
+.app-shell.mak-admin .resource-driver-summary > div + div { border-left: 1px solid #e3e9ef; }
+.app-shell.mak-admin .resource-driver-summary .resource-kpi-icon { flex: 0 0 40px; width: 40px; height: 40px; }
+.app-shell.mak-admin .resource-driver-summary .resource-summary-copy { display: flex; flex-direction: column; min-width: 0; gap: 4px; }
+.app-shell.mak-admin .resource-driver-summary small { display: block; margin: 0; color: #60758c; font-size: 12px; font-weight: 400; line-height: 1.35; }
+.app-shell.mak-admin .resource-driver-summary strong { display: block; margin: 0; color: #102a43; font-size: 24px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.app-shell.mak-admin .resource-register :is(.fleet-empty, .driver-empty) { gap: 10px; min-height: 240px; padding: 30px 20px; color: #60758c; text-align: center; font-size: 13px; }
+.app-shell.mak-admin .resource-register :is(.fleet-empty, .driver-empty) strong { color: #24445f; font-size: 16px; font-weight: 600; }
+.app-shell.mak-admin .resource-register :is(.fleet-empty, .driver-empty) p { max-width: 42ch; margin: 0; line-height: 1.6; }
+.app-shell.mak-admin .resource-register .resource-empty-add { min-height: 40px; margin-top: 4px; padding: 0 14px; border: 1px solid #008dca; border-radius: 6px; color: #fff; background: #008dca; font-size: 13px; font-weight: 500; cursor: pointer; }
+.app-shell.mak-admin .resource-scroll-hint { display: none; margin: 0; padding: 0 16px 10px; color: #60758c; font-size: 12px; }
+.app-shell.mak-admin .resource-register .resource-period { display: flex; align-items: center; gap: 8px; margin-top: 14px; color: #60758c; font-size: 12px; font-weight: 400; }
+.app-shell.mak-admin .resource-register .resource-period select { height: 34px; color: #60758c; font-size: 12px; }
+.app-shell.mak-admin .resource-menu-backdrop { position: fixed; inset: 0; z-index: 50; border: 0; background: transparent; cursor: default; }
+.app-shell.mak-admin .resource-action-menu { position: fixed; z-index: 51; width: 220px; padding: 5px; border: 1px solid #e3e9ef; border-radius: 8px; background: #fff; box-shadow: 0 12px 30px #102a4320; }
+.app-shell.mak-admin .resource-action-menu > button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 40px; padding: 9px 10px; border: 0; border-radius: 5px; background: transparent; color: #34546f; font-size: 13px; font-weight: 400; text-align: left; cursor: pointer; }
+.app-shell.mak-admin .resource-action-menu > button:hover:not(:disabled), .app-shell.mak-admin .resource-action-menu > button:focus-visible { background: #eaf6fc; color: #007bb7; }
+.app-shell.mak-admin .resource-action-menu > button:disabled { opacity: .45; cursor: default; }
+.app-shell.mak-admin .resource-action-menu > button.danger { color: #bc334b; }
+.app-shell.mak-admin .resource-action-menu > button.danger:hover:not(:disabled) { background: #fff0f2; }
+@media (max-width: 1250px) {
+  .app-shell.mak-admin .resource-kpi { gap: 8px; padding: 15px 10px; }
+  .app-shell.mak-admin .resource-kpi-icon { width: 32px; height: 32px; flex-basis: 32px; }
+}
+@media (max-width: 1100px) {
+  .app-shell.mak-admin .resource-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .app-shell.mak-admin .resource-toolbar { align-items: flex-start; }
+  .app-shell.mak-admin .resource-filter-controls { order: 3; width: 100%; }
+  .app-shell.mak-admin .resource-filter-controls > select { flex: 1 1 140px; max-width: none; }
+  .app-shell.mak-admin .resource-scroll-hint { display: block; }
+}
+@media (max-width: 700px) {
+  .app-shell.mak-admin .resource-page .resource-heading { flex-direction: column; align-items: stretch; gap: 16px; margin-bottom: 20px; }
+  .app-shell.mak-admin .resource-heading .admin-page-actions { width: auto; }
+  .app-shell.mak-admin .resource-heading .admin-page-action-buttons { width: auto; margin-left: 0; justify-content: flex-start; }
+  .app-shell.mak-admin .resource-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .app-shell.mak-admin .resource-kpi { min-height: 130px; padding: 14px 10px; }
+  .app-shell.mak-admin .resource-kpi-copy > span { font-size: 12px; }
+  .app-shell.mak-admin .resource-kpi strong { font-size: 25px; }
+  .app-shell.mak-admin .resource-presets { gap: 6px; }
+  .app-shell.mak-admin .resource-toolbar { padding: 12px; gap: 8px; }
+  .app-shell.mak-admin .resource-toolbar :is(.fleet-search, .driver-search) { min-width: 0; flex-basis: 160px; }
+  .app-shell.mak-admin .resource-filter-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .app-shell.mak-admin .resource-filter-controls[hidden] { display: none; }
+  .app-shell.mak-admin .resource-filter-controls > select { min-width: 0; width: 100%; max-width: none; }
+  .app-shell.mak-admin .resource-register :is(.fleet-pagination, .driver-pagination) { align-items: flex-start; flex-direction: column; padding: 14px 12px; }
+  .app-shell.mak-admin .resource-register :is(.fleet-pagination, .driver-pagination) > div { width: 100%; justify-content: space-between; gap: 8px; }
+}
+@media (prefers-reduced-motion: reduce) { .app-shell.mak-admin .resource-kpi { transition: none; } }
+
+@media (max-width: 560px) {
+  .app-shell.mak-admin .resource-driver-summary { min-height: 124px; padding: 14px 0; }
+  .app-shell.mak-admin .resource-driver-summary > div { flex-direction: column; justify-content: center; gap: 8px; padding: 0 8px; text-align: center; }
+  .app-shell.mak-admin .resource-driver-summary .resource-kpi-icon { flex-basis: 32px; width: 32px; height: 32px; }
+  .app-shell.mak-admin .resource-driver-summary .resource-summary-copy { align-items: center; }
+  .app-shell.mak-admin .resource-driver-summary small { display: flex; align-items: center; justify-content: center; min-height: 32px; }
+}

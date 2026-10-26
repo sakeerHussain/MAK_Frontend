@@ -1,8 +1,10 @@
 import { blankDriver, DRIVER_CATEGORIES, DRIVER_STATUSES, EMPLOYMENT_TYPES } from './DriverData.js'
+import { PERSONNEL_PROFILE_COLUMNS, personnelProfile, normalizePersonnelExcelDates } from '../../shared/lib/personnelImport.js'
 
 export const DRIVER_IMPORT_COLUMNS = [
   'Employee ID', 'Name', 'Phone', 'Email', 'Category', 'Designation', 'Employment Type', 'Vendor',
   'Daily Rate (SAR)', 'Status', 'Join Date', 'Driving Licence No.', 'ID / Iqama No.',
+  ...Object.keys(PERSONNEL_PROFILE_COLUMNS).filter(column => column !== 'Driving Licence No.'), 'Monthly Rate (SAR)',
 ]
 const REQUIRED = ['Employee ID', 'Name', 'Phone', 'Daily Rate (SAR)']
 const EXAMPLE = ['DRV-9001', 'Maya Rahman', '+966 50 123 4567', 'maya@example.com', 'Light Vehicle', 'Driver', 'Full-time', '', '180.00', 'Active', '2026-01-15', 'LIC-9001', 'IQ-9001']
@@ -11,16 +13,17 @@ const csv = (rows) => rows.map((row) => row.map(quote).join(',')).join('\r\n')
 const normalizedPhone = (value) => String(value || '').replace(/\D/g, '')
 const validIsoDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`)) && new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value
 
-export const driverTemplateCsv = () => csv([DRIVER_IMPORT_COLUMNS, EXAMPLE])
+export const driverTemplateCsv = () => csv([DRIVER_IMPORT_COLUMNS, [...EXAMPLE, ...Array(DRIVER_IMPORT_COLUMNS.length - EXAMPLE.length).fill('')]])
 export const driverErrorCsv = (rows) => csv([['Row', 'Employee ID', 'Name', 'Phone', 'Errors'], ...rows.filter((row) => row.errors.length).map((row) => [row.rowNumber, row.driver.employeeId, row.driver.name, row.driver.phone, row.errors.join('; ')])])
 
 export async function parseDriverImportFile(file) {
   if (!/\.(csv|xlsx|xls)$/i.test(file.name)) throw new Error('Choose a CSV, XLSX, or XLS file.')
   if (file.size > 5 * 1024 * 1024) throw new Error('Choose a file smaller than 5 MB.')
   const XLSX = await import('../../shared/vendor/xlsx.mjs')
-  const workbook = XLSX.read(await file.arrayBuffer(), { type: 'array', cellDates: false })
+  const workbook = XLSX.read(await file.arrayBuffer(), { type: 'array', cellDates: false, raw: /\.csv$/i.test(file.name) })
   if (!workbook.SheetNames.length) throw new Error('The workbook has no sheets.')
   const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1, defval: '', raw: false, blankrows: false })
+  if (/\.xlsx?$/i.test(file.name)) normalizePersonnelExcelDates(rows, workbook, XLSX)
   if (rows.length < 2) throw new Error('The file needs a header row and at least one driver.')
   if (rows.length > 2001) throw new Error('Import up to 2,000 drivers at a time.')
   return rows
@@ -43,7 +46,9 @@ export function validateDriverImport(rows, existing) {
       status: values.Status || 'Active', joinedOn: values['Join Date'],
       licenceNumber: values['Driving Licence No.'], idNumber: values['ID / Iqama No.'],
     }
-    const errors = []
+    const profile = personnelProfile(values, { 'Monthly Rate (SAR)': ['monthlyRate', 'number'] })
+    Object.assign(driver, profile.fields)
+    const errors = [...profile.errors]
     REQUIRED.forEach((column) => { if (!values[column]) errors.push(`${column} is required`) })
     if (driver.employeeId && (existingIds.has(driver.employeeId) || seenIds.has(driver.employeeId))) errors.push('Duplicate Employee ID')
     const phoneKey = normalizedPhone(driver.phone)

@@ -1,0 +1,32 @@
+/* Simple route foundations; individual page designs can be developed separately. */
+.rent-public-page { padding-block:142px 64px; min-height:calc(100svh - 260px); }
+.rent-site .rent-public-page-heading h1 { font-size:38px; font-weight:700; line-height:1.2; letter-spacing:-.8px; margin:0; color:#102a43; }
+.rent-site .rent-public-page-heading > p { color:#64758a; font-size:16px; line-height:1.75; max-width:720px; margin:16px 0 28px; }
+.rent-header nav a { display:inline-flex; align-items:center; min-height:44px; padding:8px 0; font-size:12px; font-weight:500; color:#354356; text-decoration:none; }
+.rent-header nav a:hover,.rent-header nav a[aria-current=page] { color:#007fbd; }
+.rent-header nav a[aria-current=page] { font-weight:700; }
+.rent-header nav .rent-mobile-contact { display:none; }
+.rent-header a.rent-nav-cta { color:#fff; }
+.rent-header nav a:focus-visible { outline:2px solid #007fbd; outline-offset:4px; border-radius:3px; }
+.rent-contact-form { max-width:760px; padding:28px; border:1px solid #e0e7ee; border-radius:12px; background:#fff; }
+.rent-site .rent-contact-note { font-size:13px; line-height:1.7; color:#64758a; margin:0 0 24px; }
+.rent-contact-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; margin-bottom:24px; }
+.rent-contact-fields label { display:block; font-size:13px; font-weight:550; color:#243e54; }
+.rent-contact-fields label > small { font-weight:400; color:#64758a; margin-left:5px; }
+.rent-contact-fields label > span { color:#007fbd; }
+.rent-contact-fields :is(input,select,textarea) { display:block; box-sizing:border-box; margin-top:8px; width:100%; min-width:0; border:1px solid #dce4ed; border-radius:6px; padding:11px 12px; font:inherit; font-size:15px; font-weight:400; color:#243e54; background:#fff; }
+.rent-contact-fields :is(input,select) { min-height:46px; }
+.rent-contact-fields textarea { resize:vertical; min-height:150px; line-height:1.6; }
+.rent-contact-fields :is(input,select,textarea):focus-visible { outline:2px solid #007fbd; outline-offset:2px; }
+.rent-contact-wide { grid-column:1/-1; }
+.rent-site .rent-contact-status { color:#176653; background:#effaf6; padding:12px 14px; border-radius:6px; font-size:13px; line-height:1.6; margin-bottom:18px; }
+@media(max-width:850px) { .rent-header nav .rent-mobile-contact { display:inline-flex; } }
+@media(max-width:650px) {
+ .rent-public-page { padding-block:108px 40px; min-height:60svh; }
+ .rent-site .rent-public-page-heading h1 { font-size:30px; }
+ .rent-site .rent-public-page-heading > p { font-size:15px; }
+ .rent-header nav a { min-height:44px; width:100%; }
+ .rent-contact-form { padding:22px 18px; }
+ .rent-contact-fields { grid-template-columns:minmax(0,1fr); gap:18px; }
+ .rent-contact-form > .rent-button { min-height:46px; width:100%; }
+}

@@ -1,37 +1,25 @@
-import ActionIcon from '../../app/ActionIcon.jsx'
+import ActionIcon from '../../shared/components/ResourceIcon.jsx'
+import Icon from '../../shared/components/ResourceIcon.jsx'
+import AdminPageHeader from '../../app/AdminPageHeader.jsx'
+import { ResourceFilters, ResourcePresets, ResourceIndicator, ResourceMenu } from '../../shared/components/ResourceRegister.jsx'
 import { useMemo, useState } from 'react'
 import { STATUS_OPTIONS, DOCUMENT_OPTIONS, TYPE_OPTIONS, documentStatus, vehicleOwner } from './FleetData.js'
 import FleetCarForm from './FleetCarForm.jsx'
 import FleetBulkUpload from './FleetBulkUpload.jsx'
+import FleetImportDrafts from './FleetImportDrafts.jsx'
 import FleetDocumentDialog from './FleetDocumentDialog.jsx'
 import VehicleDetailsPage from './VehicleDetailsPage.jsx'
 import { prepareUpload } from '../../shared/lib/upload.js'
-import { createVehicle, getVehicle, importVehicles, saveVehicleFiles, updateVehicle, updateVehicleStatus, uploadVehicleDocument } from './FleetApi.js'
+import { createVehicle, getVehicle, importVehicles, saveVehicleImportDrafts, saveVehicleFiles, updateVehicle, updateVehicleStatus, uploadVehicleDocument } from './FleetApi.js'
 import './FleetPage.css'
 
 const PAGE_SIZES = [8, 12, 20]
 const PERIODS = ['Last 7 days', 'Last 30 days', 'This month']
-const paths = {
-  fleet: 'M3 7h11v9H3z M14 10h4l3 3v3h-7z M7 19a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z M18 19a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z',
-  check: 'M5 12l5 5L20 7', key: 'M15 8a5 5 0 1 0-9 3l-3 3v3h3v3h3l5-5a5 5 0 0 0 1-7z M17 8h.01',
-  wrench: 'M14.5 6.5a4 4 0 0 0-5 5L3 18l3 3 6.5-6.5a4 4 0 0 0 5-5l-3 2-3-3z',
-  gauge: 'M4 18a9 9 0 1 1 16 0 M12 14l4-5 M6 18h12',
-  plus: 'M12 4v16 M4 12h16', more: 'M5 12h.01 M12 12h.01 M19 12h.01',
-  eye: 'M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
-  edit: 'M4 20l4-.8L20 7l-3-3L5 16z M14.5 6.5l3 3',
-  upload: 'M12 16V4 M7 9l5-5 5 5 M4 17v3h16v-3',
-  swap: 'M4 7h15 M15 3l4 4-4 4 M20 17H5 M9 13l-4 4 4 4',
-  search: 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M17 17l4 4',
-  close: 'M5 5l14 14 M19 5L5 19', left: 'M15 5l-7 7 7 7', right: 'M9 5l7 7-7 7',
-  filter: 'M4 7h16 M7 12h10 M10 17h4', document: 'M6 3h12v18l-3-2-3 2-3-2-3 2z M9 8h6 M9 12h6 M9 16h4',
-}
-function Icon({ name, size = 19 }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[name]} /></svg>
-}
 const statusClass = (status) => status.toLowerCase().replaceAll(' ', '-')
 const formatRate = (car) => `${car.rateCurrency || 'USD'} ${Number(car.dailyRate ?? car.rate ?? 0).toFixed(2)}`
 
 export default function FleetPage({ vehicles, setVehicles, vendors = [], loading = false, loadError = '', onReload, viewVehicleId, onViewVehicle, onBackFleet }) {
+  const [draftRefreshToken, setDraftRefreshToken] = useState(0)
   const [period, setPeriod] = useState('Last 7 days')
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('All statuses')
@@ -98,6 +86,15 @@ export default function FleetPage({ vehicles, setVehicles, vendors = [], loading
     resetFilters()
     return result
   }
+  const saveImportDrafts = async cars => {
+    const result = await saveVehicleImportDrafts(cars)
+    setDraftRefreshToken(current => current + 1)
+    return result
+  }
+  const completeImportDraft = car => {
+    setVehicles(current => [car, ...current.filter(item => item.id !== car.id)])
+    resetFilters()
+  }
   const saveStatus = async () => {
     if (!selected || busy) return
     setBusy(true); setActionError('')
@@ -128,34 +125,76 @@ export default function FleetPage({ vehicles, setVehicles, vendors = [], loading
   const openMenu = (event, car) => {
     if (menu?.id === car.id) { setMenu(null); return }
     const rect = event.currentTarget.getBoundingClientRect()
-    setMenu({ id: car.id, x: Math.max(8, Math.min(rect.right - 190, window.innerWidth - 202)), y: Math.max(8, Math.min(rect.bottom + 5, window.innerHeight - 165)), car })
+    setMenu({ id: car.id, trigger: event.currentTarget, x: Math.max(8, Math.min(rect.right - 220, window.innerWidth - 228)), y: Math.max(8, Math.min(rect.bottom + 5, window.innerHeight - 190)), car })
   }
   const kpis = [
     { label: 'Total Vehicles', value: counts.total, icon: 'fleet', color: 'blue', foot: 'Overall fleet size', filter: 'All statuses' },
     { label: 'Available Vehicles', value: counts.available, icon: 'check', color: 'green', foot: 'Ready for assignment', filter: 'Available' },
     { label: 'Vehicles in Use', value: counts.inUse, icon: 'key', color: 'purple', foot: 'Assigned or on a trip', filter: 'In Use' },
     { label: 'Under Maintenance', value: counts.maintenance, icon: 'wrench', color: 'amber', foot: 'Servicing or repairs', filter: 'Under Maintenance' },
-    { label: 'Fleet Utilization', value: '—', icon: 'gauge', color: 'cyan', foot: 'Requires booking hours API' },
+    { label: 'Fleet Utilization', value: '—', icon: 'gauge', color: 'cyan', foot: 'Utilization data unavailable' },
   ]
   const detailVehicle = vehicles.find((car) => String(car.id) === String(viewVehicleId))
-  return <div className="fleet-page">
+  const activeFilters = [query.trim(), statusFilter !== 'All statuses', typeFilter !== 'All types', documentFilter !== 'All documents', siteFilter !== 'Any location'].filter(Boolean).length
+  return <div className={`fleet-page resource-page ${viewVehicleId ? '' : 'resource-register'}`}>
     {viewVehicleId ? <VehicleDetailsPage key={viewVehicleId} car={detailVehicle} onBack={onBackFleet} onEdit={() => openDialog('edit', detailVehicle)} onUploadDocuments={() => openDialog('documents', detailVehicle)} onUpdateStatus={() => openDialog('status', detailVehicle)} /> : <>
-    <div className="admin-page-actions admin-page-actions-with-context" role="group" aria-label="Fleet actions"><label className="fleet-period">Period <select value={period} onChange={(event) => setPeriod(event.target.value)} aria-label="Fleet utilization period" disabled>{PERIODS.map((option) => <option key={option}>{option}</option>)}</select></label><div className="admin-page-action-buttons"><button className="fleet-secondary-button" type="button" disabled={loading || Boolean(loadError)} onClick={() => openDialog('bulk')}><ActionIcon name="upload" size={16} /> Bulk Upload</button><button className="fleet-add-button" type="button" disabled={loading || Boolean(loadError)} onClick={() => openDialog('add')}><ActionIcon name="plus" size={17} /> Add Car</button></div></div>
-    {(loadError || actionError) && <div className="fleet-form-error" role="alert">{loadError || actionError} <button type="button" onClick={() => { setActionError(''); onReload().catch((error) => setActionError(error.message)) }}>Retry</button></div>}
-    {loading && <p className="fleet-form-help" role="status">Loading vehicles from the backend…</p>}
-    <div className="fleet-kpis">{kpis.map((kpi) => <button className={`fleet-kpi ${kpi.filter ? 'clickable' : ''}`} type="button" key={kpi.label} onClick={kpi.filter ? () => chooseCard(kpi.filter) : undefined} disabled={!kpi.filter} aria-label={`${kpi.label}: ${kpi.value}${kpi.filter ? '. Filter fleet list' : ''}`}><div className="fleet-kpi-top"><span>{kpi.label}</span><Icon name="right" size={15} /></div><div className="fleet-kpi-main"><span className={`fleet-kpi-icon ${kpi.color}`}><Icon name={kpi.icon} size={22} /></span><strong>{kpi.value}</strong></div><div className="fleet-kpi-foot"><i className={`fleet-dot ${kpi.color}`} />{kpi.foot}</div></button>)}</div>
-    <section className="fleet-table-panel" id="fleet-list" aria-labelledby="fleet-table-title">
-      <div className="fleet-table-titlebar"><div><h2 id="fleet-table-title">All vehicles</h2></div></div>
-      <div className="fleet-toolbar"><label className="fleet-search"><Icon name="search" size={17} /><input type="search" placeholder="Search reg no., vehicle ID, model..." aria-label="Search vehicles" value={query} onChange={(event) => updateFilter(setQuery, event.target.value)} /></label><span className="fleet-filter-label"><Icon name="filter" size={16} /> Filter by:</span><select aria-label="Filter by type" value={typeFilter} onChange={(event) => updateFilter(setTypeFilter, event.target.value)}><option>All types</option>{TYPE_OPTIONS.map((type) => <option key={type}>{type}</option>)}</select><select aria-label="Filter by status" value={statusFilter} onChange={(event) => updateFilter(setStatusFilter, event.target.value)}><option>All statuses</option>{STATUS_OPTIONS.map((status) => <option key={status}>{status}</option>)}</select><select aria-label="Filter by documents" value={documentFilter} onChange={(event) => updateFilter(setDocumentFilter, event.target.value)}><option>All documents</option>{DOCUMENT_OPTIONS.map((status) => <option key={status}>{status}</option>)}</select><select aria-label="Filter by on-site status" value={siteFilter} onChange={(event) => updateFilter(setSiteFilter, event.target.value)}><option>Any location</option><option>On-site</option><option>Off-site</option></select><select aria-label="Rows per page" value={pageSize} onChange={(event) => { setPageSize(Number(event.target.value)); setPage(1) }}>{PAGE_SIZES.map((size) => <option key={size} value={size}>{size} rows</option>)}</select></div>
-      {(query || statusFilter !== 'All statuses' || typeFilter !== 'All types' || documentFilter !== 'All documents' || siteFilter !== 'Any location') && <div className="fleet-filter-summary"><span>{filtered.length} matching vehicles</span><button type="button" onClick={resetFilters}>Clear filters</button></div>}
-      <div className="fleet-table-scroll"><table className="fleet-table"><thead><tr><th scope="col">Reg No.</th><th scope="col">Make / Model / Year</th><th scope="col">Type</th><th scope="col">Owner</th><th scope="col">Price / Rate</th><th scope="col">Status</th><th scope="col">On-site?</th><th scope="col">Documents</th><th scope="col">Actions</th></tr></thead><tbody>{visible.map((car) => { const docs = documentStatus(car); return <tr key={car.id}><td className="fleet-reg">{car.registration}</td><td><div className="fleet-vehicle-cell"><span className="fleet-car-icon"><Icon name="fleet" size={19} /></span><span><strong>{car.make} {car.model}</strong><small>{car.year}</small></span></div></td><td>{car.type}</td><td>{vehicleOwner(car)}</td><td className="fleet-rate">{formatRate(car)} <small>/ day</small></td><td><span className={`fleet-status ${statusClass(car.status)}`}>{car.status}</span></td><td><span className={`fleet-site ${car.onSite ? 'yes' : 'no'}`}>{car.onSite ? 'Yes' : 'No'}</span></td><td><span className={`fleet-documents ${docs.toLowerCase()}`}><i />{docs}</span></td><td><div className="fleet-row-actions"><button type="button" className="fleet-view" onClick={() => onViewVehicle(car.id)}><ActionIcon name="eye" size={16} /> View</button><button type="button" className="fleet-more" aria-label={`More actions for ${car.registration}`} aria-expanded={menu?.id === car.id} onClick={(event) => openMenu(event, car)}><ActionIcon name="more" size={20} /></button></div></td></tr> })}</tbody></table>{!visible.length && !loading && !loadError && <div className="fleet-empty"><Icon name="search" size={25} /><strong>No vehicles found</strong><span>Try different search terms or clear the filters.</span><button type="button" onClick={resetFilters}>Clear filters</button></div>}</div>
-      <div className="fleet-pagination"><span>{filtered.length ? `Showing ${(safePage - 1) * pageSize + 1}–${Math.min(safePage * pageSize, filtered.length)} of ${filtered.length} vehicles` : 'Showing 0 vehicles'}</span><div><button type="button" aria-label="Previous page" disabled={safePage === 1} onClick={() => setPage(safePage - 1)}><Icon name="left" size={15} /></button><span>Page {safePage} of {pageCount}</span><button type="button" aria-label="Next page" disabled={safePage === pageCount} onClick={() => setPage(safePage + 1)}><Icon name="right" size={15} /></button></div></div>
-    </section>
-    {menu && <><button className="fleet-menu-backdrop" type="button" aria-label="Close vehicle actions" onClick={() => setMenu(null)} /><div className="fleet-action-menu" style={{ left: menu.x, top: menu.y }} role="menu"><button role="menuitem" type="button" onClick={() => openDialog('edit', menu.car)}><ActionIcon name="edit" size={16} /> Edit</button><button role="menuitem" type="button" onClick={() => openDialog('documents', menu.car)}><ActionIcon name="upload" size={16} /> Upload Documents</button><button role="menuitem" type="button" onClick={() => openDialog('status', menu.car)}><ActionIcon name="swap" size={16} /> Update Status</button></div></>}
+      <div className="resource-heading">
+        <AdminPageHeader title="Fleet" description="Manage vehicles, availability, and fleet records." />
+        <div className="admin-page-actions" role="group" aria-label="Fleet actions"><div className="admin-page-action-buttons">
+          <button className="fleet-secondary-button" type="button" disabled={loading || Boolean(loadError)} onClick={() => openDialog('bulk')}><Icon name="upload" /> Bulk Upload</button>
+          <button className="fleet-add-button" type="button" disabled={loading || Boolean(loadError)} onClick={() => openDialog('add')}><Icon name="plus" /> Add Car</button>
+        </div></div>
+      </div>
+      {(loadError || actionError) && <div className="fleet-form-error" role="alert">{loadError || actionError} <button type="button" onClick={() => { setActionError(''); onReload().catch((error) => setActionError(error.message)) }}>Retry</button></div>}
+      {loading && <p className="fleet-form-help" role="status">Loading vehicles...</p>}
+      <div className="resource-kpis" aria-label="Fleet overview">{kpis.map((kpi) => <button className="resource-kpi" type="button" key={kpi.label} onClick={kpi.filter ? () => chooseCard(kpi.filter) : undefined} disabled={!kpi.filter} aria-label={`${kpi.label}: ${kpi.value}${kpi.filter ? '. Filter fleet list' : ''}`}>
+        <span className={`resource-kpi-icon ${kpi.color}`}><Icon name={kpi.icon} size={21} /></span>
+        <span className="resource-kpi-copy"><span>{kpi.label}</span><strong>{kpi.value}</strong><small>{kpi.foot}</small></span>
+        {kpi.filter && <Icon className="resource-kpi-arrow" name="right" size={14} />}
+      </button>)}</div>
+      <ResourcePresets label="Vehicle status shortcuts" value={statusFilter} onChange={(value) => updateFilter(setStatusFilter, value)} items={[
+        { label: 'All vehicles', value: 'All statuses', count: counts.total },
+        { label: 'Available', value: 'Available', count: counts.available },
+        { label: 'Under maintenance', value: 'Under Maintenance', count: counts.maintenance },
+      ]} />
+      <section className="fleet-table-panel" id="fleet-list" aria-label="Vehicles">
+        <ResourceFilters activeCount={activeFilters} onReset={resetFilters} search={<label className="fleet-search"><Icon name="search" /><input type="search" placeholder="Search reg no., vehicle ID, model..." aria-label="Search vehicles" value={query} onChange={(event) => updateFilter(setQuery, event.target.value)} /></label>}>
+          <select aria-label="Filter by type" value={typeFilter} onChange={(event) => updateFilter(setTypeFilter, event.target.value)}><option>All types</option>{TYPE_OPTIONS.map((type) => <option key={type}>{type}</option>)}</select>
+          <select aria-label="Filter by status" value={statusFilter} onChange={(event) => updateFilter(setStatusFilter, event.target.value)}><option>All statuses</option>{STATUS_OPTIONS.map((status) => <option key={status}>{status}</option>)}</select>
+          <select aria-label="Filter by documents" value={documentFilter} onChange={(event) => updateFilter(setDocumentFilter, event.target.value)}><option>All documents</option>{DOCUMENT_OPTIONS.map((status) => <option key={status}>{status}</option>)}</select>
+          <select aria-label="Filter by on-site status" value={siteFilter} onChange={(event) => updateFilter(setSiteFilter, event.target.value)}><option>Any location</option><option>On-site</option><option>Off-site</option></select>
+        </ResourceFilters>
+        <p className="resource-scroll-hint" id="fleet-scroll-help">Scroll the table sideways to see all vehicle details.</p>
+        <div className="fleet-table-scroll" role="region" aria-label="Vehicle records" tabIndex={0}>
+          <table className="fleet-table"><thead><tr>{['Reg No.', 'Make / Model / Year', 'Type', 'Owner', 'Price / Rate', 'Status', 'On-site?', 'Documents', 'Actions'].map((heading) => <th scope="col" key={heading}>{heading}</th>)}</tr></thead>
+            <tbody>{visible.map((car) => { const docs = documentStatus(car); return <tr key={car.id}>
+              <td className="fleet-reg">{car.registration}</td>
+              <td><div className="fleet-vehicle-cell"><span className="fleet-car-icon"><Icon name="fleet" size={19} /></span><span><strong>{car.make} {car.model}</strong><small>{car.year}</small></span></div></td>
+              <td>{car.type}</td><td>{vehicleOwner(car)}</td><td className="fleet-rate">{formatRate(car)}<small>/ day</small></td>
+              <td><span className={`fleet-status ${statusClass(car.status)}`}>{car.status}</span></td><td><span className={`fleet-site ${car.onSite ? 'yes' : 'no'}`}>{car.onSite ? 'Yes' : 'No'}</span></td>
+              <td><ResourceIndicator value={docs} /></td>
+              <td><button type="button" className="fleet-more" aria-label={`More actions for ${car.registration}`} aria-haspopup="menu" aria-expanded={menu?.id === car.id} onClick={(event) => openMenu(event, car)}><Icon name="more" size={20} /></button></td>
+            </tr> })}</tbody>
+          </table>
+          {!visible.length && !loading && !loadError && <div className="fleet-empty"><Icon name={vehicles.length ? 'search' : 'fleet'} size={28} /><strong>{vehicles.length ? 'No matching vehicles' : 'No vehicles added yet'}</strong><p>{vehicles.length ? 'Try another search or reset the filters.' : 'Add your first vehicle or use Bulk Upload to build your fleet.'}</p>{vehicles.length ? <button type="button" onClick={resetFilters}>Reset filters</button> : <button className="resource-empty-add" type="button" onClick={() => openDialog('add')}>Add Car</button>}</div>}
+        </div>
+        <div className="fleet-pagination"><span aria-live="polite">{filtered.length ? `Showing ${(safePage - 1) * pageSize + 1}–${Math.min(safePage * pageSize, filtered.length)} of ${filtered.length} vehicles` : 'Showing 0 vehicles'}</span><div>
+          <select aria-label="Rows per page" value={pageSize} onChange={(event) => { setPageSize(Number(event.target.value)); setPage(1); setMenu(null) }}>{PAGE_SIZES.map((size) => <option key={size} value={size}>{size} rows</option>)}</select>
+          <button type="button" aria-label="Previous page" disabled={safePage === 1} onClick={() => { setPage(safePage - 1); setMenu(null) }}><Icon name="left" size={16} /></button><span>Page {safePage} of {pageCount}</span><button type="button" aria-label="Next page" disabled={safePage === pageCount} onClick={() => { setPage(safePage + 1); setMenu(null) }}><Icon name="right" size={16} /></button>
+        </div></div>
+      </section>
+      <FleetImportDrafts refreshToken={draftRefreshToken} vehicles={vehicles} vendors={vendors} onCompleted={completeImportDraft} />
+      <label className="resource-period fleet-period">Utilization period <select value={period} onChange={(event) => setPeriod(event.target.value)} aria-label="Fleet utilization period" disabled>{PERIODS.map((option) => <option key={option}>{option}</option>)}</select></label>
+      {menu && <ResourceMenu menu={menu} onClose={() => setMenu(null)} label={`Vehicle actions for ${menu.car.registration}`} className="fleet-action-menu">
+        <button role="menuitem" type="button" onClick={() => { onViewVehicle(menu.car.id); setMenu(null) }}><Icon name="eye" /> View Vehicle</button>
+        <button role="menuitem" type="button" onClick={() => openDialog('edit', menu.car)}><Icon name="edit" /> Edit</button>
+        <button role="menuitem" type="button" onClick={() => openDialog('documents', menu.car)}><Icon name="upload" /> Upload Documents</button>
+        <button role="menuitem" type="button" onClick={() => openDialog('status', menu.car)}><Icon name="swap" /> Update Status</button>
+      </ResourceMenu>}
     </>}
     {dialog && <div className="fleet-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !busy) closeDialog() }}><div className={`fleet-dialog ${['add', 'edit', 'bulk'].includes(dialog) ? 'wide' : ''}`} role="dialog" aria-modal="true" aria-labelledby="fleet-dialog-title"><div className="fleet-dialog-header"><div><span className="fleet-demo-mark">CONNECTED TO BACKEND</span><h2 id="fleet-dialog-title">{({ add: 'Add Car', edit: 'Edit Car', bulk: 'Bulk Upload', status: 'Update Status', documents: 'Upload Documents' })[dialog]}</h2></div><button type="button" aria-label="Close dialog" disabled={busy} onClick={closeDialog}><Icon name="close" size={20} /></button></div>
       {(dialog === 'add' || dialog === 'edit') && <FleetCarForm key={selected?.id || 'new'} initial={selected} vehicles={vehicles} vendors={vendors} onCancel={closeDialog} onSave={saveCar} />}
-      {dialog === 'bulk' && <FleetBulkUpload vehicles={vehicles} onImport={importCars} onCancel={closeDialog} />}
+      {dialog === 'bulk' && <FleetBulkUpload vehicles={vehicles} onImport={importCars} onSaveDrafts={saveImportDrafts} onBusyChange={setBusy} onCancel={closeDialog} />}
       {dialog === 'status' && selected && <div className="fleet-simple-dialog"><p>Choose a new status for <strong>{selected.registration}</strong>.</p><label>Status<select value={pendingStatus} onChange={(event) => setPendingStatus(event.target.value)} disabled={busy}>{STATUS_OPTIONS.map((status) => <option key={status}>{status}</option>)}</select></label>{actionError && <p className="fleet-form-error" role="alert">{actionError}</p>}<div className="fleet-dialog-actions"><button type="button" className="fleet-secondary-button" disabled={busy} onClick={closeDialog}>Cancel</button><button type="button" className="fleet-primary-button" onClick={saveStatus} disabled={busy}><ActionIcon name="check" size={16} /> {busy ? 'Saving…' : 'Update Status'}</button></div></div>}
       {dialog === 'documents' && selected && <FleetDocumentDialog vehicle={selected} documentType={documentType} setDocumentType={setDocumentType} expiryDate={expiryDate} setExpiryDate={setExpiryDate} documentFile={documentFile} setDocumentFile={setDocumentFile} documentError={documentError} chooseDocument={chooseDocument} onCancel={closeDialog} onSave={saveDocument} busy={busy} />}
     </div></div>}

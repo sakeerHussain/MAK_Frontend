@@ -1,3 +1,5 @@
+import { vehicleComplianceExpiries } from '../../shared/lib/rentalPolicy.js'
+import { rentalDay } from '../../shared/lib/rentalTime.js'
 const models = [
   ['Toyota', 'Camry', 'Sedan', 72], ['Honda', 'Civic', 'Sedan', 65],
   ['Hyundai', 'Tucson', 'SUV', 89], ['Kia', 'Sportage', 'SUV', 86],
@@ -9,7 +11,7 @@ const models = [
 const owners = ['Company Fleet', 'Northside Rentals', 'Airport Mobility', 'CityDrive Partners']
 export const STATUS_OPTIONS = ['Available', 'In Use', 'Under Maintenance', 'Inactive']
 export const DOCUMENT_OPTIONS = ['Complete', 'Missing', 'Expired']
-export const TYPE_OPTIONS = ['Sedan', 'SUV', 'Van', 'Electric', 'Luxury']
+export const TYPE_OPTIONS = ['Sedan', 'SUV', 'Van', 'Bus', 'Electric', 'Luxury']
 export const TRANSMISSION_OPTIONS = ['Automatic', 'Manual']
 export const FUEL_OPTIONS = ['Petrol', 'Diesel', 'Hybrid', 'Electric']
 export const DOCUMENT_TYPES = ['Istimara', 'Insurance', 'Fahas', 'Others']
@@ -22,21 +24,34 @@ export function blankVehicle() {
     registration: '', make: '', model: '', year: String(new Date().getFullYear()),
     color: '', vehicleId: '', doorNo: '', chassisNo: '', type: 'Sedan', seats: '4',
     transmission: 'Automatic', fuelType: 'Petrol', featureTags: '',
-    hourlyRate: '', dailyRate: '', monthlyRate: '', ownership: 'Owned', vendor: '',
+    rateCurrency: 'SAR', hourlyRate: '', dailyRate: '', monthlyRate: '', ownership: 'Owned', vendor: '',
     status: 'Available', custodian: 'Unassigned', onSite: true,
     listedForBooking: true, showOnPublicSite: false,
     serviceIntervalKm: '', lastServiceKm: '', currentOdometerKm: '',
     oilIntervalKm: '', lastOilKm: '', tyreIntervalKm: '', lastTyreKm: '',
     brakeIntervalKm: '', lastBrakeKm: '', carImages: [], documentRecords: [],
+    registrationExpiryDate: '', insuranceExpiryDate: '', inspectionExpiryDate: '',
   }
+}
+
+export function vehicleFormValues(initial, fromImportDraft = false) {
+  const form = { ...blankVehicle(), ...initial }
+  if (fromImportDraft) {
+    for (const field of ['year', 'type', 'seats', 'transmission', 'fuelType', 'dailyRate', 'ownership']) form[field] = initial?.[field] ?? ''
+    form.onSite = initial?.onSite ?? null
+  }
+  Object.keys(form).forEach(field => { if (field !== 'onSite' && form[field] == null) form[field] = '' })
+  form.year = String(form.year)
+  form.featureTags = Array.isArray(form.featureTags) ? form.featureTags.join(', ') : form.featureTags || ''
+  return form
 }
 
 export function documentStatus(vehicle) {
   const records = vehicle.documentRecords || []
+  const today = rentalDay(new Date())
+  if (vehicleComplianceExpiries(vehicle).some((date) => date < today)) return 'Expired'
   if (!records.length && vehicle.documents) return vehicle.documents
-  const today = new Date().toISOString().slice(0, 10)
-  if (records.some((item) => item.expiryDate && item.expiryDate < today)) return 'Expired'
-  return REQUIRED_DOCUMENT_TYPES.every((type) => records.some((item) => item.type === type && item.name)) ? 'Complete' : 'Missing'
+  return REQUIRED_DOCUMENT_TYPES.every((type) => records.some((item) => item.type === type && item.name && item.expiryDate && item.expiryDate >= today)) ? 'Complete' : 'Missing'
 }
 
 export function vehicleOwner(vehicle) {

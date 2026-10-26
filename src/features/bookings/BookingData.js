@@ -1,23 +1,11 @@
+import { rentalDate, rentalDay, rentalDateTime, shiftRentalDays, formatRentalDateTime } from '../../shared/lib/rentalTime.js'
 export const BOOKING_STATUSES = ['Pending', 'Confirmed', 'Active', 'Completed', 'Cancelled']
 export const PAYMENT_STATUSES = ['Unpaid', 'Partially Paid', 'Paid', 'Partially Refunded', 'Refunded']
 
-export const dayKey = (value) => {
-  const date = value instanceof Date ? value : new Date(value)
-  if (Number.isNaN(date.getTime())) return ''
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-}
-
-export const shiftDays = (date, days) => {
-  const shifted = new Date(date)
-  shifted.setDate(shifted.getDate() + days)
-  return shifted
-}
-
-export const localDateTime = (date) => `${dayKey(date)}T${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
-
-export const formatDateTime = (value) => value ? new Intl.DateTimeFormat('en-GB', {
-  day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true,
-}).format(new Date(value)) : '—'
+export const dayKey = rentalDay
+export const shiftDays = shiftRentalDays
+export const localDateTime = rentalDateTime
+export const formatDateTime = formatRentalDateTime
 
 export const sar = (value) => `SAR ${Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
@@ -33,7 +21,7 @@ export function paymentStatus(booking) {
 
 export const netPaid = (booking) => Math.max(0, Number(booking.receivedAmount || 0) - Number(booking.refundedAmount || 0))
 export const balanceDue = (booking) => booking.status === 'Cancelled' ? 0 : Math.max(0, Number(booking.invoicedAmount ?? booking.totalAmount ?? 0) - netPaid(booking))
-export const isOverdue = (booking, now = new Date()) => booking.status === 'Active' && new Date(booking.returnAt).getTime() < now.getTime()
+export const isOverdue = (booking, now = new Date()) => booking.status === 'Active' && rentalDate(booking.returnAt).getTime() < now.getTime()
 
 export function bookingPriority(booking, now = new Date()) {
   const today = dayKey(now)
@@ -51,7 +39,9 @@ export function bookingPriority(booking, now = new Date()) {
 
 export function periodBounds(preset, customStart, customEnd, now = new Date()) {
   const today = dayKey(now)
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+  const [year, month, day] = today.split('-').map(Number)
+  const calendar = (offset, date) => new Date(Date.UTC(year, month-1+offset, date, 9))
+  const monthStart = calendar(0,1)
   let start, end = today, previousStart = '', previousEnd = ''
   if (preset === 'Today') {
     start = today
@@ -66,20 +56,20 @@ export function periodBounds(preset, customStart, customEnd, now = new Date()) {
     previousEnd = dayKey(shiftDays(now, -30))
   } else if (preset === 'This month') {
     start = dayKey(monthStart)
-    previousStart = dayKey(new Date(now.getFullYear(), now.getMonth() - 1, 1))
-    previousEnd = dayKey(new Date(now.getFullYear(), now.getMonth() - 1, Math.min(now.getDate(), new Date(now.getFullYear(), now.getMonth(), 0).getDate())))
+    previousStart = dayKey(calendar(-1,1))
+    previousEnd = dayKey(calendar(-1,Math.min(day, calendar(0,0).getUTCDate())))
   } else if (preset === 'Last month') {
-    start = dayKey(new Date(now.getFullYear(), now.getMonth() - 1, 1))
-    end = dayKey(new Date(now.getFullYear(), now.getMonth(), 0))
-    previousStart = dayKey(new Date(now.getFullYear(), now.getMonth() - 2, 1))
-    previousEnd = dayKey(new Date(now.getFullYear(), now.getMonth() - 1, 0))
+    start = dayKey(calendar(-1,1))
+    end = dayKey(calendar(0,0))
+    previousStart = dayKey(calendar(-2,1))
+    previousEnd = dayKey(calendar(-1,0))
   } else if (preset === 'Custom range') {
     start = customStart
     end = customEnd
     if (start && end && start <= end) {
-      const days = Math.round((new Date(`${end}T12:00`).getTime() - new Date(`${start}T12:00`).getTime()) / 86400000) + 1
-      previousStart = dayKey(shiftDays(new Date(`${start}T12:00`), -days))
-      previousEnd = dayKey(shiftDays(new Date(`${start}T12:00`), -1))
+      const days = Math.round((rentalDate(`${end}T12:00`).getTime() - rentalDate(`${start}T12:00`).getTime()) / 86400000) + 1
+      previousStart = dayKey(shiftDays(rentalDate(`${start}T12:00`), -days))
+      previousEnd = dayKey(shiftDays(rentalDate(`${start}T12:00`), -1))
     }
   } else {
     start = ''

@@ -59,7 +59,7 @@
 .invoice-link{padding:4px 6px 4px 0}
 .invoice-link:hover{text-decoration:underline}
 .invoice-pill{display:inline-flex;align-items:center;justify-content:center;padding:5px 8px;border-radius:4px;font-size:10px;font-weight:900;white-space:nowrap}
-.tone-draft{background:#eceff4;color:#7a8798}.tone-unpaid{background:#e8f1fe;color:#397ec3}.tone-partially-paid{background:#fff3df;color:#c28a2c}.tone-overdue{background:#fee9ed;color:#d06478}.tone-paid{background:#dcf7ef;color:#19a886}.tone-voided{background:#eceff4;color:#7a8798}
+.tone-draft{background:#eceff4;color:#7a8798}.tone-unpaid{background:#e8f1fe;color:#397ec3}.tone-partially-paid{background:#fff3df;color:#c28a2c}.tone-overdue{background:#fee9ed;color:#d06478}.tone-paid{background:#dcf7ef;color:#19a886}.tone-credited{background:#dcf7ef;color:#188365}.tone-refund-due{background:#fff3df;color:#925d10}.tone-voided{background:#eceff4;color:#7a8798}
 .invoice-pagination{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 20px;color:#8b97a6;font-size:11px}
 .invoice-pagination div{display:flex;gap:7px}.invoice-pagination button{padding:6px 9px;border:1px solid #e1e7ef;border-radius:4px;background:#fff;color:#5e6d7f;font-size:10px;font-weight:800;cursor:pointer}.invoice-pagination button:disabled{opacity:.45;cursor:default}
 .invoice-empty-table,.invoice-empty{padding:40px 22px;text-align:center;color:#8794a4;font-size:12px}.invoice-empty h2{color:#4b5769}

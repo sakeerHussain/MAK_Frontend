@@ -1,10 +1,14 @@
+import { rentalDay } from '../../shared/lib/rentalTime.js'
+
 const shown = (value) => String(value ?? '').trim() || '—'
 
 export const invoiceMetadataRows = (invoice) => [
   ['Invoice #', invoice.invoiceNumber || (invoice.id ? `DRAFT-${invoice.id}` : 'Assigned when issued')],
-  ['Invoice Issue Date', invoice.issuedAt?.slice(0, 10) || 'Not issued'],
+  ['Invoice Issue Date', rentalDay(invoice.issuedAt) || 'Not issued'],
   ['Due Date', shown(invoice.dueDate)],
   ['Terms', shown(invoice.paymentTerms)],
+  ['Due Date Basis', invoice.dueDateMode==='Terms'?'Payment terms from issue date (KSA)':invoice.dueDateMode==='Manual'?'Manual override':'Saved due date'],
+  ...(invoice.dueDateMode==='Manual' ? [['Due Date Override Reason', shown(invoice.dueDateOverrideReason)]] : []),
   ['P.O. #', shown(invoice.poNumber)],
   ['Transaction Type', shown(invoice.transactionType || (invoice.kind === 'Corporate' ? 'Corporate Trip' : 'Vehicle Rental'))],
 ]
