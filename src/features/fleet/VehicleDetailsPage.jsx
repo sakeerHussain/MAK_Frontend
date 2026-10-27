@@ -3,6 +3,7 @@ import { COMPLIANCE_DATE_FIELDS } from '../../shared/lib/rentalPolicy.js'
 import { rentalDay } from '../../shared/lib/rentalTime.js'
 import { useState } from 'react'
 import { DOCUMENT_TYPES, REQUIRED_DOCUMENT_TYPES, documentStatus, vehicleOwner } from './FleetData.js'
+import { FleetDocumentThumbnail, FleetDocumentLinks } from './FleetDocumentFile.jsx'
 import './VehicleDetailsPage.css'
 
 const maintenanceItems = [
@@ -85,7 +86,7 @@ export default function VehicleDetailsPage({ car, onBack, onEdit, onUploadDocume
         const registerDate = car[COMPLIANCE_DATE_FIELDS[type]]
         const expiryDate = record ? record.expiryDate : registerDate
         const expired = Boolean(expiryDate && expiryDate < today)
-        return <div className="vehicle-document-card" key={type}>{record?.previewUrl ? <img className="vehicle-document-thumbnail" src={record.previewUrl} alt={`${type} document preview`} /> : <span className="vehicle-document-placeholder">{record ? 'PDF' : '—'}</span>}<div><strong>{type}</strong><small>{REQUIRED_DOCUMENT_TYPES.includes(type) ? 'Required' : 'Optional'}</small><span className={expired ? 'expired' : record ? 'complete' : 'missing'}>{expired ? 'Expired' : record ? 'Uploaded' : REQUIRED_DOCUMENT_TYPES.includes(type) ? 'Missing' : 'Not uploaded'}</span>{record ? <p title={record.name}>{record.name}{expiryDate && <><br />Expires {expiryDate}</>}</p> : registerDate && <p>Register expiry: {registerDate}<br />Document file missing</p>}</div></div>
+        return <div className="vehicle-document-card" key={type}>{record ? <FleetDocumentThumbnail record={record} label={type} /> : <span className="vehicle-document-placeholder">—</span>}<div><strong>{type}</strong><small>{REQUIRED_DOCUMENT_TYPES.includes(type) ? 'Required' : 'Optional'}</small><span className={expired ? 'expired' : record ? 'complete' : 'missing'}>{expired ? 'Expired' : record ? 'Uploaded' : REQUIRED_DOCUMENT_TYPES.includes(type) ? 'Missing' : 'Not uploaded'}</span>{record ? <p title={record.name}>{record.name}{expiryDate && <><br />Expires {expiryDate}</>}</p> : registerDate && <p>Register expiry: {registerDate}<br />Document file missing</p>}{record && <FleetDocumentLinks record={record} label={type} />}</div></div>
       })}</div></section>
     </div>
   </div>

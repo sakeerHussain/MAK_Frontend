@@ -9,7 +9,7 @@ function isolateBackground(){
   background.clear()
   const top=dialogs.at(-1)?.dialog
   if(!top)return
-  for(let branch=top.closest('.booking-overlay')||top;branch?.parentElement;branch=branch.parentElement){
+  for(let branch=top.closest('.booking-overlay, .fleet-overlay')||top;branch?.parentElement;branch=branch.parentElement){
     for(const sibling of branch.parentElement.children){
       if(sibling===branch||!(sibling instanceof HTMLElement))continue
       background.set(sibling,sibling.inert);sibling.inert=true
@@ -19,13 +19,13 @@ function isolateBackground(){
 }
 const available=element=>element?.isConnected&&!element.closest('[inert]')&&!element.matches(':disabled')&&element.getClientRects().length&&getComputedStyle(element).visibility!=='hidden'
 
-export default function useRentalDialog(open,onClose,dialogRef){
+export default function useRentalDialog(open,onClose,dialogRef,returnFocusRef){
   const close=useEffectEvent(()=>onClose())
   useEffect(()=>{
     if(!open)return
     const dialog=dialogRef?.current||document.querySelector('.booking-dialog[role="dialog"]')
     if(!dialog)return
-    const trigger=document.activeElement
+    const trigger=returnFocusRef?.current || document.activeElement
     const previousTabIndex=dialog.getAttribute('tabindex')
     if(previousTabIndex===null)dialog.setAttribute('tabindex','-1')
     const entry={dialog}
@@ -65,5 +65,5 @@ export default function useRentalDialog(open,onClose,dialogRef){
         if(temporary)next.addEventListener('blur',()=>{if(next.getAttribute('tabindex')==='-1')next.removeAttribute('tabindex')},{once:true})
       }
     }
-  },[open,dialogRef])
+  },[open,dialogRef,returnFocusRef])
 }

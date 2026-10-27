@@ -107,3 +107,9 @@
 .fleet-draft-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .fleet-import-drafts .booking-dialog.wide { max-width: 940px; }
 .fleet-import-drafts .booking-dialog > .fleet-form-help { margin: 10px 24px; }
+
+.fleet-utilization-controls{display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:10px;margin:0 0 14px}
+.fleet-utilization-note{margin:-5px 0 20px;color:#6c7d91;font-size:11px;line-height:1.6}
+.fleet-utilization-note p{margin:4px 0}.fleet-utilization-note strong{font-weight:600;color:#334b62}
+.fleet-utilization-kpi{cursor:default}
+@media(max-width:620px){.fleet-utilization-controls{justify-content:flex-start}.fleet-utilization-controls .fleet-period{align-self:auto}}

@@ -1,0 +1,7 @@
+.fleet-file-thumbnail,.fleet-file-badge{width:48px;height:54px;flex:none;border-radius:5px;background:#edf5fa;object-fit:cover}
+.fleet-file-badge{display:grid!important;place-items:center;color:#087dac;font-size:11px!important;font-weight:800}
+.fleet-file-links{display:flex!important;flex-wrap:wrap;align-items:center;gap:5px 10px;margin-top:9px}
+.fleet-file-links a{display:inline-flex;align-items:center;gap:4px;min-height:32px;color:#007eae;font-size:11px;font-weight:700;text-decoration:none}
+.fleet-file-links a:hover{text-decoration:underline;color:#005e83}
+.fleet-file-links a:focus-visible{outline:2px solid #0086b8;outline-offset:3px;border-radius:2px}
+.fleet-file-sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}

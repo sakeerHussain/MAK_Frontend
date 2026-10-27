@@ -1,3 +1,4 @@
+import { assignmentIsDue } from '../../shared/lib/assignmentAlert.js'
 import { rentalDate } from '../../shared/lib/rentalTime.js'
 import { dayKey, localDateTime, shiftDays } from '../bookings/BookingData.js'
 
@@ -38,6 +39,7 @@ export function resourceConflict(kind, id, pickupAt, returnAt, currentTripId, tr
 
 export function corporatePriority(trip, now = new Date()) {
   const today = dayKey(now)
+  if (trip.status === 'Confirmed' && assignmentIsDue(trip, now) && (!trip.vehicleId || (trip.serviceMode !== 'Self-drive' && !trip.driverId))) return { score: 96, label: 'Assignment alert due', tone: 'danger' }
   if (trip.status === 'Active' && rentalDate(trip.returnAt) < now) return { score: 100, label: 'Overdue return', tone: 'danger' }
   if (trip.status === 'Confirmed' && dayKey(trip.pickupAt) <= today && (!trip.vehicleId || (trip.serviceMode === 'With driver' && !trip.driverId))) return { score: 95, label: 'Assignment needed', tone: 'danger' }
   if (trip.status === 'Confirmed' && dayKey(trip.pickupAt) <= today) return { score: 90, label: 'Handover pending', tone: 'warning' }

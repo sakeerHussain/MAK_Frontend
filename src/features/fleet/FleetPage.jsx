@@ -2,7 +2,11 @@ import ActionIcon from '../../shared/components/ResourceIcon.jsx'
 import Icon from '../../shared/components/ResourceIcon.jsx'
 import AdminPageHeader from '../../app/AdminPageHeader.jsx'
 import { ResourceFilters, ResourcePresets, ResourceIndicator, ResourceMenu } from '../../shared/components/ResourceRegister.jsx'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
+import useRentalDialog from '../../shared/hooks/useRentalDialog.js'
+import useFleetUtilization from '../../shared/hooks/useFleetUtilization.js'
+import { UTILIZATION_PERIODS, utilizationValue, utilizationHours } from './FleetUtilization.js'
+import { formatRentalDateTime } from '../../shared/lib/rentalTime.js'
 import { STATUS_OPTIONS, DOCUMENT_OPTIONS, TYPE_OPTIONS, documentStatus, vehicleOwner } from './FleetData.js'
 import FleetCarForm from './FleetCarForm.jsx'
 import FleetBulkUpload from './FleetBulkUpload.jsx'
@@ -14,13 +18,15 @@ import { createVehicle, getVehicle, importVehicles, saveVehicleImportDrafts, sav
 import './FleetPage.css'
 
 const PAGE_SIZES = [8, 12, 20]
-const PERIODS = ['Last 7 days', 'Last 30 days', 'This month']
 const statusClass = (status) => status.toLowerCase().replaceAll(' ', '-')
 const formatRate = (car) => `${car.rateCurrency || 'USD'} ${Number(car.dailyRate ?? car.rate ?? 0).toFixed(2)}`
 
 export default function FleetPage({ vehicles, setVehicles, vendors = [], loading = false, loadError = '', onReload, viewVehicleId, onViewVehicle, onBackFleet }) {
+  const dialogRef = useRef(null)
+  const dialogTriggerRef = useRef(null)
   const [draftRefreshToken, setDraftRefreshToken] = useState(0)
-  const [period, setPeriod] = useState('Last 7 days')
+  const [period, setPeriod] = useState('LAST_7_DAYS')
+  const utilization = useFleetUtilization(period, !viewVehicleId && !loading && !loadError, vehicles)
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('All statuses')
   const [typeFilter, setTypeFilter] = useState('All types')
@@ -60,24 +66,29 @@ export default function FleetPage({ vehicles, setVehicles, vendors = [], loading
   const resetFilters = () => { setQuery(''); setStatusFilter('All statuses'); setTypeFilter('All types'); setDocumentFilter('All documents'); setSiteFilter('Any location'); setPage(1); setMenu(null) }
   const chooseCard = (status) => { setStatusFilter(status); setPage(1); document.getElementById('fleet-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
   const openDialog = (kind, car = null) => {
+    dialogTriggerRef.current = menu?.trigger || document.activeElement
     setSelected(car); setDialog(kind); setMenu(null); setActionError('')
     if (kind === 'status') setPendingStatus(car.status)
     if (kind === 'documents') { setDocumentFile(null); setDocumentType('Istimara'); setExpiryDate(''); setDocumentError('') }
   }
   const closeDialog = () => { setDialog(null); setSelected(null); setDocumentFile(null) }
+  useRentalDialog(Boolean(dialog), () => { if (!busy) closeDialog() }, dialogRef, dialogTriggerRef)
   const saveCar = async (car) => {
-    const saved = dialog === 'add' ? await createVehicle(car) : await updateVehicle(selected.id, car)
+    setBusy(true)
     try {
-      const complete = await saveVehicleFiles(saved.id, car, selected)
-      setVehicles((current) => dialog === 'add' ? [complete, ...current] : current.map((item) => item.id === complete.id ? complete : item))
-      if (dialog === 'add') resetFilters()
-      closeDialog()
-    } catch (error) {
-      const latest = await getVehicle(saved.id).catch(() => saved)
-      setVehicles((current) => dialog === 'add' ? [latest, ...current.filter((item) => item.id !== latest.id)] : current.map((item) => item.id === latest.id ? latest : item))
-      closeDialog()
-      setActionError(`Vehicle details were saved, but a file operation failed: ${error.message}. Open Edit Car to retry the file.`)
-    }
+      const saved = dialog === 'add' ? await createVehicle(car) : await updateVehicle(selected.id, car)
+      try {
+        const complete = await saveVehicleFiles(saved.id, car, selected)
+        setVehicles((current) => dialog === 'add' ? [complete, ...current] : current.map((item) => item.id === complete.id ? complete : item))
+        if (dialog === 'add') resetFilters()
+        closeDialog()
+      } catch (error) {
+        const latest = await getVehicle(saved.id).catch(() => saved)
+        setVehicles((current) => dialog === 'add' ? [latest, ...current.filter((item) => item.id !== latest.id)] : current.map((item) => item.id === latest.id ? latest : item))
+        closeDialog()
+        setActionError(`Vehicle details were saved, but a file operation failed: ${error.message}. Open Edit Car to retry the file.`)
+      }
+    } finally { setBusy(false) }
   }
   const importCars = async (cars) => {
     const result = await importVehicles(cars)
@@ -132,7 +143,6 @@ export default function FleetPage({ vehicles, setVehicles, vendors = [], loading
     { label: 'Available Vehicles', value: counts.available, icon: 'check', color: 'green', foot: 'Ready for assignment', filter: 'Available' },
     { label: 'Vehicles in Use', value: counts.inUse, icon: 'key', color: 'purple', foot: 'Assigned or on a trip', filter: 'In Use' },
     { label: 'Under Maintenance', value: counts.maintenance, icon: 'wrench', color: 'amber', foot: 'Servicing or repairs', filter: 'Under Maintenance' },
-    { label: 'Fleet Utilization', value: '—', icon: 'gauge', color: 'cyan', foot: 'Utilization data unavailable' },
   ]
   const detailVehicle = vehicles.find((car) => String(car.id) === String(viewVehicleId))
   const activeFilters = [query.trim(), statusFilter !== 'All statuses', typeFilter !== 'All types', documentFilter !== 'All documents', siteFilter !== 'Any location'].filter(Boolean).length
@@ -147,11 +157,13 @@ export default function FleetPage({ vehicles, setVehicles, vendors = [], loading
       </div>
       {(loadError || actionError) && <div className="fleet-form-error" role="alert">{loadError || actionError} <button type="button" onClick={() => { setActionError(''); onReload().catch((error) => setActionError(error.message)) }}>Retry</button></div>}
       {loading && <p className="fleet-form-help" role="status">Loading vehicles...</p>}
+      <div className="fleet-utilization-controls"><label className="fleet-period">Utilization period <select value={period} onChange={event => setPeriod(event.target.value)} aria-label="Fleet utilization period">{UTILIZATION_PERIODS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label><button type="button" className="fleet-secondary-button" data-permission="fleet.read" onClick={utilization.refresh} disabled={utilization.loading}>Refresh utilization</button></div>
       <div className="resource-kpis" aria-label="Fleet overview">{kpis.map((kpi) => <button className="resource-kpi" type="button" key={kpi.label} onClick={kpi.filter ? () => chooseCard(kpi.filter) : undefined} disabled={!kpi.filter} aria-label={`${kpi.label}: ${kpi.value}${kpi.filter ? '. Filter fleet list' : ''}`}>
         <span className={`resource-kpi-icon ${kpi.color}`}><Icon name={kpi.icon} size={21} /></span>
         <span className="resource-kpi-copy"><span>{kpi.label}</span><strong>{kpi.value}</strong><small>{kpi.foot}</small></span>
         {kpi.filter && <Icon className="resource-kpi-arrow" name="right" size={14} />}
-      </button>)}</div>
+      </button>)}<div className="resource-kpi fleet-utilization-kpi" role="group" aria-labelledby="fleet-utilization-title" aria-busy={utilization.loading}><span className="resource-kpi-icon cyan"><Icon name="gauge" size={21} /></span><span className="resource-kpi-copy"><span id="fleet-utilization-title">Fleet Utilization</span><strong aria-live="polite">{utilization.loading ? '…' : utilizationValue(utilization.data)}</strong><small>{utilization.loading ? 'Loading rental activity' : utilization.error ? 'Unable to load' : utilization.data?.fleetSize === 0 ? 'No vehicles in Fleet' : utilization.data?.capacitySeconds === 0 ? 'No elapsed time yet' : UTILIZATION_PERIODS.find(option => option.value === period)?.label + ' · actual use'}</small></span></div></div>
+      {utilization.error ? <p className="fleet-form-error" role="alert">Fleet utilization: {utilization.error} <button type="button" data-permission="fleet.read" onClick={utilization.refresh}>Retry utilization</button></p> : !utilization.loading && utilization.data && <div className="fleet-utilization-note" role="status"><p><strong>{utilizationHours(utilization.data.rentedSeconds)} rental hours / {utilizationHours(utilization.data.capacitySeconds)} fleet hours.</strong> {formatRentalDateTime(utilization.data.start)} – {formatRentalDateTime(utilization.data.end)}.</p><p>Actual handover to return for individual and corporate rentals. Uses the current fleet of {utilization.data.fleetSize} vehicles, including inactive and maintenance vehicles; import drafts are excluded.</p>{utilization.data.omittedRentals > 0 && <p className="fleet-import-warning">{utilization.data.omittedRentals} rental record(s) excluded because actual handover/return timestamps are missing or invalid. Recorded utilization may be incomplete.</p>}</div>}
       <ResourcePresets label="Vehicle status shortcuts" value={statusFilter} onChange={(value) => updateFilter(setStatusFilter, value)} items={[
         { label: 'All vehicles', value: 'All statuses', count: counts.total },
         { label: 'Available', value: 'Available', count: counts.available },
@@ -184,7 +196,6 @@ export default function FleetPage({ vehicles, setVehicles, vendors = [], loading
         </div></div>
       </section>
       <FleetImportDrafts refreshToken={draftRefreshToken} vehicles={vehicles} vendors={vendors} onCompleted={completeImportDraft} />
-      <label className="resource-period fleet-period">Utilization period <select value={period} onChange={(event) => setPeriod(event.target.value)} aria-label="Fleet utilization period" disabled>{PERIODS.map((option) => <option key={option}>{option}</option>)}</select></label>
       {menu && <ResourceMenu menu={menu} onClose={() => setMenu(null)} label={`Vehicle actions for ${menu.car.registration}`} className="fleet-action-menu">
         <button role="menuitem" type="button" onClick={() => { onViewVehicle(menu.car.id); setMenu(null) }}><Icon name="eye" /> View Vehicle</button>
         <button role="menuitem" type="button" onClick={() => openDialog('edit', menu.car)}><Icon name="edit" /> Edit</button>
@@ -192,7 +203,7 @@ export default function FleetPage({ vehicles, setVehicles, vendors = [], loading
         <button role="menuitem" type="button" onClick={() => openDialog('status', menu.car)}><Icon name="swap" /> Update Status</button>
       </ResourceMenu>}
     </>}
-    {dialog && <div className="fleet-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !busy) closeDialog() }}><div className={`fleet-dialog ${['add', 'edit', 'bulk'].includes(dialog) ? 'wide' : ''}`} role="dialog" aria-modal="true" aria-labelledby="fleet-dialog-title"><div className="fleet-dialog-header"><div><span className="fleet-demo-mark">CONNECTED TO BACKEND</span><h2 id="fleet-dialog-title">{({ add: 'Add Car', edit: 'Edit Car', bulk: 'Bulk Upload', status: 'Update Status', documents: 'Upload Documents' })[dialog]}</h2></div><button type="button" aria-label="Close dialog" disabled={busy} onClick={closeDialog}><Icon name="close" size={20} /></button></div>
+    {dialog && <div className="fleet-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !busy) closeDialog() }}><div ref={dialogRef} tabIndex={-1} className={`fleet-dialog ${['add', 'edit', 'bulk'].includes(dialog) ? 'wide' : ''}`} role="dialog" aria-modal="true" aria-labelledby="fleet-dialog-title"><div className="fleet-dialog-header"><div><span className="fleet-demo-mark">CONNECTED TO BACKEND</span><h2 id="fleet-dialog-title" tabIndex={-1} data-dialog-initial-focus>{({ add: 'Add Car', edit: 'Edit Car', bulk: 'Bulk Upload', status: 'Update Status', documents: 'Upload Documents' })[dialog]}</h2></div><button type="button" aria-label="Close dialog" disabled={busy} onClick={closeDialog}><Icon name="close" size={20} /></button></div>
       {(dialog === 'add' || dialog === 'edit') && <FleetCarForm key={selected?.id || 'new'} initial={selected} vehicles={vehicles} vendors={vendors} onCancel={closeDialog} onSave={saveCar} />}
       {dialog === 'bulk' && <FleetBulkUpload vehicles={vehicles} onImport={importCars} onSaveDrafts={saveImportDrafts} onBusyChange={setBusy} onCancel={closeDialog} />}
       {dialog === 'status' && selected && <div className="fleet-simple-dialog"><p>Choose a new status for <strong>{selected.registration}</strong>.</p><label>Status<select value={pendingStatus} onChange={(event) => setPendingStatus(event.target.value)} disabled={busy}>{STATUS_OPTIONS.map((status) => <option key={status}>{status}</option>)}</select></label>{actionError && <p className="fleet-form-error" role="alert">{actionError}</p>}<div className="fleet-dialog-actions"><button type="button" className="fleet-secondary-button" disabled={busy} onClick={closeDialog}>Cancel</button><button type="button" className="fleet-primary-button" onClick={saveStatus} disabled={busy}><ActionIcon name="check" size={16} /> {busy ? 'Saving…' : 'Update Status'}</button></div></div>}

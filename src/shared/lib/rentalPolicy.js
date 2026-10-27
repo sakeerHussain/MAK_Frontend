@@ -1,4 +1,10 @@
 import { rentalDay } from './rentalTime.js'
+// Existing assignments remain manageable after unlisting; new selections require an explicit listing.
+export function vehicleBookingCandidate(vehicle, assignedVehicleId) {
+  if (!vehicle) return false
+  const assigned = assignedVehicleId != null && String(vehicle.id) === String(assignedVehicleId)
+  return assigned || (vehicle.status === 'Available' && vehicle.listedForBooking === true)
+}
 // Legacy records without a currency are unknown, never presumed to be SAR.
 export const vehicleRateForUnit = (vehicle, unit) => vehicle?.rateCurrency === 'SAR' ? vehicle?.[{ Hour:'hourlyRate', Day:'dailyRate', Month:'monthlyRate' }[unit]] ?? '' : ''
 export const COMPLIANCE_DATE_FIELDS = {

@@ -16,7 +16,7 @@ import './RentalPlans.css'
 import './SectionTitles.css'
 import './FeaturedControls.css'
 
-const publicNavigation=[['Our Fleet','our-fleet'],['About Us','about-us'],['Services','services'],['Home','home']]
+const publicNavigation=[['Home','home'],['Our Fleet','our-fleet'],['About Us','about-us'],['Services','services']]
 const serviceIcons=[IconBriefcase,IconSteeringWheel,IconBuildingAirport,IconCarSuv,IconShieldCheck,IconRoute]
 const vehicleBrands = [
  {id:'toyota',name:'Toyota'}, {id:'honda',name:'Honda'}, {id:'ford',name:'Ford'},

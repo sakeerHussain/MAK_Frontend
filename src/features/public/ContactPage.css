@@ -1,0 +1,74 @@
+.rent-site .rent-contact-page {
+  background:#f3f8fc;
+  padding:122px 0 44px;
+  min-height:0;
+}
+.rent-contact-layout {
+  width:min(1100px,calc(100% - 80px));
+  margin-inline:auto;
+  display:grid;
+  grid-template-columns:minmax(0,.72fr) minmax(0,1fr);
+  align-items:center;
+  gap:56px;
+}
+.rent-site .rent-contact-intro h1 {
+  color:#101d31;
+  font-size:48px;
+  line-height:1.08;
+  font-weight:750;
+  letter-spacing:-1.9px;
+  margin:0;
+}
+.rent-site .rent-contact-intro h1>span { color:#007fbd; }
+.rent-site .rent-contact-description { margin-top:18px; color:#64758a; font-size:15px; line-height:1.6; max-width:390px; }
+.rent-contact-details { margin:26px 0 0; display:grid; gap:20px; }
+.rent-contact-details>div { display:flex; align-items:flex-start; gap:16px; }
+.rent-contact-details svg { width:27px; height:27px; flex-shrink:0; color:#007fbd; margin-top:5px; }
+.rent-contact-details dt { color:#64758a; font-size:13px; margin-bottom:3px; }
+.rent-contact-details dd { margin:0; color:#101d31; font-size:19px; font-weight:650; letter-spacing:-.3px; line-height:1.35; }
+.rent-contact-details address { font:inherit; }
+.rent-contact-details a { display:inline-flex; align-items:center; min-height:32px; }
+.rent-contact-details a:hover { color:#007fbd; }
+.rent-contact-page .rent-contact-form { min-width:0; width:100%; max-width:none; padding:26px; border:0; border-radius:22px; background:#fff; }
+.rent-contact-page .rent-contact-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:18px; row-gap:16px; margin:0 0 18px; }
+.rent-contact-page .rent-contact-fields label { display:block; color:#101d31; font-size:14px; line-height:1.5; font-weight:550; }
+.rent-contact-page .rent-contact-fields .rent-contact-optional { color:inherit; }
+.rent-contact-page .rent-contact-fields :is(input,select,textarea) { display:block; box-sizing:border-box; width:100%; min-width:0; margin-top:6px; border:1px solid #d6e1ec; border-radius:10px; padding:10px 12px; font:inherit; font-size:14px; font-weight:400; color:#243e54; background:#f7f9fc; box-shadow:none; transition:border-color .15s; }
+.rent-contact-page .rent-contact-fields :is(input,select) { min-height:44px; }
+.rent-contact-page .rent-contact-fields select { background-color:#fff; padding-right:10px; }
+.rent-contact-page .rent-contact-fields textarea { min-height:96px; resize:vertical; line-height:1.6; }
+.rent-contact-page .rent-contact-fields ::placeholder { color:#7a8ca3; opacity:1; }
+.rent-contact-page .rent-contact-fields :is(input,select,textarea):hover { border-color:#a8c3d9; }
+.rent-contact-page .rent-contact-fields :is(input,select,textarea):focus-visible { outline:2px solid #007fbd; outline-offset:3px; border-color:#007fbd; }
+.rent-contact-submit { display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+.rent-site .rent-contact-submit .rent-button { min-height:44px; padding:11px 22px; border-radius:999px; font-size:14px; gap:14px; }
+.rent-site .rent-contact-submit p { font-size:11px; color:#64758a; line-height:1.5; }
+.rent-site .rent-contact-page .rent-contact-status { margin:0 0 16px; padding:10px 12px; border-radius:8px; background:#f3f8fc; color:#243e54; font-size:14px; line-height:1.5; }
+.rent-site .rent-contact-error { margin-bottom:16px; color:#9b3333; font-size:14px; }
+@media(max-width:1000px) {
+  .rent-contact-layout { width:calc(100% - 48px); gap:32px; }
+  .rent-site .rent-contact-intro h1 { font-size:42px; letter-spacing:-1.6px; }
+  .rent-contact-page .rent-contact-form { padding:24px; }
+  .rent-contact-details dd { font-size:18px; }
+}
+@media(max-width:760px) {
+  .rent-site .rent-contact-page { padding:104px 0 32px; }
+  .rent-contact-layout { width:calc(100% - 36px); grid-template-columns:minmax(0,1fr); gap:26px; }
+  .rent-site .rent-contact-intro h1 { font-size:38px; line-height:1.1; letter-spacing:-1.5px; }
+  .rent-site .rent-contact-description { margin-top:14px; max-width:470px; font-size:15px; }
+  .rent-contact-details { margin-top:20px; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+  .rent-contact-details>div { gap:10px; }
+  .rent-contact-details svg { width:22px; height:22px; }
+  .rent-contact-details dd { font-size:16px; }
+  .rent-contact-page .rent-contact-form { padding:24px 20px; border-radius:20px; }
+  .rent-contact-page .rent-contact-fields :is(input,select,textarea) { font-size:16px; }
+  .rent-contact-page .rent-contact-fields textarea { min-height:104px; }
+  .rent-site .rent-contact-submit .rent-button { width:100%; font-size:14px; }
+  .rent-contact-submit { align-items:center; }
+}
+@media(max-width:480px) {
+  .rent-contact-page .rent-contact-fields { grid-template-columns:minmax(0,1fr); gap:16px; }
+  .rent-contact-page .rent-contact-form { padding:22px 18px; }
+  .rent-contact-details { grid-template-columns:minmax(0,1fr); gap:14px; }
+  .rent-contact-details dd { font-size:17px; }
+}

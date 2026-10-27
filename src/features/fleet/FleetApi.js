@@ -69,6 +69,10 @@ export async function listVehicles() {
   return vehicles
 }
 
+export function getFleetUtilization(period, signal) {
+  return request(`${VEHICLES}/utilization?${new URLSearchParams({ period })}`, { signal })
+}
+
 export async function getVehicle(id) { return mapVehicle(await request(`${VEHICLES}/${id}`)) }
 export async function createVehicle(car) { return mapVehicle(await request(VEHICLES, json('POST', vehiclePayload(car)))) }
 export async function updateVehicle(id, car) { return mapVehicle(await request(`${VEHICLES}/${id}`, json('PUT', vehiclePayload(car)))) }

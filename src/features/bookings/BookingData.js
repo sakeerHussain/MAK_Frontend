@@ -1,3 +1,4 @@
+import { assignmentIsDue } from '../../shared/lib/assignmentAlert.js'
 import { rentalDate, rentalDay, rentalDateTime, shiftRentalDays, formatRentalDateTime } from '../../shared/lib/rentalTime.js'
 export const BOOKING_STATUSES = ['Pending', 'Confirmed', 'Active', 'Completed', 'Cancelled']
 export const PAYMENT_STATUSES = ['Unpaid', 'Partially Paid', 'Paid', 'Partially Refunded', 'Refunded']
@@ -25,6 +26,7 @@ export const isOverdue = (booking, now = new Date()) => booking.status === 'Acti
 
 export function bookingPriority(booking, now = new Date()) {
   const today = dayKey(now)
+  if (booking.status === 'Confirmed' && assignmentIsDue(booking, now) && (!booking.vehicleId || (booking.driverMode !== 'Self-drive' && !booking.driverId))) return { score: 96, label: 'Assignment alert due', tone: 'danger' }
   if (isOverdue(booking, now)) return { score: 100, label: 'Overdue return', tone: 'danger' }
   if (booking.status === 'Confirmed' && booking.bookingType === 'Advance' && !booking.vehicleId && dayKey(booking.pickupAt) <= today) return { score: 95, label: booking.driverMode === 'Self-drive' ? 'Assign vehicle' : 'Assign vehicle & driver', tone: 'danger' }
   if (booking.status === 'Confirmed' && dayKey(booking.pickupAt) <= today) return { score: 90, label: 'Handover pending', tone: 'warning' }
