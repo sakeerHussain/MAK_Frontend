@@ -1,3 +1,5 @@
+import ServicesPage from './ServicesPage.jsx'
+import AboutPage from './AboutPage.jsx'
 import ContactPage from './ContactPage.jsx'
 import { IconArrowRight } from '@tabler/icons-react'
 import './PublicPages.css'
@@ -9,6 +11,8 @@ const pages = {
 }
 
 export default function PublicPage({ page }) {
+  if (page === 'services') return <ServicesPage/>
+  if (page === 'about-us') return <AboutPage/>
   if (page === 'contact-us') return <ContactPage/>
   const content = pages[page]
   return <section className="rent-container rent-public-page" aria-labelledby="rent-public-title">

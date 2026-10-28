@@ -1,0 +1,55 @@
+.rent-site .rent-about-page { padding-top:86px; background:#fff; color:#101d31; }
+.rent-about-hero { display:grid; grid-template-columns:46.5% 53.5%; background:#0d2237; }
+.rent-about-hero-copy { padding:clamp(48px,6vw,86px) clamp(28px,4.8vw,76px); align-self:center; }
+.rent-site .rent-about-label { margin:0 0 24px; font-size:13px; font-weight:700; letter-spacing:2px; text-transform:uppercase; line-height:1.6; color:inherit; }
+.rent-site .rent-about-page h1 { margin:0; color:#fff; font-size:clamp(38px,5.6vw,80px); line-height:1.06; letter-spacing:-2.5px; font-weight:750; }
+.rent-about-hero-copy { color:#fff; }
+.rent-site .rent-about-lead { color:#e0e8f0; font-size:clamp(16px,1.8vw,26px); line-height:1.5; margin:30px 0 0; max-width:530px; }
+.rent-site .rent-about-founded { color:#fff; margin:38px 0 0; padding-top:22px; font-size:11px; font-weight:650; letter-spacing:2px; text-transform:uppercase; }
+.rent-about-founded:before { content:''; display:block; width:44px; border-top:1px solid #a2b5c8; margin-bottom:20px; }
+.rent-about-hero-photo { width:100%; height:100%; min-height:560px; max-height:760px; object-fit:cover; }
+.rent-about-editorial { width:min(1280px,calc(100% - 96px)); margin:auto; padding:68px 0 56px; }
+.rent-about-story,.rent-about-approach { display:grid; grid-template-columns:1.08fr .92fr; gap:70px; }
+.rent-about-story { align-items:center; margin-bottom:56px; }
+.rent-site .rent-about-page h2 { margin:0; font-size:clamp(32px,4.4vw,64px); line-height:1.08; letter-spacing:-1.8px; font-weight:750; color:#101d31; }
+.rent-site .rent-about-story>p,.rent-site .rent-about-approach-copy>p:not(.rent-about-label) { font-size:clamp(17px,1.53vw,22px); line-height:1.6; color:#4c6077; margin:0; max-width:530px; }
+.rent-about-approach { align-items:start; }
+.rent-about-approach>img { width:100%; height:100%; min-height:600px; max-height:740px; object-fit:cover; }
+.rent-site .rent-about-approach-copy>p:not(.rent-about-label) { margin-top:26px; }
+.rent-about-services { list-style:none; padding:0; margin:24px 0 0; }
+.rent-about-services li { border-top:1px solid #d8e2eb; }
+.rent-about-services li:last-child { border-bottom:1px solid #d8e2eb; }
+.rent-site .rent-about-services a { display:flex; justify-content:space-between; gap:16px; align-items:center; min-height:70px; color:#007fbd; font-size:20px; font-weight:600; text-decoration:none; }
+.rent-site .rent-about-services a:hover { color:#101d31; }
+.rent-about-page a:focus-visible { outline:3px solid #007fbd; outline-offset:5px; }
+.rent-about-contact { position:relative; isolation:isolate; background:#0d2237; overflow:hidden; }
+.rent-about-contact>img { position:absolute; inset:0; z-index:-2; width:100%; height:100%; object-fit:cover; }
+.rent-about-contact:before { content:''; position:absolute; inset:0; background:rgba(8,27,45,.3); z-index:-1; }
+.rent-about-contact>div { width:min(1280px,calc(100% - 96px)); margin:auto; padding:48px 0; }
+.rent-site .rent-about-contact h2 { color:white; max-width:650px; font-size:clamp(32px,4.1vw,60px); }
+.rent-site .rent-about-contact .rent-button { margin-top:24px; border-radius:999px; color:#fff; font-size:16px; min-height:48px; padding:14px 26px; }
+@media(max-width:1000px) {
+ .rent-about-hero-copy { padding:48px 28px; }
+ .rent-about-hero-photo { min-height:520px; }
+ .rent-about-editorial { width:calc(100% - 56px); padding:48px 0; }
+ .rent-about-story,.rent-about-approach { gap:36px; }
+ .rent-about-approach>img { min-height:500px; }
+ .rent-about-contact>div { width:calc(100% - 56px); }
+}
+@media(max-width:700px) {
+ .rent-site .rent-about-page { padding-top:76px; }
+ .rent-about-hero,.rent-about-story,.rent-about-approach { grid-template-columns:1fr; }
+ .rent-about-hero-copy { padding:42px 24px; }
+ .rent-site .rent-about-page h1 { font-size:46px; letter-spacing:-1.8px; }
+ .rent-site .rent-about-lead { font-size:18px; margin-top:24px; }
+ .rent-site .rent-about-founded { margin-top:24px; padding-top:0; }
+ .rent-about-hero-photo { height:360px; min-height:0; }
+ .rent-about-editorial { width:calc(100% - 48px); padding:42px 0; }
+ .rent-about-story { gap:24px; margin-bottom:36px; }
+ .rent-site .rent-about-page h2 { font-size:36px; letter-spacing:-1.2px; }
+ .rent-about-approach { gap:32px; }
+ .rent-about-approach>img { height:420px; min-height:0; }
+ .rent-site .rent-about-story>p,.rent-site .rent-about-approach-copy>p:not(.rent-about-label) { font-size:16px; }
+ .rent-about-contact>div { width:calc(100% - 48px); padding:40px 0; }
+}
+
