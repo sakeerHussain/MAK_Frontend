@@ -1,3 +1,4 @@
+import CustomerEditor from './CustomerEditor.jsx'
 import { RentalHeading, RentalKpis, RentalFilters } from '../../shared/components/RentalRegister.jsx'
 import { OperationsRowActions } from '../../shared/components/OperationsRegister.jsx'
 import ActionIcon from '../../app/ActionIcon.jsx'
@@ -11,36 +12,11 @@ import './CustomerPage.css'
 
 const today = () => dayKey(new Date())
 const newId = () => crypto.randomUUID()
-const emptyIndividual = { name: '', phone: '', email: '', address: '', status: 'Active' }
-const emptyCompany = { name: '', registrationNumber: '', taxNumber: '', billingContactName: '', billingEmail: '', billingPhone: '', billingAddress: '', billingCity: '', billingCountry: 'Saudi Arabia', paymentTerms: 'Net 30 days', waitingRatePerHour: 0, includedWaitingMinutes: 0, waitingBillingIncrementMinutes: 15, status: 'Active' }
 const tone = (status) => status === 'Active' ? 'green' : status === 'Awaiting approval' || status === 'Upcoming' ? 'amber' : status === 'Rejected' || status === 'Expired' ? 'red' : 'gray'
 const Badge = ({ children, status = children }) => <span className={`customer-badge ${tone(status)}`}>{children}</span>
 const Field = ({ label, required, children, wide = false }) => <label className={`customer-field ${wide ? 'wide' : ''}`}><span>{label}{required && <b aria-hidden="true"> *</b>}</span>{children}</label>
 const Text = ({ value }) => value || '—'
 
-function CustomerEditor({ initial, type, onSave, onCancel, rows }) {
-  const [kind, setKind] = useState(type || 'Individual')
-  const [form, setForm] = useState(initial || (kind === 'Corporate' ? emptyCompany : emptyIndividual))
-  const [error, setError] = useState('')
-  const set = (key, value) => { setForm((current) => ({ ...current, [key]: value })); setError('') }
-  const switchKind = (value) => { setKind(value); setForm(value === 'Corporate' ? emptyCompany : emptyIndividual); setError('') }
-  const save = (event) => {
-    event.preventDefault()
-    const name = form.name?.trim()
-    const phone = kind === 'Corporate' ? form.billingPhone?.trim() : form.phone?.trim()
-    const email = kind === 'Corporate' ? form.billingEmail?.trim() : form.email?.trim()
-    if (!name || !phone || !email) { setError('Complete the name, phone, and email.'); return }
-    if (rows.some((row) => row.key !== initial?.key && row.type === kind && normalizePlace(row.name) === normalizePlace(name))) { setError('This customer name already exists.'); return }
-    onSave(kind, { ...form, name, ...(kind === 'Corporate' ? { billingPhone: phone, billingEmail: email } : { phone, email }) })
-  }
-  return <section className="customer-card customer-editor"><div className="customer-section-head"><div><span className="customer-eyebrow">CUSTOMER ACCOUNT</span><h2>{initial ? 'Edit customer' : 'Add customer'}</h2><p>Customer details are used for quotes, bookings, and billing.</p></div><button type="button" className="customer-secondary" onClick={onCancel}><ActionIcon name="back" size={15} /> Back</button></div>
-    <form data-permission-scope={`customers.${initial ? 'edit' : 'create'}`} onSubmit={save}>{!initial && <div className="customer-type-pick" role="group" aria-label="Customer type">{['Individual', 'Corporate'].map((option) => <button key={option} type="button" className={kind === option ? 'selected' : ''} onClick={() => switchKind(option)}>{option}</button>)}</div>}
-      <div className="customer-form-grid"><Field label={kind === 'Corporate' ? 'Company name' : 'Full name'} required><input value={form.name || ''} onChange={(e) => set('name', e.target.value)} required /></Field>
-        {kind === 'Corporate' ? <><Field label="Billing contact name"><input value={form.billingContactName || ''} onChange={(e) => set('billingContactName', e.target.value)} /></Field><Field label="Billing phone" required><input value={form.billingPhone || ''} onChange={(e) => set('billingPhone', e.target.value)} required /></Field><Field label="Billing email" required><input type="email" value={form.billingEmail || ''} onChange={(e) => set('billingEmail', e.target.value)} required /></Field><Field label="Registration / CR number"><input value={form.registrationNumber || ''} onChange={(e) => set('registrationNumber', e.target.value)} /></Field><Field label="VAT number"><input value={form.taxNumber || ''} onChange={(e) => set('taxNumber', e.target.value)} /></Field><Field label="Billing address" wide><input value={form.billingAddress || ''} onChange={(e) => set('billingAddress', e.target.value)} /></Field><Field label="City"><input value={form.billingCity || ''} onChange={(e) => set('billingCity', e.target.value)} /></Field><Field label="Country"><input value={form.billingCountry || ''} onChange={(e) => set('billingCountry', e.target.value)} /></Field><Field label="Payment terms"><input value={form.paymentTerms || ''} onChange={(e) => set('paymentTerms', e.target.value)} placeholder="Net 30 days" /></Field><Field label="Default waiting rate (SAR/hour)"><input type="number" min="0" step="0.01" value={form.waitingRatePerHour ?? ''} onChange={(e) => set('waitingRatePerHour', e.target.value)} /></Field><Field label="Included waiting minutes"><input type="number" min="0" value={form.includedWaitingMinutes ?? ''} onChange={(e) => set('includedWaitingMinutes', e.target.value)} /></Field><Field label="Billing increment minutes"><input type="number" min="1" value={form.waitingBillingIncrementMinutes ?? ''} onChange={(e) => set('waitingBillingIncrementMinutes', e.target.value)} /></Field></> : <><Field label="Phone" required><input value={form.phone || ''} onChange={(e) => set('phone', e.target.value)} required /></Field><Field label="Email" required><input type="email" value={form.email || ''} onChange={(e) => set('email', e.target.value)} required /></Field><Field label="Address" wide><input value={form.address || ''} onChange={(e) => set('address', e.target.value)} /></Field></>}
-        <Field label="Status"><select value={form.status || 'Active'} onChange={(e) => set('status', e.target.value)}><option>Active</option><option>Inactive</option></select></Field></div>
-      {error && <p className="customer-error" role="alert">{error}</p>}<div className="customer-form-actions"><button type="button" className="customer-secondary" onClick={onCancel}>Cancel</button><button className="customer-primary" type="submit"><ActionIcon name="check" size={16} /> Save customer</button></div>
-    </form></section>
-}
 
 function RateTable({ title, note, rows, columns, onAdd, onUpdate, onRemove, addLabel }) {
   return <section className="customer-rate-section"><div className="customer-section-head"><div><h3>{title}</h3><p>{note}</p></div><button type="button" className="customer-secondary" onClick={onAdd}><ActionIcon name="plus" size={15} /> {addLabel}</button></div>{rows.length ? <div className="customer-rate-scroll"><table className="customer-rate-table"><thead><tr>{columns.map((column) => <th key={column.key}>{column.label}</th>)}<th>Actions</th></tr></thead><tbody>{rows.map((row, index) => <tr key={row.id}>{columns.map((column) => <td key={column.key}><input aria-label={`${title} ${index + 1} ${column.label}`} type={column.type || 'text'} min={column.type === 'number' ? '0' : undefined} step={column.type === 'number' ? '0.01' : undefined} placeholder={column.placeholder || ''} value={row[column.key] ?? ''} onChange={(event) => onUpdate(row.id, column.key, event.target.value)} /></td>)}<td><button type="button" className="customer-icon-danger" aria-label={`Remove ${title} row ${index + 1}`} onClick={() => onRemove(row.id)}><Icon name="trash" size={16} /></button></td></tr>)}</tbody></table></div> : <div className="customer-inline-empty">No {title.toLowerCase()} yet. Add a row to define a customer-specific price.</div>}</section>

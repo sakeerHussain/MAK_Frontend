@@ -1,8 +1,10 @@
+import { rentalDay } from '../../shared/lib/rentalTime.js'
 export const DRIVER_CATEGORIES = ['Light Vehicle', 'Heavy Vehicle', 'Chauffeur', 'Delivery']
 export const EMPLOYMENT_TYPES = ['Full-time', 'Part-time', 'Contract', 'Vendor']
 export const DRIVER_STATUSES = ['Active', 'Inactive']
 export const DRIVER_DOCUMENT_TYPES = ['Iqama', 'Passport copy', 'License copy', 'Contract copy', 'PCC', 'Medical', 'Home address Proof', 'Others']
 export const REQUIRED_DRIVER_DOCUMENTS = ['Iqama', 'License copy']
+export const EXPIRING_DRIVER_DOCUMENTS = [...REQUIRED_DRIVER_DOCUMENTS, 'Passport copy', 'Contract copy']
 
 export function blankDriver() {
   return {
@@ -17,11 +19,44 @@ export function blankDriver() {
   }
 }
 
-export function driverCompliance(driver) {
+const PROFILE_DOCUMENTS = { iqamaExpiry:'Iqama', licenceExpiry:'License copy', passportExpiry:'Passport copy', contractExpiry:'Contract copy', insuranceExpiry:'Insurance' }
+export function driverEffectiveDates(driver) {
+  const dates = Object.fromEntries(Object.entries(PROFILE_DOCUMENTS).map(([field,type]) => [type,driver[field] || '']))
+  for (const doc of driver.documents || []) if (doc.expiryDate) dates[doc.type] = doc.expiryDate
+  return dates
+}
+function expiryIssues(driver, through) {
+  return Object.entries(driverEffectiveDates(driver)).filter(([type,date]) => REQUIRED_DRIVER_DOCUMENTS.includes(type) && date && date < through).map(([type]) => type)
+}
+export function driverOptionalWarnings(driver, now = new Date()) {
+  const today = rentalDay(now)
+  const dates = driverEffectiveDates(driver)
+  const warnings = Object.entries(dates).filter(([type,date]) => !REQUIRED_DRIVER_DOCUMENTS.includes(type) && date && date < today)
+    .map(([type,date]) => ({ type, date, message:`${type} (${(driver.documents || []).some(doc => doc.type === type && doc.expiryDate) ? 'uploaded document' : 'profile record'}) expired on ${date}` }))
+  for (const doc of driver.documents || []) if (!REQUIRED_DRIVER_DOCUMENTS.includes(doc.type) && EXPIRING_DRIVER_DOCUMENTS.includes(doc.type) && !dates[doc.type])
+    warnings.push({type:doc.type,date:'',message:`${doc.type}: expiry date needed`})
+  for (const cert of driver.certifications || []) if (cert.expiryDate && cert.expiryDate < today)
+    warnings.push({type:cert.name,date:cert.expiryDate,message:`${cert.name} certificate expired on ${cert.expiryDate}`})
+  return warnings
+}
+export function driverDocumentStatus(record, now = new Date()) {
+  return !record?.name ? 'Missing' : !record.expiryDate ? 'Expiry needed' : record.expiryDate < rentalDay(now) ? 'Expired' : 'Valid'
+}
+export function driverCompliance(driver, now = new Date()) {
   const records = driver.documents || []
-  const today = new Date().toISOString().slice(0, 10)
-  if (records.some((item) => item.expiryDate && item.expiryDate < today) || [driver.iqamaExpiry, driver.passportExpiry, driver.contractExpiry, driver.licenceExpiry, driver.insuranceExpiry].some((date) => date && date < today)) return 'Expired'
-  return REQUIRED_DRIVER_DOCUMENTS.every((type) => records.some((item) => item.type === type && item.name && item.expiryDate)) ? 'Complete' : 'Missing'
+  if (expiryIssues(driver, rentalDay(now)).length) return 'Expired'
+  return REQUIRED_DRIVER_DOCUMENTS.every(type => records.some(item => item.type === type && item.name && item.expiryDate)) ? 'Complete' : 'Missing'
+}
+export function driverBookingIssue(driver, returnAt, now = new Date()) {
+  if (!driver || driver.status !== 'Active') return 'Driver is inactive'
+  const today = rentalDay(now)
+  const end = rentalDay(returnAt)
+  const through = end > today ? end : today
+  for (const type of REQUIRED_DRIVER_DOCUMENTS) {
+    if (!(driver.documents || []).some(d => d.type === type && d.name && d.expiryDate)) return `Missing ${type} or expiry date`
+  }
+  const expired = expiryIssues(driver, through)
+  return expired.length ? `${expired[0]} must be valid through ${through} (KSA)` : ''
 }
 
 export function makeDemoDrivers() {

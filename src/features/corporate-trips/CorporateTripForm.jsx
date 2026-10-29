@@ -1,3 +1,4 @@
+import { driverBookingIssue } from '../drivers/DriverData.js'
 import AssignmentAlertFields from '../../shared/components/AssignmentAlertFields.jsx'
 import { assignmentAlertError, suggestedAssignmentAlert } from '../../shared/lib/assignmentAlert.js'
 import { rentalDate } from '../../shared/lib/rentalTime.js'
@@ -9,7 +10,8 @@ import { dayKey, localDateTime, shiftDays, sar } from '../bookings/BookingData.j
 import { billableWaitingMinutes, resourceConflict, tripCharges, tripPassengers, tripStops, waitingMinutes } from './CorporateData.js'
 import { TYPE_OPTIONS } from '../fleet/FleetData.js'
 import FormFieldCaption from '../../shared/components/FormFieldCaption.jsx'
-import CompanyEditor from './CompanyEditor.jsx'
+import CustomerEditor from '../customers/CustomerEditor.jsx'
+import { requireCorporateCustomer } from '../customers/CustomerEditorData.js'
 import { normalizeCompanyName } from './CompanyData.js'
 import { activeQuoteFor, customerKey, money, normalizePlace, normalizeStops, pricePreview } from '../customers/CustomerData.js'
 
@@ -23,7 +25,7 @@ export default function CorporateTripForm({ initial, kind, trips, bookings, comp
   const [form, setForm] = useState(() => {
     const now = new Date()
     return {
-      companyId: initial?.companyId || null, companyName: initial?.companyName || '', contactName: initial?.contactName || '', contactPhone: initial?.contactPhone || '', contactEmail: initial?.contactEmail || '',
+      companyId: initial?.companyId || companies.find(company => normalizeCompanyName(company.name) === normalizeCompanyName(initial?.companyName || ''))?.id || null, companyName: initial?.companyName || '', contactName: initial?.contactName || '', contactPhone: initial?.contactPhone || '', contactEmail: initial?.contactEmail || '',
       emailNotifications: initial?.emailNotifications ?? true,
       assignmentAlertAt: initial?.assignmentAlertAt || suggestedAssignmentAlert(initial?.pickupAt || localDateTime(isAdvance ? shiftDays(now, 1) : now)), assignmentAlertReviewedForPickup: '',
       projectManager: initial?.projectManager || '', projectCode: initial?.projectCode || '', projectRemarks: initial?.projectRemarks || '',
@@ -62,7 +64,7 @@ export default function CorporateTripForm({ initial, kind, trips, bookings, comp
   const selectedVehicle = eligibleVehicles.find((vehicle) => vehicle.id === Number(form.vehicleId))
   if (selectedVehicle && !shownVehicles.some((vehicle) => vehicle.id === selectedVehicle.id)) shownVehicles.unshift(selectedVehicle)
   const activeDrivers = drivers.filter((driver) => driver.status === 'Active' || driver.id === initial?.driverId)
-  const matchedCompany = companies.find((company) => normalizeCompanyName(company.name) === normalizeCompanyName(form.companyName))
+  const matchedCompany = companies.find((company) => company.id === Number(form.companyId))
   const quote = matchedCompany ? activeQuoteFor(quotes, customerKey('Corporate', matchedCompany.id), dayKey(form.pickupAt)) : null
   const via = form.stops.slice(1, -1).map((stop) => stop.location.trim()).join(', ')
   const from = form.stops[0]?.location || ''
@@ -83,16 +85,17 @@ export default function CorporateTripForm({ initial, kind, trips, bookings, comp
     setForm((current) => ({ ...current, quoteSnapshot: snapshot, rateUnit: 'Trip', unitPrice: String(quoteEstimate.match.amount), quantity: '1', taxPercent: String(quote.taxPercent) }))
     setError('')
   }
-  const chooseCompany = (name) => {
-    const company = companies.find((item) => normalizeCompanyName(item.name) === normalizeCompanyName(name))
-    setForm((current) => ({ ...current, companyId: company?.id || null, companyName: company?.name || name, quoteSnapshot: null,
+  const chooseCompany = (id) => {
+    const company = companies.find((item) => item.id === Number(id))
+    setForm((current) => ({ ...current, companyId: company?.id || null, companyName: company?.name || '', quoteSnapshot: null,
       ...(company && company.id !== current.companyId ? {
         waitingRatePerHour: String(company.waitingRatePerHour ?? 0), includedWaitingMinutes: String(company.includedWaitingMinutes ?? 0), waitingBillingIncrementMinutes: String(company.waitingBillingIncrementMinutes ?? 15),
       } : {}),
     }))
     setError('')
   }
-  const addCompany = async (details) => {
+  const addCompany = async (type, details) => {
+    if (type !== 'Corporate') throw new Error('Choose a corporate customer.')
     const company = await onAddCompany(details)
     setForm((current) => ({ ...current, companyId: company.id, companyName: company.name, quoteSnapshot: null,
       waitingRatePerHour: String(company.waitingRatePerHour), includedWaitingMinutes: String(company.includedWaitingMinutes), waitingBillingIncrementMinutes: String(company.waitingBillingIncrementMinutes),
@@ -105,6 +108,7 @@ export default function CorporateTripForm({ initial, kind, trips, bookings, comp
 
   const save = async (event) => {
     event.preventDefault()
+    if (!isAdvance && form.serviceMode === 'With driver' && !['Completed', 'Cancelled'].includes(form.status)) { const issue = driverBookingIssue(drivers.find(d => d.id === Number(form.driverId)), form.returnAt); if (issue) { setError('Driver assignment blocked: '+issue); return } }
     if (saving) return
     const pickup = rentalDate(form.pickupAt)
     const returnAt = rentalDate(form.returnAt)
@@ -117,6 +121,7 @@ export default function CorporateTripForm({ initial, kind, trips, bookings, comp
     const taxPercent = Number(form.taxPercent)
     const stops = form.stops.map(cleanStop)
     const passengers = form.passengers.map(cleanPassenger)
+    try { requireCorporateCustomer(companies, form.companyId) } catch (cause) { setError(cause.message); return }
     if (!form.companyName.trim() || !form.contactName.trim() || !form.contactPhone.trim() || !form.contactEmail.trim()) { setError('Enter the company and primary contact details.'); return }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.contactEmail.trim())) { setError('Enter a valid contact email address.'); return }
     if (!form.projectManager.trim() || !form.projectCode.trim()) { setError('Enter the project manager and project code.'); return }
@@ -146,7 +151,7 @@ export default function CorporateTripForm({ initial, kind, trips, bookings, comp
     if (alertError) { setError(alertError); return }
     setSaving(true)
     try { await onSave({
-      ...initial, bookingType: isAdvance ? 'Advance' : 'Quick', companyId: matchedCompany?.id || null, companyName: (matchedCompany?.name || form.companyName).trim(), contactName: form.contactName.trim(),
+      ...initial, bookingType: isAdvance ? 'Advance' : 'Quick', companyId: matchedCompany.id, companyName: matchedCompany.name, contactName: form.contactName.trim(),
       contactPhone: form.contactPhone.trim(), contactEmail: form.contactEmail.trim().toLowerCase(), emailNotifications: form.emailNotifications,
       projectManager: form.projectManager.trim(), projectCode: form.projectCode.trim(), projectRemarks: form.projectRemarks.trim(),
       passengerCount, passengers, stops, pickupLocation: stops[0].location, destination: stops.at(-1).location,
@@ -162,14 +167,16 @@ export default function CorporateTripForm({ initial, kind, trips, bookings, comp
     finally { setSaving(false) }
   }
 
+  if (showCompanyEditor) return <CustomerEditor type="Corporate" lockType rows={companies} onSave={addCompany} onCancel={() => setShowCompanyEditor(false)} />
+
   return <form data-permission-scope={initial ? 'corporate-trips.edit' : 'corporate-trips.create'} className="booking-form corporate-form" onSubmit={save} noValidate>
     <section className="booking-form-section"><h3>Corporate Account</h3><div className="booking-form-grid">
-      <div className="corporate-company-picker"><label><FormFieldCaption required>Company Name</FormFieldCaption><input required list="corporate-company-suggestions" value={form.companyName} onChange={(event) => chooseCompany(event.target.value)} placeholder="Choose or type a company" autoComplete="off" /></label><datalist id="corporate-company-suggestions">{companies.map((company) => <option key={company.id} value={company.name} />)}</datalist><button type="button" data-permission={showCompanyEditor ? '' : 'customers.create'} onClick={() => setShowCompanyEditor((value) => !value)}>{showCompanyEditor ? 'Close company form' : '+ Add New Company'}</button><small>{matchedCompany ? 'Existing company selected' : 'Type a new name or add a company now'}</small></div>
+      <div className="corporate-company-picker"><label><FormFieldCaption required>Corporate customer</FormFieldCaption><select required value={form.companyId || ''} onChange={(event) => chooseCompany(event.target.value)}><option value="">Select a corporate customer</option>{companies.filter(company => company.status === 'Active' || company.id === initial?.companyId).map(company => <option key={company.id} value={company.id} disabled={company.status !== 'Active'}>{company.name}{company.status !== 'Active' ? ' (Inactive)' : ''}</option>)}</select></label><button type="button" data-permission="customers.create" onClick={() => setShowCompanyEditor(true)}>Add Corporate Customer</button><small>{matchedCompany ? 'Linked to the same account in Customers. Trip contact details are entered separately.' : 'Select an existing account, or explicitly create a corporate customer first.'}</small></div>
       <label><FormFieldCaption required>Trip Contact</FormFieldCaption><input required value={form.contactName} onChange={(event) => set('contactName', event.target.value)} placeholder="Person coordinating this trip" /></label>
       <label><FormFieldCaption required>Contact Phone</FormFieldCaption><input required type="tel" value={form.contactPhone} onChange={(event) => set('contactPhone', event.target.value)} placeholder="+966 5X XXX XXXX" /></label>
       <label><FormFieldCaption required>Contact Email</FormFieldCaption><input required type="email" value={form.contactEmail} onChange={(event) => set('contactEmail', event.target.value)} placeholder="contact@company.com" /></label>
       <label className="booking-wide-field booking-check-field"><input type="checkbox" checked={form.emailNotifications} onChange={(event) => set('emailNotifications', event.target.checked)} /><span>Email trip confirmations and updates</span></label>
-    </div>{showCompanyEditor && <div className="corporate-inline-company"><CompanyEditor companies={companies} onSave={addCompany} onCancel={() => setShowCompanyEditor(false)} compact /></div>}</section>
+    </div></section>
     <section className="booking-form-section"><h3>Project</h3><div className="booking-form-grid">
       <label><FormFieldCaption required>Project Manager</FormFieldCaption><input required value={form.projectManager} onChange={(event) => set('projectManager', event.target.value)} placeholder="Client-side project manager" /></label>
       <label><FormFieldCaption required>Project Code</FormFieldCaption><input required value={form.projectCode} onChange={(event) => set('projectCode', event.target.value)} placeholder="e.g. PRJ-420" /></label>
@@ -180,7 +187,7 @@ export default function CorporateTripForm({ initial, kind, trips, bookings, comp
     <section className="booking-form-section"><h3>Vehicle & Assignment</h3><p className="booking-form-lead">{isAdvance ? 'Reserve a vehicle class now. Assign the specific vehicle and driver from the saved alert time or on the pickup day.' : 'Select a vehicle and driver for a trip starting now.'}</p><div className="booking-form-grid"><label><FormFieldCaption required>Service Mode</FormFieldCaption><select required value={form.serviceMode} onChange={(event) => { setForm((current) => ({ ...current, serviceMode: event.target.value, driverId: event.target.value === 'Self-drive' ? '' : current.driverId })); setError('') }}><option>With driver</option><option>Self-drive</option></select></label>
       {isAdvance ? <label><FormFieldCaption required>Requested Vehicle Type</FormFieldCaption><select required value={form.requestedType} onChange={(event) => set('requestedType', event.target.value)}>{TYPE_OPTIONS.map((type) => <option key={type}>{type}</option>)}</select></label> : <div className="booking-vehicle-picker"><label>Search Available Vehicles<input type="search" value={vehicleSearch} onChange={(event) => setVehicleSearch(event.target.value)} placeholder="Make, model or registration" /></label><label><FormFieldCaption required>Vehicle</FormFieldCaption><select required value={form.vehicleId} onChange={(event) => { const vehicleId = event.target.value; const vehicle = vehicles.find((item) => item.id === Number(vehicleId)); setForm((current) => ({ ...current, vehicleId, unitPrice: vehicleId ? String(rateFor(vehicle, current.rateUnit)) : '', quoteVehicle: vehicle?.type || current.quoteVehicle, quoteSnapshot: null })); setError('') }}><option value="">Select vehicle</option>{shownVehicles.map((vehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.make} {vehicle.model} · {vehicle.registration} · {vehicle.seats} seats</option>)}</select></label><small>{shownVehicles.length} of {eligibleVehicles.length} available vehicles shown</small>{!eligibleVehicles.length && <p className="booking-help" role="status">No vehicles are available and listed for booking. Review availability and Listed for Booking in Fleet.</p>}</div>}
       {isAdvance && initial?.vehicleId && <label>Assigned Vehicle<input readOnly value={`${selectedVehicle?.make || ''} ${selectedVehicle?.model || ''} · ${selectedVehicle?.registration || ''}`} /></label>}
-      {!isAdvance && form.serviceMode === 'With driver' && <label><FormFieldCaption required>Driver</FormFieldCaption><select required value={form.driverId} onChange={(event) => set('driverId', event.target.value)}><option value="">Select driver</option>{activeDrivers.map((driver) => <option key={driver.id} value={driver.id}>{driver.name} · {driver.employeeId}</option>)}</select></label>}
+      {!isAdvance && form.serviceMode === 'With driver' && <label><FormFieldCaption required>Driver</FormFieldCaption><select required value={form.driverId} onChange={(event) => set('driverId', event.target.value)}><option value="">Select driver</option>{activeDrivers.map((driver) => { const issue = driverBookingIssue(driver, form.returnAt); return <option key={driver.id} value={driver.id} disabled={Boolean(issue)}>{driver.name} · {driver.employeeId}{issue ? ` — ${issue}` : ''}</option> })}</select></label>}
     </div></section>
 <section className="booking-form-section"><h3>Charges</h3>{matchedCompany && <div className="booking-quote-panel"><strong>Company agreed rates</strong>{quote ? <><p>{quote.number} v{quote.version} · effective {quote.effectiveFrom} to {quote.effectiveTo || 'open'} · {quote.taxPercent}% VAT</p><div className="booking-form-grid"><label>Quoted vehicle / class<select value={form.quoteVehicle} onChange={(event) => set('quoteVehicle', event.target.value)}><option value="">Select quoted class</option>{[...new Set(matchingRoutes.map((rate) => rate.vehicle))].map((value) => <option key={value}>{value}</option>)}</select></label><label>Chargeable extra km<input type="number" min="0" value={form.extraKm} onChange={(event) => set('extraKm', event.target.value)} /></label><label>Overtime hours<input type="number" min="0" step="0.5" value={form.overtimeHours} onChange={(event) => set('overtimeHours', event.target.value)} /></label><label>One-way distance (km)<input type="number" min="0" value={form.oneWayKm} onChange={(event) => set('oneWayKm', event.target.value)} /></label><label className="booking-check-field"><input type="checkbox" checked={form.extraDriver} onChange={(event) => set('extraDriver', event.target.checked)} /><span>Additional driver charge applies</span></label></div>{quoteEstimate?.match && matchingRoutes.some((rate) => rate.id === quoteEstimate.match.id) ? <div className="booking-quote-preview"><span>{quoteEstimate.match.from}{quoteEstimate.match.via ? ` → ${quoteEstimate.match.via}` : ''} → {quoteEstimate.match.to} · {quoteEstimate.match.vehicle}</span><strong>{money(quoteEstimate.total)} before planned waiting</strong><button type="button" className="booking-secondary" onClick={applyQuote}>Apply agreed rate</button></div> : <p>No exact route/class rate matches this itinerary. For multi-stop trips, quote the ordered stops as one package. Monthly rates are billed by cycle.</p>}</> : <p>No approved quote covers this pickup date. Enter a manual price or arrange a quote in Customer.</p>}{form.quoteSnapshot && <p className="booking-quote-applied">Applied {form.quoteSnapshot.quoteNumber} v{form.quoteSnapshot.version} · {money(form.quoteSnapshot.totalAmount)} including waiting and VAT.</p>}</div>}<div className="booking-form-grid"><label><FormFieldCaption required>Billing Unit</FormFieldCaption><select required value={form.rateUnit} onChange={(event) => { const rateUnit = event.target.value; const vehicle = vehicles.find((item) => item.id === Number(form.vehicleId)); setForm((current) => ({ ...current, rateUnit, unitPrice: !isAdvance && vehicle ? String(rateFor(vehicle, rateUnit)) : current.unitPrice })); setError('') }}><option>Trip</option><option>Hour</option><option>Day</option><option>Month</option></select></label><label><FormFieldCaption required>Unit Price (SAR)</FormFieldCaption><input required type="number" min="0.01" step="0.01" value={form.unitPrice} onChange={(event) => set('unitPrice', event.target.value)} placeholder="0.00" /></label><label><FormFieldCaption required>Quantity</FormFieldCaption><input required type="number" min="0.01" step="0.01" value={form.quantity} onChange={(event) => set('quantity', event.target.value)} /></label><label>Waiting Rate (SAR / hour)<input type="number" min="0" step="0.01" value={form.waitingRatePerHour} onChange={(event) => set('waitingRatePerHour', event.target.value)} /></label><label>Included Waiting (minutes)<input type="number" min="0" step="1" value={form.includedWaitingMinutes} onChange={(event) => set('includedWaitingMinutes', event.target.value)} /></label><label>Waiting Billing Increment<select value={form.waitingBillingIncrementMinutes} onChange={(event) => set('waitingBillingIncrementMinutes', event.target.value)}>{[5, 15, 30, 60].map((value) => <option key={value} value={value}>{value} minutes</option>)}</select></label><label>Tax %<input type="number" min="0" max="100" step="0.01" value={form.taxPercent} onChange={(event) => set('taxPercent', event.target.value)} /></label>{isAdvance && !initial && <label>Trip Status<select value={form.status} onChange={(event) => set('status', event.target.value)}><option>Pending</option><option>Confirmed</option></select></label>}{initial && ['Pending', 'Confirmed'].includes(initial.status) && <label>Trip Status<select value={form.status} onChange={(event) => set('status', event.target.value)}><option disabled={initial.status === 'Confirmed'}>Pending</option><option>Confirmed</option></select></label>}{!initial && !isAdvance && <label className="booking-wide-field booking-check-field"><input type="checkbox" checked={form.handoverNow} onChange={(event) => set('handoverNow', event.target.checked)} /><span>Vehicle handed over now — mark trip Active</span></label>}<label className="booking-wide-field">Internal Notes<textarea rows="2" value={form.notes} onChange={(event) => set('notes', event.target.value)} placeholder="Operational notes" /></label></div><div className="corporate-charge-summary"><div><span>Base ({form.quantity || 0} × {sar(form.unitPrice)})</span><strong>{sar(charges.base)}</strong></div><div><span>Waiting ({waitingMinutes(form.stops)} planned · {billableWaitingMinutes(form.stops, form.includedWaitingMinutes, form.waitingBillingIncrementMinutes)} billable min)</span><strong>{sar(charges.waiting)}</strong></div>{form.quoteSnapshot && <div><span>Quoted extras</span><strong>{sar(form.quoteSnapshot.subtotal - charges.base - charges.waiting)}</strong></div>}<div><span>Subtotal</span><strong>{sar(charges.subtotal)}</strong></div><div><span>Tax ({form.taxPercent || 0}%)</span><strong>{sar(charges.taxAmount)}</strong></div><div className="corporate-charge-total"><span>Total (SAR)</span><strong>{sar(charges.totalAmount)}</strong></div></div><p className="booking-help">Confirm the applicable tax rate and waiting charge for this agreement.</p></section>
     {error && <p className="booking-error" role="alert">{error}</p>}
